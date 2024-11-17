@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -79,7 +80,7 @@ fun ChatsListScreen(
         if (error != null) {
             Text("Error: $error")
         } else if (isLoading) {
-            Text("Loading...")
+            CircularProgressIndicator()
         } else {
             chats.forEach { chat ->
                 ChatItem(chat)
