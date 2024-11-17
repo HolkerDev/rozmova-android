@@ -15,7 +15,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import eu.rozmova.app.clients.ChatState
 import eu.rozmova.app.clients.RetrofitClient
+import eu.rozmova.app.components.ChatItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +25,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ChatsListViewModel() : ViewModel() {
-    private val _chats = MutableStateFlow(listOf<String>())
+    private val _chats = MutableStateFlow(listOf<ChatItem>())
     val chats = _chats.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
@@ -44,7 +46,11 @@ class ChatsListViewModel() : ViewModel() {
                 val result = withContext(Dispatchers.IO) {
                     RetrofitClient.chatApi.getChats()
                 }
-                _chats.value = result.map { it.title }
+                _chats.value = result.map {
+                    ChatItem(
+                        it.id, it.title, listOf("dog"), it.state == ChatState.CREATED
+                    )
+                }
             } catch (e: Exception) {
                 Log.e("ChatsListViewModel", "Error loading chats", e)
                 _error.value = e.message ?: "Unknown error"
@@ -76,7 +82,7 @@ fun ChatsListScreen(
             Text("Loading...")
         } else {
             chats.forEach { chat ->
-                Text(chat)
+                ChatItem(chat)
             }
         }
     }

@@ -14,7 +14,7 @@ if (secretsFile.exists()) {
 
 android {
     namespace = "eu.rozmova.app"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "eu.rozmova.app"
