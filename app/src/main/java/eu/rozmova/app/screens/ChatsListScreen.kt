@@ -39,6 +39,7 @@ class ChatsListViewModel() : ViewModel() {
     fun loadChats() {
         viewModelScope.launch {
             _isLoading.value = true
+            _error.value = null
             try {
                 val result = withContext(Dispatchers.IO) {
                     RetrofitClient.chatApi.getChats()
@@ -60,6 +61,7 @@ fun ChatsListScreen(
 ) {
     val isLoading by viewModel.isLoading.collectAsState()
     val chats by viewModel.chats.collectAsState()
+    val error by viewModel.error.collectAsState()
 
     Column(
         modifier = Modifier
@@ -68,7 +70,9 @@ fun ChatsListScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        if (isLoading) {
+        if (error != null) {
+            Text("Error: $error")
+        } else if (isLoading) {
             Text("Loading...")
         } else {
             chats.forEach { chat ->
