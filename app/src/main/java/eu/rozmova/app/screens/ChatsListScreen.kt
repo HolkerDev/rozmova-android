@@ -43,25 +43,23 @@ class ChatsListViewModel @Inject constructor() : ViewModel() {
         loadChats()
     }
 
-    fun loadChats() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            _error.value = null
-            try {
-                val result = withContext(Dispatchers.IO) {
-                    RetrofitClient.chatApi.getChats()
-                }
-                _chats.value = result.map {
-                    ChatItem(
-                        it.id, it.title, listOf("dog"), it.state == ChatState.CREATED
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e("ChatsListViewModel", "Error loading chats", e)
-                _error.value = e.message ?: "Unknown error"
+    fun loadChats() = viewModelScope.launch {
+        _isLoading.value = true
+        _error.value = null
+        try {
+            val result = withContext(Dispatchers.IO) {
+                RetrofitClient.chatApi.getChats()
             }
-            _isLoading.value = false
+            _chats.value = result.map {
+                ChatItem(
+                    it.id, it.title, listOf("dog"), it.state == ChatState.CREATED
+                )
+            }
+        } catch (e: Exception) {
+            Log.e("ChatsListViewModel", "Error loading chats", e)
+            _error.value = e.message ?: "Unknown error"
         }
+        _isLoading.value = false
     }
 }
 
