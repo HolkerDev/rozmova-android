@@ -13,9 +13,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.clients.ChatState
 import eu.rozmova.app.clients.RetrofitClient
 import eu.rozmova.app.components.ChatItem
@@ -24,8 +26,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class ChatsListViewModel() : ViewModel() {
+@HiltViewModel
+class ChatsListViewModel @Inject constructor() : ViewModel() {
     private val _chats = MutableStateFlow(listOf<ChatItem>())
     val chats = _chats.asStateFlow()
 
@@ -64,7 +68,8 @@ class ChatsListViewModel() : ViewModel() {
 
 @Composable
 fun ChatsListScreen(
-    viewModel: ChatsListViewModel = viewModel()
+    viewModel: ChatsListViewModel = hiltViewModel(),
+    onChatSelected: (String) -> Unit
 ) {
     val isLoading by viewModel.isLoading.collectAsState()
     val chats by viewModel.chats.collectAsState()
@@ -83,7 +88,7 @@ fun ChatsListScreen(
             CircularProgressIndicator()
         } else {
             chats.forEach { chat ->
-                ChatItem(chat)
+                ChatItem(chat, onChatClick = { onChatSelected(chat.id) })
             }
         }
     }

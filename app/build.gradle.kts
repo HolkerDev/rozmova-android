@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
 }
 
 val secretsFile = rootProject.file("secrets.properties")
@@ -19,13 +21,13 @@ android {
     defaultConfig {
         applicationId = "eu.rozmova.app"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-         buildConfigField(
+        buildConfigField(
             "String",
             "API_BASE_URL",
             "\"${secrets.getProperty("api.base.url", "")}\""
@@ -57,6 +59,11 @@ android {
 
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.accompanist.navigation.animation)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.retrofit2.retrofit)
     implementation(libs.converter.gson)
