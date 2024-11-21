@@ -4,12 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -17,7 +19,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
@@ -35,7 +36,7 @@ import eu.rozmova.app.screens.SettingsScreen
 import eu.rozmova.app.ui.theme.RozmovaTheme
 
 sealed class MainScreensNav(val route: String, val icon: ImageVector, val label: String) {
-    object Home : MainScreensNav("chats", Icons.Default.Home, "Chats")
+    object Home : MainScreensNav("chats", Icons.Default.ChatBubble, "Chats")
     object Settings : MainScreensNav("settings", Icons.Default.Settings, "Settings")
 }
 
@@ -50,25 +51,18 @@ class MainActivity : ComponentActivity() {
             val bottomNavScreens = listOf(MainScreensNav.Home, MainScreensNav.Settings)
 
             RozmovaTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(padding),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Authenticator(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            Scaffold(bottomBar = {
-                                val currentRoute = getCurrentRoute(navController) ?: ""
-                                if (currentRoute in bottomNavScreens.map { it.route }) {
-                                    BottomNavBar(bottomNavScreens, currentRoute, navController)
-                                }
-                            }) { innerPadding ->
-                                NavigationHost(navController, innerPadding)
-                            }
+                Authenticator(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(WindowInsets.systemBars.asPaddingValues())
+                ) {
+                    Scaffold(bottomBar = {
+                        val currentRoute = getCurrentRoute(navController) ?: ""
+                        if (currentRoute in bottomNavScreens.map { it.route }) {
+                            BottomNavBar(bottomNavScreens, currentRoute, navController)
                         }
+                    }) { innerPadding ->
+                        NavigationHost(navController, innerPadding)
                     }
                 }
             }
@@ -130,7 +124,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-   private fun getCurrentRoute(navController: NavHostController): String? {
+    private fun getCurrentRoute(navController: NavHostController): String? {
         val navBackStackEntry = navController.currentBackStackEntryAsState().value
         return navBackStackEntry?.destination?.route
     }
