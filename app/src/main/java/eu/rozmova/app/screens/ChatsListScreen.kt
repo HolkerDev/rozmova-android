@@ -68,8 +68,8 @@ class ChatsListViewModel @Inject constructor() : ViewModel() {
 
 @Composable
 fun ChatsListScreen(
+    onChatSelected: (String) -> Unit,
     viewModel: ChatsListViewModel = hiltViewModel(),
-    onChatSelected: (String) -> Unit
 ) {
     val isLoading by viewModel.isLoading.collectAsState()
     val chats by viewModel.chats.collectAsState()
@@ -80,7 +80,6 @@ fun ChatsListScreen(
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
         if (error != null) {
             Text("Error: $error")
