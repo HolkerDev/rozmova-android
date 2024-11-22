@@ -1,12 +1,24 @@
 package eu.rozmova.app.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -47,6 +59,7 @@ class ChatDetailsViewModel @Inject constructor() : ViewModel() {
 fun ChatDetailScreen(
     onBackClicked: () -> Unit,
     chatId: String,
+    modifier: Modifier = Modifier,
     viewModel: ChatDetailsViewModel = hiltViewModel()
 ) {
     LaunchedEffect(key1 = Unit) {
@@ -56,18 +69,85 @@ fun ChatDetailScreen(
 
     Column {
         when (val viewState = state) {
-            ChatDetailState.Empty -> SimpleToolBar(title = "Loading...", onBack = onBackClicked)
-            ChatDetailState.Loading -> {
-                SimpleToolBar(title = "Loading...", onBack = onBackClicked)
-                CircularProgressIndicator()
-            }
+            ChatDetailState.Empty -> LoadingComponent(onBackClicked)
+            ChatDetailState.Loading -> LoadingComponent(onBackClicked)
 
             is ChatDetailState.Success -> {
-                SimpleToolBar(title = viewState.chat.title, onBack = onBackClicked)
-                Text("Chat detail screen for chat with title ${viewState.chat.title}")
+                ChatDetails(
+                    chatWithMessages = viewState.chat,
+                    onBackClicked = onBackClicked,
+                    modifier = modifier,
+                )
             }
 
-            is ChatDetailState.Error -> Text("Error: ${viewState.msg}")
+            is ChatDetailState.Error -> ErrorComponent(viewState.msg, onBackClicked)
         }
     }
+}
+
+@Composable
+private fun ChatDetails(
+    chatWithMessages: ChatWithMessagesDto, onBackClicked: () -> Unit, modifier: Modifier = Modifier
+) {
+    SimpleToolBar(title = chatWithMessages.title, onBack = onBackClicked)
+    TaskDetailComponent(modifier, chatWithMessages.description, chatWithMessages.userInstructions)
+    // Messages List
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(vertical = 16.dp)
+    ) {
+        items(chatWithMessages.messages) { message ->
+            Text(
+                text = message.body,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun TaskDetailComponent(modifier: Modifier, description: String, userInstruction: String) {
+    Column(modifier = modifier) {
+        Text(
+            text = "Task Description",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Language Level: A2",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = userInstruction,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun LoadingComponent(onBackClicked: () -> Unit) {
+    SimpleToolBar("Loading...", onBackClicked)
+    CircularProgressIndicator()
+}
+
+@Composable
+private fun ErrorComponent(errorMessage: String, onBackClicked: () -> Unit) {
+    SimpleToolBar("Error", onBack = onBackClicked)
+    Text("Error: $errorMessage")
 }
