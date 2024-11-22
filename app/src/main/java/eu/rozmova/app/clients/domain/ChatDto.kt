@@ -1,4 +1,4 @@
-package eu.rozmova.app.clients
+package eu.rozmova.app.clients.domain
 
 enum class ChatState {
     CREATED, COMPLETED

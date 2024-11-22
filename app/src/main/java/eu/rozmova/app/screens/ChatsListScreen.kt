@@ -17,8 +17,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import eu.rozmova.app.clients.ChatState
 import eu.rozmova.app.clients.RetrofitClient
+import eu.rozmova.app.clients.domain.ChatState
 import eu.rozmova.app.components.ChatItem
 import eu.rozmova.app.components.SimpleToolBar
 import kotlinx.coroutines.Dispatchers
@@ -48,9 +48,9 @@ class ChatsListViewModel @Inject constructor() : ViewModel() {
                 RetrofitClient.chatApi.getChats()
             }
             _state.update {
-                ChatListState.Success(result.map {
+                ChatListState.Success(result.map { chat->
                     ChatItem(
-                        it.id, it.title, listOf("dog"), it.state == ChatState.CREATED
+                        chat.id, chat.title, listOf("dog"), chat.state == ChatState.CREATED
                     )
                 })
             }
