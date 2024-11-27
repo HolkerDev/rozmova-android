@@ -8,6 +8,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.clients.RetrofitClient
 import eu.rozmova.app.clients.domain.ChatWithMessagesDto
+import eu.rozmova.app.clients.domain.Owner
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -28,7 +29,9 @@ data class AudioState(
     val isLoading: Boolean, val error: String?, val currentMessageIdPlaying: String?
 )
 
-data class ChatMessage(val id: String, val isPlaying: Boolean, val body: String, val link: String)
+data class ChatMessage(
+    val id: String, val isPlaying: Boolean, val body: String, val link: String, val owner: Owner
+)
 
 @HiltViewModel
 class ChatDetailsViewModel @Inject constructor(
@@ -49,7 +52,8 @@ class ChatDetailsViewModel @Inject constructor(
                         id = message.id,
                         isPlaying = false,
                         body = message.body,
-                        link = message.link
+                        link = message.link,
+                        owner = message.owner
                     )
                 })
             }

@@ -13,6 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.clients.domain.ChatWithMessagesDto
+import eu.rozmova.app.clients.domain.Owner
 import eu.rozmova.app.components.SimpleToolBar
 
 
@@ -72,7 +75,6 @@ private fun ChatDetails(
 ) {
     SimpleToolBar(title = chatWithMessages.title, onBack = onBackClicked)
     TaskDetailComponent(modifier, chatWithMessages.description, chatWithMessages.userInstructions)
-    // Messages List
     LazyColumn(
         modifier = Modifier.Companion
             .fillMaxWidth()
@@ -92,8 +94,23 @@ private fun ChatDetails(
 private fun ChatMessageComponent(
     chatMessage: ChatMessage, onStopClick: () -> Unit, onPlayClick: () -> Unit
 ) {
-    Card {
-        Column {
+    val isUser = chatMessage.owner == Owner.USER
+    Card(
+        modifier = Modifier.Companion.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+        ),
+    ) {
+        Column(
+            modifier = Modifier.Companion.padding(16.dp), horizontalAlignment = if (isUser) {
+                androidx.compose.ui.Alignment.End
+            } else {
+                androidx.compose.ui.Alignment.Start
+            }
+        ) {
             Text(chatMessage.body)
             if (!chatMessage.link.isEmpty()) {
                 IconButton(onClick = {
