@@ -30,7 +30,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.amplifyframework.ui.authenticator.ui.Authenticator
 import dagger.hilt.android.AndroidEntryPoint
-import eu.rozmova.app.screens.ChatDetailScreen
+import eu.rozmova.app.screens.chatdetails.ChatDetailScreen
 import eu.rozmova.app.screens.ChatsListScreen
 import eu.rozmova.app.screens.SettingsScreen
 import eu.rozmova.app.ui.theme.RozmovaTheme
