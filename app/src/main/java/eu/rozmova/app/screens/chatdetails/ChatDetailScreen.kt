@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,7 +15,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -73,20 +73,24 @@ private fun ChatDetails(
     modifier: Modifier = Modifier.Companion,
     viewModel: ChatDetailsViewModel = hiltViewModel()
 ) {
-    SimpleToolBar(title = chatWithMessages.title, onBack = onBackClicked)
-    TaskDetailComponent(modifier, chatWithMessages.description, chatWithMessages.userInstructions)
-    LazyColumn(
-        modifier = Modifier.Companion
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 16.dp)
-    ) {
-        items(messages) { message ->
-            ChatMessageComponent(chatMessage = message,
-                onStopClick = { viewModel.stopAudio(message.id) },
-                onPlayClick = { viewModel.playAudio(message.id, message.link) })
+    Column(modifier = Modifier.fillMaxSize()) {
+        SimpleToolBar(title = chatWithMessages.title, onBack = onBackClicked)
+        TaskDetailComponent(modifier, chatWithMessages.description, chatWithMessages.userInstructions)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f) // Takes remaining space
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(vertical = 16.dp)
+        ) {
+            items(messages) { message ->
+                ChatMessageComponent(chatMessage = message,
+                    onStopClick = { viewModel.stopAudio(message.id) },
+                    onPlayClick = { viewModel.playAudio(message.id, message.link) })
+            }
         }
+        SpeechRecognitionComponent()
     }
 }
 
@@ -112,7 +116,7 @@ private fun ChatMessageComponent(
             }
         ) {
             Text(chatMessage.body)
-            if (!chatMessage.link.isEmpty()) {
+            if (chatMessage.link.isNotEmpty()) {
                 IconButton(onClick = {
                     if (chatMessage.isPlaying) {
                         onStopClick()
