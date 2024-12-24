@@ -31,6 +31,7 @@ import androidx.navigation.navArgument
 import com.amplifyframework.ui.authenticator.ui.Authenticator
 import dagger.hilt.android.AndroidEntryPoint
 import eu.rozmova.app.screens.ChatsListScreen
+import eu.rozmova.app.screens.LoginScreen
 import eu.rozmova.app.screens.SettingsScreen
 import eu.rozmova.app.screens.chatdetails.ChatDetailScreen
 import eu.rozmova.app.ui.theme.RozmovaTheme
@@ -51,19 +52,19 @@ class MainActivity : ComponentActivity() {
             val bottomNavScreens = listOf(MainScreensNav.Home, MainScreensNav.Settings)
 
             RozmovaTheme {
-                Authenticator(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(WindowInsets.systemBars.asPaddingValues())
-                ) {
-                    Scaffold(bottomBar = {
+                Scaffold(
+                    bottomBar = {
                         val currentRoute = getCurrentRoute(navController) ?: ""
                         if (currentRoute in bottomNavScreens.map { it.route }) {
                             BottomNavBar(bottomNavScreens, currentRoute, navController)
                         }
-                    }) { innerPadding ->
-                        NavigationHost(navController, innerPadding)
-                    }
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(WindowInsets.systemBars.asPaddingValues())
+                ) { innerPadding ->
+                    LoginScreen(Modifier.padding(innerPadding))
+//                    NavigationHost(navController, innerPadding)
                 }
             }
         }

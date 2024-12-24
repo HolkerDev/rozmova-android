@@ -32,6 +32,24 @@ android {
             "API_BASE_URL",
             "\"${secrets.getProperty("api.base.url", "")}\""
         )
+
+        buildConfigField(
+            "String",
+            "GOOGLE_CLIENT_ID",
+            "\"${secrets.getProperty("google.client.id", "")}\""
+        )
+
+        buildConfigField(
+            "String",
+            "SUPABASE_URL",
+            "\"${secrets.getProperty("supabase.url", "")}\""
+        )
+
+        buildConfigField(
+            "String",
+            "SUPABASE_KEY",
+            "\"${secrets.getProperty("supabase.key", "")}\""
+        )
     }
 
     buildTypes {
@@ -62,7 +80,11 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
     implementation("io.github.jan-tennert.supabase:auth-kt")
     implementation("io.github.jan-tennert.supabase:realtime-kt")
-    implementation("io.ktor:ktor-client-[engine]:3.0.0-rc1")
+    implementation("io.github.jan-tennert.supabase:functions-kt")
+    implementation("io.ktor:ktor-client-android:3.0.2")
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
