@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChatBubble
@@ -32,6 +33,7 @@ import com.amplifyframework.ui.authenticator.ui.Authenticator
 import dagger.hilt.android.AndroidEntryPoint
 import eu.rozmova.app.screens.ChatsListScreen
 import eu.rozmova.app.screens.LoginScreen
+import eu.rozmova.app.screens.MainScreen
 import eu.rozmova.app.screens.SettingsScreen
 import eu.rozmova.app.screens.chatdetails.ChatDetailScreen
 import eu.rozmova.app.ui.theme.RozmovaTheme
@@ -45,7 +47,6 @@ sealed class MainScreensNav(val route: String, val icon: ImageVector, val label:
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
         setContent {
             val navController = rememberNavController()
@@ -59,12 +60,10 @@ class MainActivity : ComponentActivity() {
                             BottomNavBar(bottomNavScreens, currentRoute, navController)
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(WindowInsets.systemBars.asPaddingValues())
+                    contentWindowInsets = WindowInsets.statusBars,
+                    modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
-                    LoginScreen(Modifier.padding(innerPadding))
-//                    NavigationHost(navController, innerPadding)
+                    NavigationHost(navController, innerPadding)
                 }
             }
         }
@@ -100,7 +99,7 @@ class MainActivity : ComponentActivity() {
     private fun NavigationHost(navController: NavHostController, innerPadding: PaddingValues) {
         NavHost(
             navController = navController,
-            startDestination = "chats",
+            startDestination = "main",
             modifier = Modifier.padding(innerPadding)
         ) {
             // Main Screens
@@ -108,6 +107,9 @@ class MainActivity : ComponentActivity() {
                 ChatsListScreen(onChatSelected = { chatId ->
                     navController.navigate("chat_details/$chatId")
                 })
+            }
+            composable(route = "main") {
+                MainScreen()
             }
             composable(route = "settings") {
                 SettingsScreen()
