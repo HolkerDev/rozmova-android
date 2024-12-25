@@ -9,13 +9,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,8 +36,8 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 sealed interface ChatListState {
-    object Empty : ChatListState
-    object Loading : ChatListState
+    data object Empty : ChatListState
+    data object Loading : ChatListState
     data class Success(val chats: List<ChatItem>) : ChatListState
     data class Error(val msg: String) : ChatListState
 }
@@ -49,7 +47,11 @@ class ChatsListViewModel @Inject constructor() : ViewModel() {
     private val _state = MutableStateFlow<ChatListState>(ChatListState.Empty)
     val state = _state.asStateFlow()
 
-    fun loadChats() = viewModelScope.launch {
+    init {
+        loadChats()
+    }
+
+    private fun loadChats() = viewModelScope.launch {
         _state.update { ChatListState.Loading }
         try {
             val result = withContext(Dispatchers.IO) {
@@ -69,18 +71,12 @@ class ChatsListViewModel @Inject constructor() : ViewModel() {
     }
 }
 
-
 @Composable
 fun ChatsListScreen(
     onChatSelected: (String) -> Unit,
     viewModel: ChatsListViewModel = hiltViewModel(),
 ) {
-    LaunchedEffect(key1 = Unit, block = {
-        viewModel.loadChats()
-    })
-
     val state by viewModel.state.collectAsState()
-
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
