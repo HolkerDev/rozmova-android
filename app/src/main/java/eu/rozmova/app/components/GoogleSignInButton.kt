@@ -47,8 +47,8 @@ fun GoogleSignInButton(
                 onClick()
             }
         ),
-        shape = MaterialTheme.shapes.medium,
-        border = BorderStroke(width = 1.dp, color = Color.Gray.copy(alpha = 0.2f)),
+        shape = MaterialTheme.shapes.large,
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)),
         color = MaterialTheme.colorScheme.surface
     ) {
         Row(
