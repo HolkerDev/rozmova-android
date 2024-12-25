@@ -1,10 +1,18 @@
 package eu.rozmova.app.screens
 
 import android.util.Log
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,7 +56,7 @@ class ChatsListViewModel @Inject constructor() : ViewModel() {
                 RetrofitClient.chatApi.getChats()
             }
             _state.update {
-                ChatListState.Success(result.map { chat->
+                ChatListState.Success(result.map { chat ->
                     ChatItem(
                         chat.id, chat.title, listOf("dog"), chat.state == ChatState.CREATED
                     )
@@ -73,24 +81,40 @@ fun ChatsListScreen(
 
     val state by viewModel.state.collectAsState()
 
-    Column {
-        SimpleToolBar("Chats")
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            when (val viewState = state) {
-                ChatListState.Empty -> Text("No chats")
-                is ChatListState.Error -> Text("Error: ${viewState.msg}")
-                ChatListState.Loading -> CircularProgressIndicator()
-                is ChatListState.Success -> {
-                    viewState.chats.forEach { chat ->
-                        ChatItem(chat, onChatClick = { onChatSelected(chat.id) })
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column {
+            SimpleToolBar("Chats")
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                when (val viewState = state) {
+                    ChatListState.Empty -> Text("No chats")
+                    is ChatListState.Error -> Text("Error: ${viewState.msg}")
+                    ChatListState.Loading -> CircularProgressIndicator()
+                    is ChatListState.Success -> {
+                        LazyColumn {
+                            items(viewState.chats) { chat ->
+                                ChatItem(chat, onChatClick = { onChatSelected(chat.id) })
+                            }
+                        }
                     }
                 }
             }
+        }
+
+        FloatingActionButton(
+            onClick = {},
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.BottomEnd)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Create new chat"
+            )
         }
     }
 }
