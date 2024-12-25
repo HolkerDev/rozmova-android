@@ -1,46 +1,143 @@
 package eu.rozmova.app
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChatBubble
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.amplifyframework.ui.authenticator.ui.Authenticator
 import dagger.hilt.android.AndroidEntryPoint
-import eu.rozmova.app.screens.ChatsListScreen
-import eu.rozmova.app.screens.LoginScreen
-import eu.rozmova.app.screens.MainScreen
-import eu.rozmova.app.screens.SettingsScreen
-import eu.rozmova.app.screens.chatdetails.ChatDetailScreen
+import dagger.hilt.android.lifecycle.HiltViewModel
+import eu.rozmova.app.nav.NavRoutes
+import eu.rozmova.app.nav.NavigationHost
+import eu.rozmova.app.nav.bottomNavigationItems
+import eu.rozmova.app.repositories.AuthRepository
+import eu.rozmova.app.repositories.AuthState
 import eu.rozmova.app.ui.theme.RozmovaTheme
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-sealed class MainScreensNav(val route: String, val icon: ImageVector, val label: String) {
-    object Home : MainScreensNav("chats", Icons.Default.ChatBubble, "Chats")
-    object Settings : MainScreensNav("settings", Icons.Default.Settings, "Settings")
+sealed class AppState {
+    data object Loading : AppState()
+    data object Authenticated : AppState()
+    data object Unauthenticated : AppState()
+}
+
+@HiltViewModel
+class AppViewModel @Inject constructor(private val authRepository: AuthRepository) : ViewModel() {
+    init {
+        viewModelScope.launch {
+            authRepository.observeAuthState()
+        }
+    }
+
+    val appState = authRepository.authState
+        .map { authState ->
+            Log.i("AppViewModel", "authState: $authState")
+            when (authState) {
+                is AuthState.Loading -> AppState.Loading
+                is AuthState.Authenticated -> AppState.Authenticated
+                is AuthState.Unauthenticated -> AppState.Unauthenticated
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = AppState.Loading
+        )
+}
+
+@Composable
+private fun App(viewModel: AppViewModel = hiltViewModel()) {
+    val navController = rememberNavController()
+    val bottomNavScreens = listOf(NavRoutes.Chats, NavRoutes.Settings)
+    val appState by viewModel.appState.collectAsState()
+
+    LaunchedEffect(appState) {
+        when (appState) {
+            AppState.Loading -> {
+            }
+
+            AppState.Authenticated -> {
+                navController.navigate(NavRoutes.Chats.route) {
+                    popUpTo(NavRoutes.Main.route) { inclusive = true }
+                }
+            }
+
+            AppState.Unauthenticated -> {
+                navController.navigate(NavRoutes.Login.route) {
+                    popUpTo(NavRoutes.Main.route) { inclusive = true }
+                }
+            }
+        }
+    }
+
+    RozmovaTheme {
+        Scaffold(
+            bottomBar = {
+                val currentRoute = getCurrentRoute(navController) ?: ""
+                if (currentRoute in bottomNavScreens.map { it.route }) {
+                    BottomNavBar(currentRoute, navController)
+                }
+            },
+            contentWindowInsets = WindowInsets.statusBars,
+            modifier = Modifier.fillMaxSize()
+        ) { innerPadding ->
+            NavigationHost(navController, innerPadding)
+        }
+    }
+}
+
+@Composable
+private fun BottomNavBar(
+    currentRoute: String, navController: NavHostController
+) {
+    NavigationBar {
+        bottomNavigationItems().forEach { screen ->
+            NavigationBarItem(icon = {
+                Icon(
+                    screen.icon!!, contentDescription = screen.label
+                )
+            },
+                label = { Text(screen.label!!) },
+                selected = currentRoute == screen.route,
+                onClick = {
+                    navController.navigate(screen.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                })
+        }
+    }
+}
+
+@Composable
+private fun getCurrentRoute(navController: NavHostController): String? {
+    val navBackStackEntry = navController.currentBackStackEntryAsState().value
+    return navBackStackEntry?.destination?.route
 }
 
 @AndroidEntryPoint
@@ -49,90 +146,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val navController = rememberNavController()
-            val bottomNavScreens = listOf(MainScreensNav.Home, MainScreensNav.Settings)
-
-            RozmovaTheme {
-                Scaffold(
-                    bottomBar = {
-                        val currentRoute = getCurrentRoute(navController) ?: ""
-                        if (currentRoute in bottomNavScreens.map { it.route }) {
-                            BottomNavBar(bottomNavScreens, currentRoute, navController)
-                        }
-                    },
-                    contentWindowInsets = WindowInsets.statusBars,
-                    modifier = Modifier.fillMaxSize()
-                ) { innerPadding ->
-                    NavigationHost(navController, innerPadding)
-                }
-            }
+            App()
         }
-    }
-
-    @Composable
-    private fun BottomNavBar(
-        screens: List<MainScreensNav>, currentRoute: String, navController: NavHostController
-    ) {
-        NavigationBar {
-            screens.forEach { screen ->
-                NavigationBarItem(icon = {
-                    Icon(
-                        screen.icon, contentDescription = screen.label
-                    )
-                },
-                    label = { Text(screen.label) },
-                    selected = currentRoute == screen.route,
-                    onClick = {
-                        navController.navigate(screen.route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    })
-            }
-        }
-    }
-
-    @Composable
-    private fun NavigationHost(navController: NavHostController, innerPadding: PaddingValues) {
-        NavHost(
-            navController = navController,
-            startDestination = "main",
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            // Main Screens
-            composable(route = "chats") {
-                ChatsListScreen(onChatSelected = { chatId ->
-                    navController.navigate("chat_details/$chatId")
-                })
-            }
-            composable(route = "main") {
-                MainScreen()
-            }
-            composable(route = "settings") {
-                SettingsScreen()
-            }
-
-            // Side Screens
-            composable(
-                route = "chat_details/{chatId}",
-                arguments = listOf(navArgument("chatId") { type = NavType.StringType })
-            ) { backStackEntry ->
-                val chatId: String = backStackEntry.arguments?.getString("chatId") ?: ""
-                ChatDetailScreen(onBackClicked = { navController.navigateUp() }, chatId)
-            }
-        }
-    }
-
-    @Composable
-    private fun getCurrentRoute(navController: NavHostController): String? {
-        val navBackStackEntry = navController.currentBackStackEntryAsState().value
-        return navBackStackEntry?.destination?.route
-    }
-
-    companion object {
-        private const val SPEECH_REQUEST_CODE = 123
     }
 }

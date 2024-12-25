@@ -1,6 +1,5 @@
 package eu.rozmova.app.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,10 +10,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.amplifyframework.core.Amplify
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import eu.rozmova.app.repositories.AuthRepository
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class SettingsScreenViewModel @Inject constructor(private val authRepository: AuthRepository) :
+    ViewModel() {
+
+    fun signOut() {
+        viewModelScope.launch {
+            authRepository.signOut()
+        }
+    }
+}
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    viewModel: SettingsScreenViewModel = hiltViewModel()
+) {
+
+    val onLogOutClicked: () -> Unit = {
+        viewModel.signOut()
+    }
+
     Column(
         modifier = Modifier.Companion
             .fillMaxSize()
@@ -24,9 +47,7 @@ fun SettingsScreen() {
     ) {
         Text("Settings Screen")
         Button(
-            onClick = {
-                Amplify.Auth.signOut { Log.d("AuthQuickstart", "Signed out") }
-            }
+            onClick = onLogOutClicked
         ) {
             Text("Log out")
         }
