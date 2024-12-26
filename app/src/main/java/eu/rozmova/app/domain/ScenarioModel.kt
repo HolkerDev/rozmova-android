@@ -1,6 +1,6 @@
 package eu.rozmova.app.domain
 
-import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 data class ScenarioModel(
     val id: String,
     @SerialName("created_at")
-    val createdAt: LocalDateTime,
+    val createdAt: Instant,
     val title: String,
     val labels: List<String>,
     @SerialName("language_level")

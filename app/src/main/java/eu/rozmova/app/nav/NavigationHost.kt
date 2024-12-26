@@ -12,6 +12,7 @@ import androidx.navigation.navArgument
 import eu.rozmova.app.screens.SettingsScreen
 import eu.rozmova.app.screens.chatdetails.ChatDetailScreen
 import eu.rozmova.app.screens.chats.ChatsListScreen
+import eu.rozmova.app.screens.createchat.CreateChatScreen
 import eu.rozmova.app.screens.login.LoginScreen
 import eu.rozmova.app.screens.main.MainScreen
 
@@ -30,7 +31,7 @@ fun NavigationHost(
         composable(NavRoutes.Chats.route) {
             ChatsListScreen(onChatSelect = { chatId ->
                 navController.navigate("chat_details/$chatId")
-            })
+            }, onChatCreateClick = { navController.navigate(NavRoutes.CreateChat.route) })
         }
         composable(route = NavRoutes.Main.route) {
             MainScreen()
@@ -41,6 +42,12 @@ fun NavigationHost(
 
         composable(route = NavRoutes.Login.route) {
             LoginScreen()
+        }
+
+        composable(route = NavRoutes.CreateChat.route) {
+            CreateChatScreen(onScenarioReady = {
+                // TODO: navigate to chat
+            }, onBack = { navController.navigateUp() })
         }
 
         // Side Screens

@@ -25,6 +25,7 @@ import eu.rozmova.app.components.SimpleToolBar
 @Composable
 fun ChatsListScreen(
     onChatSelect: (String) -> Unit,
+    onChatCreateClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ChatsListViewModel = hiltViewModel(),
 ) {
@@ -55,7 +56,7 @@ fun ChatsListScreen(
         }
 
         FloatingActionButton(
-            onClick = {},
+            onClick = onChatCreateClick,
             modifier =
                 Modifier
                     .padding(16.dp)

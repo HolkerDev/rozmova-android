@@ -15,7 +15,10 @@ import eu.rozmova.app.components.GoogleSignInButton
 import eu.rozmova.app.components.ThemedLogo
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier, viewModel: LoginScreenViewModel = hiltViewModel()) {
+fun LoginScreen(
+    modifier: Modifier = Modifier,
+    viewModel: LoginScreenViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsState()
 
     val onSignInClick = {
@@ -24,10 +27,10 @@ fun LoginScreen(modifier: Modifier = Modifier, viewModel: LoginScreenViewModel =
 
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Center
+        contentAlignment = Center,
     ) {
         Column(
-            modifier = modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
