@@ -9,7 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import eu.rozmova.app.screens.ChatsListScreen
+import eu.rozmova.app.screens.chats.ChatsListScreen
 import eu.rozmova.app.screens.login.LoginScreen
 import eu.rozmova.app.screens.SettingsScreen
 import eu.rozmova.app.screens.chatdetails.ChatDetailScreen

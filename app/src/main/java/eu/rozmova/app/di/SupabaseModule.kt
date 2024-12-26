@@ -8,6 +8,7 @@ import eu.rozmova.app.BuildConfig
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.postgrest.Postgrest
 import javax.inject.Singleton
 
 @Module
@@ -22,6 +23,7 @@ object SupabaseModule {
             supabaseKey = BuildConfig.SUPABASE_KEY,
         ) {
             install(Auth)
+            install(Postgrest)
         }
     }
 }
