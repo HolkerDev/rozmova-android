@@ -24,12 +24,13 @@ import eu.rozmova.app.components.SimpleToolBar
 
 @Composable
 fun ChatsListScreen(
-    onChatSelected: (String) -> Unit,
+    onChatSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: ChatsListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         Column {
             SimpleToolBar("Chats")
             Box(
@@ -45,7 +46,7 @@ fun ChatsListScreen(
                     is ChatListState.Success -> {
                         LazyColumn {
                             items(viewState.chats) { chat ->
-                                ChatItem(chat, onChatClick = { onChatSelected(chat.id) })
+                                ChatItem(chat, onChatClick = { onChatSelect(chat.id) })
                             }
                         }
                     }

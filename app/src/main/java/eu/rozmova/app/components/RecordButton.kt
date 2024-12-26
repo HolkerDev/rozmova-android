@@ -17,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 fun RecordButton(
     onRecord: () -> Unit,
@@ -29,29 +28,34 @@ fun RecordButton(
     Button(
         modifier = modifier,
         onClick = { },
-        interactionSource = remember { MutableInteractionSource() }
-            .also { interactionSource ->
-                LaunchedEffect(interactionSource) {
-                    interactionSource.interactions.collect { interaction ->
-                        when (interaction) {
-                            is PressInteraction.Press -> {
-                                isRecording = true
-                                onRecord()
-                            }
+        interactionSource =
+            remember { MutableInteractionSource() }
+                .also { interactionSource ->
+                    LaunchedEffect(
+                        interactionSource,
+                        onRecord,
+                        onStop,
+                    ) {
+                        interactionSource.interactions.collect { interaction ->
+                            when (interaction) {
+                                is PressInteraction.Press -> {
+                                    isRecording = true
+                                    onRecord()
+                                }
 
-                            is PressInteraction.Release, is PressInteraction.Cancel -> {
-                                isRecording = false
-                                onStop()
+                                is PressInteraction.Release, is PressInteraction.Cancel -> {
+                                    isRecording = false
+                                    onStop()
+                                }
                             }
                         }
                     }
-                }
-            }
+                },
     ) {
         Icon(
             imageVector = if (isRecording) Icons.Default.Stop else Icons.Default.Mic,
             contentDescription = if (isRecording) "Recording" else "Start Recording",
-            modifier = modifier.size(50.dp)
+            modifier = Modifier.size(50.dp),
         )
     }
 }

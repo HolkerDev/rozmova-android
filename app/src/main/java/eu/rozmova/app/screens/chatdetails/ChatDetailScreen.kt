@@ -32,13 +32,12 @@ import eu.rozmova.app.clients.domain.ChatWithMessagesDto
 import eu.rozmova.app.clients.domain.Owner
 import eu.rozmova.app.components.SimpleToolBar
 
-
 @Composable
 fun ChatDetailScreen(
-    onBackClicked: () -> Unit,
+    onBackClick: () -> Unit,
     chatId: String,
     modifier: Modifier = Modifier.Companion,
-    viewModel: ChatDetailsViewModel = hiltViewModel()
+    viewModel: ChatDetailsViewModel = hiltViewModel(),
 ) {
     LaunchedEffect(key1 = Unit) {
         viewModel.loadChat(chatId)
@@ -47,20 +46,20 @@ fun ChatDetailScreen(
 
     Column {
         when (val viewState = state) {
-            ChatDetailState.Empty -> LoadingComponent(onBackClicked)
-            ChatDetailState.Loading -> LoadingComponent(onBackClicked)
+            ChatDetailState.Empty -> LoadingComponent(onBackClick)
+            ChatDetailState.Loading -> LoadingComponent(onBackClick)
 
             is ChatDetailState.Success -> {
                 ChatDetails(
                     chatWithMessages = viewState.chat,
-                    onBackClicked = onBackClicked,
+                    onBackClicked = onBackClick,
                     modifier = modifier,
                     messages = viewState.messages,
-                    viewModel = viewModel
+                    viewModel = viewModel,
                 )
             }
 
-            is ChatDetailState.Error -> ErrorComponent(viewState.msg, onBackClicked)
+            is ChatDetailState.Error -> ErrorComponent(viewState.msg, onBackClick)
         }
     }
 }
@@ -71,23 +70,26 @@ private fun ChatDetails(
     messages: List<ChatMessage>,
     onBackClicked: () -> Unit,
     modifier: Modifier = Modifier.Companion,
-    viewModel: ChatDetailsViewModel = hiltViewModel()
+    viewModel: ChatDetailsViewModel = hiltViewModel(),
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         SimpleToolBar(title = chatWithMessages.title, onBack = onBackClicked)
         TaskDetailComponent(modifier, chatWithMessages.description, chatWithMessages.userInstructions)
         LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f) // Takes remaining space
-                .padding(horizontal = 16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f) // Takes remaining space
+                    .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(vertical = 16.dp)
+            contentPadding = PaddingValues(vertical = 16.dp),
         ) {
             items(messages) { message ->
-                ChatMessageComponent(chatMessage = message,
+                ChatMessageComponent(
+                    chatMessage = message,
                     onStopClick = { viewModel.stopAudio(message.id) },
-                    onPlayClick = { viewModel.playAudio(message.id, message.link) })
+                    onPlayClick = { viewModel.playAudio(message.id, message.link) },
+                )
             }
         }
         SpeechRecognitionComponent()
@@ -96,24 +98,30 @@ private fun ChatDetails(
 
 @Composable
 private fun ChatMessageComponent(
-    chatMessage: ChatMessage, onStopClick: () -> Unit, onPlayClick: () -> Unit
+    chatMessage: ChatMessage,
+    onStopClick: () -> Unit,
+    onPlayClick: () -> Unit,
 ) {
     val isUser = chatMessage.owner == Owner.USER
     Card(
         modifier = Modifier.Companion.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp
-        ),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-        ),
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = 6.dp,
+            ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+            ),
     ) {
         Column(
-            modifier = Modifier.Companion.padding(16.dp), horizontalAlignment = if (isUser) {
-                androidx.compose.ui.Alignment.End
-            } else {
-                androidx.compose.ui.Alignment.Start
-            }
+            modifier = Modifier.Companion.padding(16.dp),
+            horizontalAlignment =
+                if (isUser) {
+                    androidx.compose.ui.Alignment.End
+                } else {
+                    androidx.compose.ui.Alignment.Start
+                },
         ) {
             Text(chatMessage.body)
             if (chatMessage.link.isNotEmpty()) {
@@ -125,11 +133,13 @@ private fun ChatMessageComponent(
                     }
                 }) {
                     Icon(
-                        imageVector = if (chatMessage.isPlaying) {
-                            Icons.Default.Stop
-                        } else {
-                            Icons.Default.PlayArrow
-                        }, contentDescription = "Play/Stop"
+                        imageVector =
+                            if (chatMessage.isPlaying) {
+                                Icons.Default.Stop
+                            } else {
+                                Icons.Default.PlayArrow
+                            },
+                        contentDescription = "Play/Stop",
                     )
                 }
             }
@@ -138,32 +148,36 @@ private fun ChatMessageComponent(
 }
 
 @Composable
-private fun TaskDetailComponent(modifier: Modifier, description: String, userInstruction: String) {
+private fun TaskDetailComponent(
+    modifier: Modifier = Modifier,
+    description: String,
+    userInstruction: String,
+) {
     Column(modifier = modifier) {
         Text(
             text = "Task Description",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Companion.Bold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.Companion.height(8.dp))
         Text(
             text = description,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.Companion.height(8.dp))
         Text(
             text = "Language Level: A2",
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Companion.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.Companion.height(4.dp))
         Text(
             text = userInstruction,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -175,7 +189,10 @@ private fun LoadingComponent(onBackClicked: () -> Unit) {
 }
 
 @Composable
-private fun ErrorComponent(errorMessage: String, onBackClicked: () -> Unit) {
+private fun ErrorComponent(
+    errorMessage: String,
+    onBackClicked: () -> Unit,
+) {
     SimpleToolBar("Error", onBack = onBackClicked)
     Text("Error: $errorMessage")
 }

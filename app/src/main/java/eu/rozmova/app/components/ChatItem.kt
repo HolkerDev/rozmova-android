@@ -27,19 +27,25 @@ data class ChatItem(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ChatItem(chat: ChatItem, onChatClick: (String) -> Unit) {
+fun ChatItem(
+    chat: ChatItem,
+    onChatClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = { onChatClick(chat.id) }),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clickable(onClick = { onChatClick(chat.id) }),
     ) {
         Column {
             Text(
                 text = chat.title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .wrapContentWidth(Alignment.CenterHorizontally)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .wrapContentWidth(Alignment.CenterHorizontally),
             )
             FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 chat.labels.forEach { label ->
@@ -51,18 +57,21 @@ fun ChatItem(chat: ChatItem, onChatClick: (String) -> Unit) {
 }
 
 @Composable
-fun Chip(text: String) {
+fun Chip(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
     Surface(
-        modifier = Modifier.padding(vertical = 4.dp),
+        modifier = modifier.padding(vertical = 4.dp),
         shadowElevation = 2.dp,
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
     ) {
         Text(
             text = text,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
         )
     }
 }

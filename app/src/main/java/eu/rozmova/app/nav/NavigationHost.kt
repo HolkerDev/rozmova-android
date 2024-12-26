@@ -9,29 +9,33 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import eu.rozmova.app.screens.chats.ChatsListScreen
-import eu.rozmova.app.screens.login.LoginScreen
 import eu.rozmova.app.screens.SettingsScreen
 import eu.rozmova.app.screens.chatdetails.ChatDetailScreen
+import eu.rozmova.app.screens.chats.ChatsListScreen
+import eu.rozmova.app.screens.login.LoginScreen
 import eu.rozmova.app.screens.main.MainScreen
 
 @Composable
-fun NavigationHost(navController: NavHostController, innerPadding: PaddingValues) {
+fun NavigationHost(
+    navController: NavHostController,
+    innerPadding: PaddingValues,
+    modifier: Modifier = Modifier,
+) {
     NavHost(
         navController = navController,
         startDestination = NavRoutes.Main.route,
-        modifier = Modifier.padding(innerPadding)
+        modifier = modifier.padding(innerPadding),
     ) {
         // Main Screens
         composable(NavRoutes.Chats.route) {
-            ChatsListScreen(onChatSelected = { chatId ->
+            ChatsListScreen(onChatSelect = { chatId ->
                 navController.navigate("chat_details/$chatId")
             })
         }
-        composable(route = NavRoutes.Main.route){
+        composable(route = NavRoutes.Main.route) {
             MainScreen()
         }
-        composable(route = NavRoutes.Settings.route){
+        composable(route = NavRoutes.Settings.route) {
             SettingsScreen()
         }
 
@@ -42,10 +46,10 @@ fun NavigationHost(navController: NavHostController, innerPadding: PaddingValues
         // Side Screens
         composable(
             route = "chat_details/{chatId}",
-            arguments = listOf(navArgument("chatId") { type = NavType.StringType })
+            arguments = listOf(navArgument("chatId") { type = NavType.StringType }),
         ) { backStackEntry ->
             val chatId: String = backStackEntry.arguments?.getString("chatId") ?: ""
-            ChatDetailScreen(onBackClicked = { navController.navigateUp() }, chatId)
+            ChatDetailScreen(onBackClick = { navController.navigateUp() }, chatId)
         }
     }
 }

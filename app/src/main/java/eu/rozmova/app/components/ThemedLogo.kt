@@ -11,15 +11,16 @@ import androidx.compose.ui.unit.dp
 import eu.rozmova.app.R
 
 @Composable
-fun ThemedLogo() {
+fun ThemedLogo(modifier: Modifier = Modifier) {
     val isDarkTheme = isSystemInDarkTheme()
 
     Image(
-        painter = painterResource(
-            if (isDarkTheme) R.drawable.rozmova_dark else R.drawable.rozmova_light
-        ),
-        modifier = Modifier.size(400.dp),
+        painter =
+            painterResource(
+                if (isDarkTheme) R.drawable.rozmova_dark else R.drawable.rozmova_light,
+            ),
+        modifier = modifier.size(400.dp),
         contentScale = ContentScale.Fit,
-        contentDescription = "Logo"
+        contentDescription = "Logo",
     )
 }
