@@ -16,8 +16,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed interface ChatDetailState {
-    object Empty : ChatDetailState
-    object Loading : ChatDetailState
+    data object Empty : ChatDetailState
+    data object Loading : ChatDetailState
     data class Success(
         val chat: ChatWithMessagesDto, val audioState: AudioState, val messages: List<ChatMessage>
     ) : ChatDetailState
