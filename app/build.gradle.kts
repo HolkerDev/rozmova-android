@@ -31,25 +31,25 @@ android {
         buildConfigField(
             "String",
             "API_BASE_URL",
-            "\"${secrets.getProperty("api.base.url", "")}\""
+            "\"${secrets.getProperty("api.base.url", "")}\"",
         )
 
         buildConfigField(
             "String",
             "GOOGLE_CLIENT_ID",
-            "\"${secrets.getProperty("google.client.id", "")}\""
+            "\"${secrets.getProperty("google.client.id", "")}\"",
         )
 
         buildConfigField(
             "String",
             "SUPABASE_URL",
-            "\"${secrets.getProperty("supabase.url", "")}\""
+            "\"${secrets.getProperty("supabase.url", "")}\"",
         )
 
         buildConfigField(
             "String",
             "SUPABASE_KEY",
-            "\"${secrets.getProperty("supabase.key", "")}\""
+            "\"${secrets.getProperty("supabase.key", "")}\"",
         )
     }
 
@@ -58,7 +58,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }

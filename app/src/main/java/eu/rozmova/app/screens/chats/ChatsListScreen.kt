@@ -33,9 +33,10 @@ fun ChatsListScreen(
         Column {
             SimpleToolBar("Chats")
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
             ) {
                 when (val viewState = state) {
                     ChatListState.Empty -> Text("No chats")
@@ -53,12 +54,15 @@ fun ChatsListScreen(
         }
 
         FloatingActionButton(
-            onClick = {}, modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.BottomEnd)
+            onClick = {},
+            modifier =
+                Modifier
+                    .padding(16.dp)
+                    .align(Alignment.BottomEnd),
         ) {
             Icon(
-                imageVector = Icons.Default.Add, contentDescription = "Create new chat"
+                imageVector = Icons.Default.Add,
+                contentDescription = "Create new chat",
             )
         }
     }
