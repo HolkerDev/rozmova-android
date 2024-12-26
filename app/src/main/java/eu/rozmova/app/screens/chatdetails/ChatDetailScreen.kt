@@ -36,7 +36,7 @@ import eu.rozmova.app.components.SimpleToolBar
 fun ChatDetailScreen(
     onBackClick: () -> Unit,
     chatId: String,
-    modifier: Modifier = Modifier.Companion,
+    modifier: Modifier = Modifier,
     viewModel: ChatDetailsViewModel = hiltViewModel(),
 ) {
     LaunchedEffect(key1 = Unit) {
@@ -44,7 +44,7 @@ fun ChatDetailScreen(
     }
     val state by viewModel.state.collectAsState()
 
-    Column {
+    Column(modifier = modifier.fillMaxSize()) {
         when (val viewState = state) {
             ChatDetailState.Empty -> LoadingComponent(onBackClick)
             ChatDetailState.Loading -> LoadingComponent(onBackClick)
@@ -52,8 +52,7 @@ fun ChatDetailScreen(
             is ChatDetailState.Success -> {
                 ChatDetails(
                     chatWithMessages = viewState.chat,
-                    onBackClicked = onBackClick,
-                    modifier = modifier,
+                    onBackClick = onBackClick,
                     messages = viewState.messages,
                     viewModel = viewModel,
                 )
@@ -68,13 +67,16 @@ fun ChatDetailScreen(
 private fun ChatDetails(
     chatWithMessages: ChatWithMessagesDto,
     messages: List<ChatMessage>,
-    onBackClicked: () -> Unit,
+    onBackClick: () -> Unit,
     modifier: Modifier = Modifier.Companion,
     viewModel: ChatDetailsViewModel = hiltViewModel(),
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        SimpleToolBar(title = chatWithMessages.title, onBack = onBackClicked)
-        TaskDetailComponent(modifier, chatWithMessages.description, chatWithMessages.userInstructions)
+    Column(modifier = modifier.fillMaxSize()) {
+        SimpleToolBar(title = chatWithMessages.title, onBack = onBackClick)
+        TaskDetailComponent(
+            chatWithMessages.description,
+            chatWithMessages.userInstructions,
+        )
         LazyColumn(
             modifier =
                 Modifier
@@ -101,10 +103,11 @@ private fun ChatMessageComponent(
     chatMessage: ChatMessage,
     onStopClick: () -> Unit,
     onPlayClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val isUser = chatMessage.owner == Owner.USER
     Card(
-        modifier = Modifier.Companion.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         elevation =
             CardDefaults.cardElevation(
                 defaultElevation = 6.dp,
@@ -149,9 +152,9 @@ private fun ChatMessageComponent(
 
 @Composable
 private fun TaskDetailComponent(
-    modifier: Modifier = Modifier,
     description: String,
     userInstruction: String,
+    modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         Text(
@@ -183,16 +186,16 @@ private fun TaskDetailComponent(
 }
 
 @Composable
-private fun LoadingComponent(onBackClicked: () -> Unit) {
-    SimpleToolBar("Loading...", onBackClicked)
+private fun LoadingComponent(onBackClick: () -> Unit) {
+    SimpleToolBar("Loading...", onBack = onBackClick)
     CircularProgressIndicator()
 }
 
 @Composable
 private fun ErrorComponent(
     errorMessage: String,
-    onBackClicked: () -> Unit,
+    onBackClick: () -> Unit,
 ) {
-    SimpleToolBar("Error", onBack = onBackClicked)
+    SimpleToolBar("Error", onBack = onBackClick)
     Text("Error: $errorMessage")
 }
