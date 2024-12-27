@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ScenarioModel
+import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,6 +45,10 @@ sealed class CreateChatState {
     data class Success(
         val levelGroups: List<LevelGroup>,
     ) : CreateChatState()
+
+    data class ChatCreated(
+        val chatId: String,
+    ) : CreateChatState()
 }
 
 @HiltViewModel
@@ -51,6 +56,7 @@ class CreateChatViewModel
     @Inject
     constructor(
         private val scenariosRepository: ScenariosRepository,
+        private val chatsRepository: ChatsRepository,
     ) : ViewModel() {
         private val _state = MutableStateFlow<CreateChatState>(CreateChatState.Loading)
         val state = _state.asStateFlow()
@@ -62,6 +68,14 @@ class CreateChatViewModel
                 val levelGroups = scenariosToLevelGroups(scenarios)
                 _state.value = CreateChatState.Success(levelGroups)
             }
+
+        fun createChatFromScenario(scenario: ScenarioModel) {
+            viewModelScope.launch {
+                _state.value = CreateChatState.Loading
+                val chatId = chatsRepository.createChatFromScenario(scenario)
+                _state.value = CreateChatState.ChatCreated(chatId)
+            }
+        }
 
         init {
             fetchLevelGroups()

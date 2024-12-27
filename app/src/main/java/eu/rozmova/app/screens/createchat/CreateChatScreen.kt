@@ -40,21 +40,27 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.domain.ScenarioModel
 
+typealias ChatId = String
+
 @Composable
 fun CreateChatScreen(
-    onScenarioReady: () -> Unit,
+    onChatReady: (ChatId) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CreateChatViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
 
-    val onScenarioSelect = {
-        // TODO: start a chat
+    val onScenarioSelect: (ScenarioModel) -> Unit = { selectedScenario ->
+        viewModel.createChatFromScenario(selectedScenario)
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        SimpleToolBar("Select scenario", modifier = Modifier.padding(bottom = 20.dp), onBack = onBack)
+        SimpleToolBar(
+            "Select scenario",
+            modifier = Modifier.padding(bottom = 20.dp),
+            onBack = onBack,
+        )
         when (val uiState = state) {
             CreateChatState.Loading -> CircularProgressIndicator()
             is CreateChatState.Success -> {
@@ -82,6 +88,8 @@ fun CreateChatScreen(
                     }
                 }
             }
+
+            is CreateChatState.ChatCreated -> onChatReady(uiState.chatId)
         }
     }
 }
@@ -91,7 +99,7 @@ private fun ScenarioGroup(
     levelGroup: LevelGroup,
     isExpanded: Boolean,
     onHeaderClick: (String) -> Unit,
-    onScenarioSelect: () -> Unit,
+    onScenarioSelect: (ScenarioModel) -> Unit,
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -137,7 +145,7 @@ private fun ScenarioGroup(
                     levelGroup.scenarios.forEach { scenario ->
                         ScenarioItem(
                             scenario = scenario,
-                            onClick = { onScenarioSelect() },
+                            onClick = { onScenarioSelect(scenario) },
                         )
                     }
                 }

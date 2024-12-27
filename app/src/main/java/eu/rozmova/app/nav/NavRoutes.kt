@@ -14,7 +14,9 @@ sealed class NavRoutes(
 
     data object Chats : NavRoutes(route = "chats", icon = Icons.Default.ChatBubble, label = "Chats")
 
-    data object ChatDetails : NavRoutes(route = "chat_details/{chatId}")
+    data object ChatDetails : NavRoutes(route = "chat_details/{chatId}") {
+        fun routeWith(chatId: String) = "chat_details/$chatId"
+    }
 
     data object Settings :
         NavRoutes(route = "settings", icon = Icons.Default.Settings, label = "Settings")

@@ -45,14 +45,14 @@ fun NavigationHost(
         }
 
         composable(route = NavRoutes.CreateChat.route) {
-            CreateChatScreen(onScenarioReady = {
-                // TODO: navigate to chat
+            CreateChatScreen(onChatReady = { chatId ->
+                navController.navigate(NavRoutes.ChatDetails.routeWith(chatId))
             }, onBack = { navController.navigateUp() })
         }
 
         // Side Screens
         composable(
-            route = "chat_details/{chatId}",
+            route = NavRoutes.ChatDetails.route,
             arguments = listOf(navArgument("chatId") { type = NavType.StringType }),
         ) { backStackEntry ->
             val chatId: String = backStackEntry.arguments?.getString("chatId") ?: ""
