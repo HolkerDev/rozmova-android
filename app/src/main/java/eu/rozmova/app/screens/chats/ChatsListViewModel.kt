@@ -4,16 +4,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import eu.rozmova.app.clients.RetrofitClient
-import eu.rozmova.app.clients.domain.ChatState
-import eu.rozmova.app.components.ChatItem
+import eu.rozmova.app.domain.ChatWithScenarioModel
 import eu.rozmova.app.repositories.ChatsRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 sealed interface ChatListState {
@@ -22,7 +18,7 @@ sealed interface ChatListState {
     data object Loading : ChatListState
 
     data class Success(
-        val chats: List<ChatItem>,
+        val chats: List<ChatWithScenarioModel>,
     ) : ChatListState
 
     data class Error(
@@ -36,38 +32,25 @@ class ChatsListViewModel
     constructor(
         private val chatsRepository: ChatsRepository,
     ) : ViewModel() {
+        private val tag = this::class.simpleName
+
         private val _state = MutableStateFlow<ChatListState>(ChatListState.Empty)
         val state = _state.asStateFlow()
 
         init {
             loadChats()
-            viewModelScope.launch {
-                chatsRepository.fetchChats()
-            }
         }
 
         private fun loadChats() =
             viewModelScope.launch {
                 _state.update { ChatListState.Loading }
                 try {
-                    val result =
-                        withContext(Dispatchers.IO) {
-                            RetrofitClient.chatApi.getChats()
-                        }
+                    val chats = chatsRepository.fetchChats()
                     _state.update {
-                        ChatListState.Success(
-                            result.map { chat ->
-                                ChatItem(
-                                    chat.id,
-                                    chat.title,
-                                    listOf("dog"),
-                                    chat.state == ChatState.CREATED,
-                                )
-                            },
-                        )
+                        ChatListState.Success(chats)
                     }
                 } catch (e: Exception) {
-                    Log.e("ChatsListViewModel", "Error loading chats", e)
+                    Log.e(tag, "Error loading chats", e)
                     _state.update { ChatListState.Error(e.message ?: "Unknown error") }
                 }
             }

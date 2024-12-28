@@ -20,15 +20,12 @@ data class ChatModel(
 )
 
 @Serializable
-data class BaseChatModel(
+data class ChatWithScenarioModel(
     val id: String,
+    @SerialName("scenario_id")
+    val scenarioId: String,
     val status: ChatStatus,
-    val title: String,
-    val labels: List<String>,
-    val languageLevel: String,
-    val botInstruction: String,
-    val situation: String,
-    val userInstruction: String,
-    val targetLanguage: String,
-    val userLanguage: String,
+    @SerialName("user_id")
+    val userId: String,
+    val scenario: ScenarioModel,
 )

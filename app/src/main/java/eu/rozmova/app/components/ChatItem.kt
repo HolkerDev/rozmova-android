@@ -17,18 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-
-data class ChatItem(
-    val id: String,
-    val title: String,
-    val labels: List<String>,
-    val isActive: Boolean,
-)
+import eu.rozmova.app.domain.ChatWithScenarioModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ChatItem(
-    chat: ChatItem,
+    chat: ChatWithScenarioModel,
     onChatClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -40,7 +34,7 @@ fun ChatItem(
     ) {
         Column {
             Text(
-                text = chat.title,
+                text = chat.scenario.title,
                 modifier =
                     Modifier
                         .fillMaxWidth()
@@ -48,7 +42,7 @@ fun ChatItem(
                         .wrapContentWidth(Alignment.CenterHorizontally),
             )
             FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                chat.labels.forEach { label ->
+                chat.scenario.labels.forEach { label ->
                     Chip(label)
                 }
             }
