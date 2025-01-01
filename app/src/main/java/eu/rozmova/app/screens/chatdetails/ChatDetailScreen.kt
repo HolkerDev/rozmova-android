@@ -72,10 +72,10 @@ private fun ChatDetails(
     viewModel: ChatDetailsViewModel = hiltViewModel(),
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        SimpleToolBar(title = chatWithMessages.title, onBack = onBackClick)
+        SimpleToolBar(title = chatWithMessages.scenario.title, onBack = onBackClick)
         TaskDetailComponent(
-            chatWithMessages.description,
-            chatWithMessages.userInstructions,
+            chatWithMessages.scenario.situation,
+            chatWithMessages.scenario.userInstruction,
         )
         LazyColumn(
             modifier =

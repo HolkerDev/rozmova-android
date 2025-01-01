@@ -1,6 +1,7 @@
 package eu.rozmova.app.repositories
 
 import android.util.Log
+import eu.rozmova.app.clients.domain.ChatWithMessagesDto
 import eu.rozmova.app.domain.ChatModel
 import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ChatWithScenarioModel
@@ -34,6 +35,25 @@ class ChatsRepository
                 .from(Tables.CHATS)
                 .select(columns)
                 .decodeList<ChatWithScenarioModel>()
+        }
+
+        suspend fun fetchChatById(chatId: String): ChatWithMessagesDto {
+            val columns =
+                Columns.raw(
+                    """
+                *,
+                scenario:scenario_id(*)
+                messages:messages(*)
+            """,
+                )
+            return supabaseClient
+                .postgrest
+                .from(Tables.CHATS)
+                .select(columns) {
+                    filter {
+                        ChatWithScenarioModel::id eq chatId
+                    }
+                }.decodeSingle<ChatWithMessagesDto>()
         }
 
         suspend fun createChatFromScenario(scenario: ScenarioModel): String {
