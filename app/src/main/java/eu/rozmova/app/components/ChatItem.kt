@@ -29,6 +29,7 @@ fun ChatItem(
         modifier =
             modifier
                 .fillMaxWidth()
+                .padding(vertical = 5.dp)
                 .clickable(onClick = { onChatClick(chat.id) }),
     ) {
         Column {

@@ -99,13 +99,15 @@ private fun App(viewModel: AppViewModel = hiltViewModel()) {
 
                     AppState.Authenticated -> {
                         navController.navigate(NavRoutes.Chats.route) {
-                            popUpTo(NavRoutes.Main.route) { inclusive = true }
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
                         }
                     }
 
                     AppState.Unauthenticated -> {
                         navController.navigate(NavRoutes.Login.route) {
-                            popUpTo(NavRoutes.Main.route) { inclusive = true }
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
                         }
                     }
                 }
