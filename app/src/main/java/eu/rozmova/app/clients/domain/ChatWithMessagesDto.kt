@@ -16,11 +16,11 @@ enum class Owner {
 data class ChatWithMessagesDto(
     val id: String,
     val scenario: ScenarioModel,
-    val messages: List<MessageDto> = emptyList(),
+    val messages: List<MessageModel> = emptyList(),
 )
 
 @Serializable
-data class MessageDto(
+data class MessageModel(
     val id: String,
     val body: String,
     val link: String,

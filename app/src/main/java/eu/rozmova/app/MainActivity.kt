@@ -39,58 +39,45 @@ import javax.inject.Inject
 
 sealed class AppState {
     data object Loading : AppState()
+
     data object Authenticated : AppState()
+
     data object Unauthenticated : AppState()
 }
 
 @HiltViewModel
-class AppViewModel @Inject constructor(private val authRepository: AuthRepository) : ViewModel() {
-    init {
-        viewModelScope.launch {
-            authRepository.observeAuthState()
-        }
-    }
-
-    val appState = authRepository.authState
-        .map { authState ->
-            Log.i("AppViewModel", "authState: $authState")
-            when (authState) {
-                is AuthState.Loading -> AppState.Loading
-                is AuthState.Authenticated -> AppState.Authenticated
-                is AuthState.Unauthenticated -> AppState.Unauthenticated
+class AppViewModel
+    @Inject
+    constructor(
+        private val authRepository: AuthRepository,
+    ) : ViewModel() {
+        init {
+            viewModelScope.launch {
+                authRepository.observeAuthState()
             }
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = AppState.Loading
-        )
-}
+
+        val appState =
+            authRepository.authState
+                .map { authState ->
+                    Log.i("AppViewModel", "authState: $authState")
+                    when (authState) {
+                        is AuthState.Loading -> AppState.Loading
+                        is AuthState.Authenticated -> AppState.Authenticated
+                        is AuthState.Unauthenticated -> AppState.Unauthenticated
+                    }
+                }.stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = AppState.Loading,
+                )
+    }
 
 @Composable
 private fun App(viewModel: AppViewModel = hiltViewModel()) {
     val navController = rememberNavController()
     val bottomNavScreens = listOf(NavRoutes.Chats, NavRoutes.Settings)
     val appState by viewModel.appState.collectAsState()
-
-    LaunchedEffect(appState) {
-        when (appState) {
-            AppState.Loading -> {
-            }
-
-            AppState.Authenticated -> {
-                navController.navigate(NavRoutes.Chats.route) {
-                    popUpTo(NavRoutes.Main.route) { inclusive = true }
-                }
-            }
-
-            AppState.Unauthenticated -> {
-                navController.navigate(NavRoutes.Login.route) {
-                    popUpTo(NavRoutes.Main.route) { inclusive = true }
-                }
-            }
-        }
-    }
 
     RozmovaTheme {
         Scaffold(
@@ -101,24 +88,46 @@ private fun App(viewModel: AppViewModel = hiltViewModel()) {
                 }
             },
             contentWindowInsets = WindowInsets.statusBars,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) { innerPadding ->
             NavigationHost(navController, innerPadding)
+
+            LaunchedEffect(appState) {
+                when (appState) {
+                    AppState.Loading -> {
+                    }
+
+                    AppState.Authenticated -> {
+                        navController.navigate(NavRoutes.Chats.route) {
+                            popUpTo(NavRoutes.Main.route) { inclusive = true }
+                        }
+                    }
+
+                    AppState.Unauthenticated -> {
+                        navController.navigate(NavRoutes.Login.route) {
+                            popUpTo(NavRoutes.Main.route) { inclusive = true }
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
 private fun BottomNavBar(
-    currentRoute: String, navController: NavHostController
+    currentRoute: String,
+    navController: NavHostController,
 ) {
     NavigationBar {
         bottomNavigationItems().forEach { screen ->
-            NavigationBarItem(icon = {
-                Icon(
-                    screen.icon!!, contentDescription = screen.label
-                )
-            },
+            NavigationBarItem(
+                icon = {
+                    Icon(
+                        screen.icon!!,
+                        contentDescription = screen.label,
+                    )
+                },
                 label = { Text(screen.label!!) },
                 selected = currentRoute == screen.route,
                 onClick = {
@@ -129,7 +138,8 @@ private fun BottomNavBar(
                         launchSingleTop = true
                         restoreState = true
                     }
-                })
+                },
+            )
         }
     }
 }
