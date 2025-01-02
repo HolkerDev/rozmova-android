@@ -46,7 +46,9 @@ fun NavigationHost(
 
         composable(route = NavRoutes.CreateChat.route) {
             CreateChatScreen(onChatReady = { chatId ->
-                navController.navigate(NavRoutes.ChatDetails.routeWith(chatId))
+                navController.navigate(NavRoutes.ChatDetails.routeWith(chatId)) {
+                    popUpTo(NavRoutes.Chats.route)
+                }
             }, onBack = { navController.navigateUp() })
         }
 
