@@ -53,11 +53,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import eu.rozmova.app.clients.domain.ChatWithMessagesDto
-import eu.rozmova.app.clients.domain.Owner
 import eu.rozmova.app.components.SimpleToolBar
 
 @Composable
@@ -82,6 +79,7 @@ fun ChatDetailScreen(
                     title = viewState.chat.scenario.title,
                     description = viewState.chat.scenario.situation,
                     instruction = viewState.chat.scenario.userInstruction,
+                    onBackClick = onBackClick,
                 )
             }
 
@@ -95,6 +93,7 @@ fun ScenarioInfoCard(
     title: String,
     description: String,
     instruction: String,
+    onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isRecording by remember { mutableStateOf(false) }
@@ -129,54 +128,56 @@ fun ScenarioInfoCard(
                 progress = 0.1f,
             ),
         )
-
-    Card(
-        modifier = modifier.fillMaxWidth().fillMaxHeight().padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 50.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-    ) {
-        Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Surface(
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                shape = RoundedCornerShape(8.dp),
-            ) {
-                Row(
-                    modifier = Modifier.padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+    Column(modifier = modifier.fillMaxSize()) {
+        SimpleToolBar(title = "Speaking practice", onBack = onBackClick)
+        Card(
+            modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 50.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        ) {
+            Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = RoundedCornerShape(8.dp),
                 ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Task,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = instruction,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Task,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = instruction,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
+                    }
                 }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider()
-            Spacer(modifier = Modifier.height(16.dp))
-            AudioMessageList(messages = messages, Modifier.weight(1f))
-            Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider()
-            Spacer(modifier = Modifier.height(16.dp))
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-                AudioRecordButton(isRecording = isRecording, onRecordClick = { isRecording = !isRecording })
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(16.dp))
+                AudioMessageList(messages = messages, Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(16.dp))
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                    AudioRecordButton(isRecording = isRecording, onRecordClick = { isRecording = !isRecording })
+                }
             }
         }
     }
@@ -347,131 +348,15 @@ fun AudioRecordButton(
 }
 
 @Composable
-private fun ChatDetails(
-    chatWithMessages: ChatWithMessagesDto,
-    messages: List<ChatMessage>,
+private fun LoadingComponent(
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier.Companion,
-    viewModel: ChatDetailsViewModel = hiltViewModel(),
-) {
-    Column(modifier = modifier.fillMaxSize()) {
-        SimpleToolBar(title = chatWithMessages.scenario.title, onBack = onBackClick)
-        TaskDetailComponent(
-            chatWithMessages.scenario.situation,
-            chatWithMessages.scenario.userInstruction,
-        )
-        LazyColumn(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1f) // Takes remaining space
-                    .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(vertical = 16.dp),
-        ) {
-            items(messages) { message ->
-                ChatMessageComponent(
-                    chatMessage = message,
-                    onStopClick = { viewModel.stopAudio(message.id) },
-                    onPlayClick = { viewModel.playAudio(message.id, message.link) },
-                )
-            }
-        }
-        SpeechRecognitionComponent()
-    }
-}
-
-@Composable
-private fun ChatMessageComponent(
-    chatMessage: ChatMessage,
-    onStopClick: () -> Unit,
-    onPlayClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isUser = chatMessage.owner == Owner.USER
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        elevation =
-            CardDefaults.cardElevation(
-                defaultElevation = 6.dp,
-            ),
-        colors =
-            CardDefaults.cardColors(
-                containerColor = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-            ),
-    ) {
-        Column(
-            modifier = Modifier.Companion.padding(16.dp),
-            horizontalAlignment =
-                if (isUser) {
-                    Alignment.End
-                } else {
-                    Alignment.Start
-                },
-        ) {
-            Text(chatMessage.body)
-            if (chatMessage.link.isNotEmpty()) {
-                IconButton(onClick = {
-                    if (chatMessage.isPlaying) {
-                        onStopClick()
-                    } else {
-                        onPlayClick()
-                    }
-                }) {
-                    Icon(
-                        imageVector =
-                            if (chatMessage.isPlaying) {
-                                Icons.Default.Stop
-                            } else {
-                                Icons.Default.PlayArrow
-                            },
-                        contentDescription = "Play/Stop",
-                    )
-                }
-            }
-        }
+    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        SimpleToolBar("Loading...", onBack = onBackClick)
+        Spacer(modifier = Modifier.height(16.dp))
+        CircularProgressIndicator()
     }
-}
-
-@Composable
-private fun TaskDetailComponent(
-    description: String,
-    userInstruction: String,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier) {
-        Text(
-            text = "Task Description",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Companion.Bold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(modifier = Modifier.Companion.height(8.dp))
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(modifier = Modifier.Companion.height(8.dp))
-        Text(
-            text = "Language Level: A2",
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Companion.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(modifier = Modifier.Companion.height(4.dp))
-        Text(
-            text = userInstruction,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-@Composable
-private fun LoadingComponent(onBackClick: () -> Unit) {
-    SimpleToolBar("Loading...", onBack = onBackClick)
-    CircularProgressIndicator()
 }
 
 @Composable
