@@ -1,5 +1,6 @@
 package eu.rozmova.app.screens.createchat
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -58,6 +59,8 @@ class CreateChatViewModel
         private val scenariosRepository: ScenariosRepository,
         private val chatsRepository: ChatsRepository,
     ) : ViewModel() {
+        private val tag = this::class.simpleName
+
         private val _state = MutableStateFlow<CreateChatState>(CreateChatState.Loading)
         val state = _state.asStateFlow()
 
@@ -66,6 +69,11 @@ class CreateChatViewModel
                 _state.value = CreateChatState.Loading
                 val scenarios = scenariosRepository.getAll()
                 val levelGroups = scenariosToLevelGroups(scenarios)
+                if (levelGroups.isEmpty()) {
+                    Log.e(tag, "No scenarios found")
+                    _state.value = CreateChatState.Loading
+                    return@launch
+                }
                 _state.value = CreateChatState.Success(levelGroups)
             }
 
