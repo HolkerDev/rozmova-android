@@ -43,6 +43,9 @@ class AudioRecorderViewModel
         private val _isRecording = MutableStateFlow(false)
         val isRecording = _isRecording.asStateFlow()
 
+        private val _isLoading = MutableStateFlow(false)
+        val isLoading = _isLoading.asStateFlow()
+
         private val _recordedFilePath = MutableStateFlow<String?>(null)
         val recordedFilePath = _recordedFilePath.asStateFlow()
 
@@ -98,17 +101,22 @@ class AudioRecorderViewModel
     }
 
 @Composable
-fun AudioRecorderComponent(
+fun AudioRecorderButton(
+    onRecordStart: () -> Unit,
+    onRecordStop: () -> Unit,
+    isRecording: Boolean,
     modifier: Modifier = Modifier,
     viewModel: AudioRecorderViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
 ) {
-    val isRecording by viewModel.isRecording.collectAsState()
+    val tag = "AudioRecorderComponent"
+
     val recordedFilePath by viewModel.recordedFilePath.collectAsState()
 
     when (recordedFilePath) {
         null -> {}
         else -> {
+            Log.i(tag, "Audio recorded to: $recordedFilePath")
             Toast
                 .makeText(
                     context,
@@ -141,11 +149,11 @@ fun AudioRecorderComponent(
             onRecord = {
                 when {
                     ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
-                        == PackageManager.PERMISSION_GRANTED -> viewModel.startRecording()
+                        == PackageManager.PERMISSION_GRANTED -> onRecordStart()
                     else -> permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                 }
             },
-            onStop = { viewModel.stopRecording() },
+            onStop = onRecordStop,
             isRecording = isRecording,
         )
     }

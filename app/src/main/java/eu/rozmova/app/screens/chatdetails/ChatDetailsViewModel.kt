@@ -1,7 +1,11 @@
 package eu.rozmova.app.screens.chatdetails
 
+import android.app.Application
+import android.media.MediaRecorder
+import android.os.Build
+import android.os.Environment
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
@@ -13,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 sealed interface ChatDetailState {
@@ -20,14 +25,13 @@ sealed interface ChatDetailState {
 
     data object Loading : ChatDetailState
 
-    data class Success(
-        val chat: ChatWithMessagesDto,
-        val audioState: AudioState,
-        val messages: List<ChatMessage>,
-    ) : ChatDetailState
-
     data class Error(
         val msg: String,
+    ) : ChatDetailState
+
+    data class Loaded(
+        val chat: ChatWithMessagesDto,
+        val messages: List<ChatMessage>,
     ) : ChatDetailState
 }
 
@@ -35,6 +39,11 @@ data class AudioState(
     val isLoading: Boolean,
     val error: String?,
     val currentMessageIdPlaying: String?,
+)
+
+data class ChatState(
+    val chat: ChatWithMessagesDto,
+    val messages: List<ChatMessage>,
 )
 
 data class ChatMessage(
@@ -51,9 +60,92 @@ class ChatDetailsViewModel
     constructor(
         private val expoPlayer: ExoPlayer,
         private val chatsRepository: ChatsRepository,
-    ) : ViewModel() {
+        application: Application,
+    ) : AndroidViewModel(application) {
+        private val tag = this::class.simpleName
+
         private val _state = MutableStateFlow<ChatDetailState>(ChatDetailState.Empty)
         val state = _state.asStateFlow()
+
+        private val _audioState = MutableStateFlow<AudioState>(AudioState(false, null, null))
+        val audioState = _audioState.asStateFlow()
+
+        private val _chatState = MutableStateFlow<ChatState?>(null)
+        val chatState = _chatState.asStateFlow()
+
+        init {
+            _state.value = ChatDetailState.Empty
+        }
+
+        // Audio recording
+        private var mediaRecorder: MediaRecorder? = null
+        private var audioFile: File? = null
+
+        private val _isRecording = MutableStateFlow(false)
+        val isRecording = _isRecording.asStateFlow()
+
+        private val _isLoading = MutableStateFlow(false)
+        val isLoading = _isLoading.asStateFlow()
+
+        val onAudioSaved = {
+            viewModelScope.launch {
+                chatsRepository.sendMessage(
+                    chatId = _chatState.value!!.chat.id,
+                    audioFile!!,
+                )
+            }
+        }
+
+        fun startRecording() {
+            try {
+                // Create output file
+                val outputDir = getApplication<Application>().getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+                audioFile = File(outputDir, "recording_${System.currentTimeMillis()}.mp4")
+
+                mediaRecorder =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        MediaRecorder(getApplication())
+                    } else {
+                        MediaRecorder()
+                    }
+
+                mediaRecorder?.apply {
+                    setAudioSource(MediaRecorder.AudioSource.MIC)
+                    setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                    setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                    setOutputFile(audioFile?.absolutePath)
+                    prepare()
+                    start()
+                }
+
+                _isRecording.value = true
+            } catch (e: Exception) {
+                Log.e(tag, "Error starting recording: ${e.message}")
+                _isRecording.value = false
+            }
+        }
+
+        fun stopRecording() {
+            try {
+                mediaRecorder?.apply {
+                    stop()
+                    release()
+                }
+                mediaRecorder = null
+
+                onAudioSaved()
+            } catch (e: Exception) {
+                Log.e(tag, "Error stopping recording: ${e.message}")
+            } finally {
+                _isRecording.value = false
+            }
+        }
+
+        override fun onCleared() {
+            super.onCleared()
+            mediaRecorder?.release()
+            mediaRecorder = null
+        }
 
         fun loadChat(chatId: String) =
             viewModelScope.launch {
@@ -61,14 +153,21 @@ class ChatDetailsViewModel
                 try {
                     val chat = chatsRepository.fetchChatById(chatId)
                     _state.update {
-                        ChatDetailState.Success(
+                        _chatState.value =
+                            ChatState(
+                                chat,
+                                chat.messages.map { message ->
+                                    ChatMessage(
+                                        id = message.id,
+                                        isPlaying = false,
+                                        body = message.body,
+                                        link = message.link,
+                                        owner = message.owner,
+                                    )
+                                },
+                            )
+                        ChatDetailState.Loaded(
                             chat,
-                            audioState =
-                                AudioState(
-                                    isLoading = false,
-                                    error = null,
-                                    currentMessageIdPlaying = null,
-                                ),
                             messages =
                                 chat.messages.map { message ->
                                     ChatMessage(
@@ -94,15 +193,6 @@ class ChatDetailsViewModel
             try {
                 Log.i("ChatDetailsViewModel", "Playing audio $audioUrl")
                 updateAudioState { it.copy(isLoading = true, error = null) }
-
-                // If something playing, stop it
-                state.value.let { currentState ->
-                    if (currentState is ChatDetailState.Success) {
-                        currentState.audioState.currentMessageIdPlaying?.let {
-                            stopAudio(it)
-                        }
-                    }
-                }
 
                 // Play audio
                 expoPlayer.setMediaItem(MediaItem.fromUri(audioUrl))
@@ -152,18 +242,18 @@ class ChatDetailsViewModel
         }
 
         private fun updateAudioState(update: (AudioState) -> AudioState) {
-            _state.update { state ->
-                if (state is ChatDetailState.Success) {
-                    state.copy(audioState = update(state.audioState))
-                } else {
-                    state
-                }
-            }
+//            _state.update { state ->
+//                if (state is ChatDetailState.Loaded) {
+//                    state.copy(audioState = update(state.audioState))
+//                } else {
+//                    state
+//                }
+//            }
         }
 
         private fun updateMessages(update: (List<ChatMessage>) -> List<ChatMessage>) {
             _state.update { state ->
-                if (state is ChatDetailState.Success) {
+                if (state is ChatDetailState.Loaded) {
                     state.copy(messages = update(state.messages))
                 } else {
                     state

@@ -45,15 +45,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import eu.rozmova.app.clients.domain.Owner
 import eu.rozmova.app.components.SimpleToolBar
+import eu.rozmova.app.domain.ScenarioModel
 
 @Composable
 fun ChatDetailScreen(
@@ -66,18 +65,39 @@ fun ChatDetailScreen(
         viewModel.loadChat(chatId)
     }
     val state by viewModel.state.collectAsState()
+    val audioState by viewModel.state.collectAsState()
+    val chatState by viewModel.state.collectAsState()
+    val isRecording by viewModel.isRecording.collectAsState()
+
+    val onRecordStart = {
+        viewModel.startRecording()
+    }
+
+    val onRecordStop = {
+        viewModel.stopRecording()
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         when (val viewState = state) {
             ChatDetailState.Empty -> LoadingComponent(onBackClick)
             ChatDetailState.Loading -> LoadingComponent(onBackClick)
 
-            is ChatDetailState.Success -> {
+            is ChatDetailState.Loaded -> {
                 ScenarioInfoCard(
-                    title = viewState.chat.scenario.title,
-                    description = viewState.chat.scenario.situation,
-                    instruction = viewState.chat.scenario.userInstruction,
+                    scenario = viewState.chat.scenario,
+                    messages =
+                        viewState.messages.map { message ->
+                            AudioMessage(
+                                id = message.id,
+                                isFromUser = message.owner == Owner.USER,
+                                duration = message.body,
+                                isPlaying = message.isPlaying,
+                            )
+                        },
                     onBackClick = onBackClick,
+                    onRecordStart = onRecordStart,
+                    onRecordStop = onRecordStop,
+                    isRecording = isRecording,
                 )
             }
 
@@ -88,44 +108,45 @@ fun ChatDetailScreen(
 
 @Composable
 fun ScenarioInfoCard(
-    title: String,
-    description: String,
-    instruction: String,
+    scenario: ScenarioModel,
+    messages: List<AudioMessage>,
     onBackClick: () -> Unit,
+    onRecordStart: () -> Unit,
+    onRecordStop: () -> Unit,
+    isRecording: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    var isRecording by remember { mutableStateOf(false) }
-    val messages =
-        listOf(
-            AudioMessage(
-                id = "1",
-                isFromUser = true,
-                duration = "1:23",
-                isPlaying = false,
-                progress = 0.5f,
-            ),
-            AudioMessage(
-                id = "2",
-                isFromUser = false,
-                duration = "2:34",
-                isPlaying = true,
-                progress = 0.7f,
-            ),
-            AudioMessage(
-                id = "3",
-                isFromUser = true,
-                duration = "3:45",
-                isPlaying = false,
-                progress = 0.3f,
-            ),
-            AudioMessage(
-                id = "4",
-                isFromUser = false,
-                duration = "4:56",
-                isPlaying = false,
-                progress = 0.1f,
-            ),
-        )
+//    val messages =
+//        listOf(
+//            AudioMessage(
+//                id = "1",
+//                isFromUser = true,
+//                duration = "1:23",
+//                isPlaying = false,
+//                progress = 0.5f,
+//            ),
+//            AudioMessage(
+//                id = "2",
+//                isFromUser = false,
+//                duration = "2:34",
+//                isPlaying = true,
+//                progress = 0.7f,
+//            ),
+//            AudioMessage(
+//                id = "3",
+//                isFromUser = true,
+//                duration = "3:45",
+//                isPlaying = false,
+//                progress = 0.3f,
+//            ),
+//            AudioMessage(
+//                id = "4",
+//                isFromUser = false,
+//                duration = "4:56",
+//                isPlaying = false,
+//                progress = 0.1f,
+//            ),
+//        )
     Column(modifier = modifier.fillMaxSize()) {
         SimpleToolBar(title = "Speaking practice", onBack = onBackClick)
         Card(
@@ -134,13 +155,13 @@ fun ScenarioInfoCard(
         ) {
             Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
                 Text(
-                    text = title,
+                    text = scenario.title,
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = description,
+                    text = scenario.situation,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -160,7 +181,7 @@ fun ScenarioInfoCard(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = instruction,
+                            text = scenario.userInstruction,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                         )
@@ -173,10 +194,11 @@ fun ScenarioInfoCard(
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
-//                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-//                    AudioRecordButton(isRecording = isRecording, onRecordClick = { isRecording = !isRecording })
-//                }
-                AudioRecorderComponent()
+                AudioRecorderButton(
+                    onRecordStart = onRecordStart,
+                    onRecordStop = onRecordStop,
+                    isRecording = isRecording,
+                )
             }
         }
     }
