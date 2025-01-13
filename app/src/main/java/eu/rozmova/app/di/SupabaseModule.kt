@@ -24,7 +24,6 @@ object SupabaseModule {
             supabaseUrl = BuildConfig.SUPABASE_URL,
             supabaseKey = BuildConfig.SUPABASE_KEY,
         ) {
-            // 30 seconds
             requestTimeout = 30.seconds
             install(Auth)
             install(Postgrest)

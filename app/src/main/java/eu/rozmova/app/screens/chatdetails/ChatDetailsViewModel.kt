@@ -1,5 +1,4 @@
 package eu.rozmova.app.screens.chatdetails
-
 import android.app.Application
 import android.media.MediaRecorder
 import android.os.Build
@@ -33,6 +32,12 @@ sealed interface ChatDetailState {
         val chat: ChatWithMessagesDto,
         val messages: List<ChatMessage>,
     ) : ChatDetailState
+
+    data object SendingMessage : ChatDetailState
+
+    data class MessageSent(
+        val messages: List<ChatMessage>,
+    ) : ChatDetailState
 }
 
 data class AudioState(
@@ -49,6 +54,7 @@ data class ChatState(
 data class ChatMessage(
     val id: String,
     val isPlaying: Boolean,
+    val duration: Int = 0,
     val body: String,
     val link: String,
     val owner: Owner,
@@ -89,10 +95,25 @@ class ChatDetailsViewModel
 
         val onAudioSaved = {
             viewModelScope.launch {
-                chatsRepository.sendMessage(
-                    chatId = _chatState.value!!.chat.id,
-                    audioFile!!,
-                )
+                _state.value = ChatDetailState.SendingMessage
+                val allMessages =
+                    chatsRepository.sendMessage(
+                        chatId = _chatState.value!!.chat.id,
+                        audioFile!!,
+                    )
+                _state.value =
+                    ChatDetailState.MessageSent(
+                        messages =
+                            allMessages.map { message ->
+                                ChatMessage(
+                                    id = message.id,
+                                    isPlaying = false,
+                                    body = message.body,
+                                    link = message.link,
+                                    owner = message.owner,
+                                )
+                            },
+                    )
             }
         }
 

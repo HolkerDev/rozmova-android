@@ -83,14 +83,14 @@ class ChatsRepository
         suspend fun sendMessage(
             chatId: String,
             messageAudioFile: File,
-        ) {
+        ): List<MessageModel> {
             try {
                 val userId = supabaseClient.auth.currentUserOrNull()?.id ?: throw IllegalStateException("User is not authenticated")
                 val filePath = "$userId/${messageAudioFile.name}"
                 supabaseClient.storage.from("audio-messages").upload(filePath, messageAudioFile.readBytes())
                 val response = supabaseClient.functions.invoke("send-audio-message", mapOf("chatId" to chatId, "audioPath" to filePath))
                 val messages = response.body<List<MessageModel>>()
-                Log.i(tag, "All messages: $messages")
+                return messages
             } catch (e: Exception) {
                 Log.e(tag, "Failed to send message", e)
                 throw e
