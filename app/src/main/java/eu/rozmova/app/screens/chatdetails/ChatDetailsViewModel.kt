@@ -6,11 +6,10 @@ import android.os.Environment
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
+import eu.rozmova.app.clients.domain.Author
 import eu.rozmova.app.clients.domain.ChatWithMessagesDto
-import eu.rozmova.app.clients.domain.Owner
 import eu.rozmova.app.repositories.ChatsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,26 +18,14 @@ import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
-sealed interface ChatDetailState {
-    data object Empty : ChatDetailState
-
-    data object Loading : ChatDetailState
-
-    data class Error(
-        val msg: String,
-    ) : ChatDetailState
-
-    data class Loaded(
-        val chat: ChatWithMessagesDto,
-        val messages: List<ChatMessage>,
-    ) : ChatDetailState
-
-    data object SendingMessage : ChatDetailState
-
-    data class MessageSent(
-        val messages: List<ChatMessage>,
-    ) : ChatDetailState
-}
+data class ChatDetailState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val chat: ChatWithMessagesDto? = null,
+    val messages: List<ChatMessage>? = null,
+    val audioPlayback: AudioState = AudioState(false, null, null),
+    val isRecording: Boolean = false,
+)
 
 data class AudioState(
     val isLoading: Boolean,
@@ -57,7 +44,7 @@ data class ChatMessage(
     val duration: Int = 0,
     val body: String,
     val link: String,
-    val owner: Owner,
+    val author: Author,
 )
 
 @HiltViewModel
@@ -70,17 +57,14 @@ class ChatDetailsViewModel
     ) : AndroidViewModel(application) {
         private val tag = this::class.simpleName
 
-        private val _state = MutableStateFlow<ChatDetailState>(ChatDetailState.Empty)
+        private val _state = MutableStateFlow<ChatDetailState>(ChatDetailState())
         val state = _state.asStateFlow()
 
         private val _audioState = MutableStateFlow<AudioState>(AudioState(false, null, null))
         val audioState = _audioState.asStateFlow()
 
-        private val _chatState = MutableStateFlow<ChatState?>(null)
-        val chatState = _chatState.asStateFlow()
-
         init {
-            _state.value = ChatDetailState.Empty
+            _state.value = ChatDetailState()
         }
 
         // Audio recording
@@ -90,27 +74,25 @@ class ChatDetailsViewModel
         private val _isRecording = MutableStateFlow(false)
         val isRecording = _isRecording.asStateFlow()
 
-        private val _isLoading = MutableStateFlow(false)
-        val isLoading = _isLoading.asStateFlow()
-
         val onAudioSaved = {
             viewModelScope.launch {
-                _state.value = ChatDetailState.SendingMessage
+                _state.value = _state.value.copy(isLoading = true)
                 val allMessages =
                     chatsRepository.sendMessage(
-                        chatId = _chatState.value!!.chat.id,
+                        chatId = _state.value.chat!!.id,
                         audioFile!!,
                     )
                 _state.value =
-                    ChatDetailState.MessageSent(
+                    _state.value.copy(
+                        isLoading = false,
                         messages =
                             allMessages.map { message ->
                                 ChatMessage(
                                     id = message.id,
                                     isPlaying = false,
-                                    body = message.body,
-                                    link = message.link,
-                                    owner = message.owner,
+                                    body = message.transcription,
+                                    link = message.audioReference,
+                                    author = message.author,
                                 )
                             },
                     )
@@ -170,97 +152,83 @@ class ChatDetailsViewModel
 
         fun loadChat(chatId: String) =
             viewModelScope.launch {
-                _state.value = ChatDetailState.Loading
+                _state.update { ChatDetailState(isLoading = true) }
                 try {
                     val chat = chatsRepository.fetchChatById(chatId)
-                    _state.update {
-                        _chatState.value =
-                            ChatState(
-                                chat,
-                                chat.messages.map { message ->
-                                    ChatMessage(
-                                        id = message.id,
-                                        isPlaying = false,
-                                        body = message.body,
-                                        link = message.link,
-                                        owner = message.owner,
-                                    )
-                                },
-                            )
-                        ChatDetailState.Loaded(
-                            chat,
+                    _state.value =
+                        _state.value.copy(
+                            chat = chat,
+                            isLoading = false,
                             messages =
                                 chat.messages.map { message ->
                                     ChatMessage(
                                         id = message.id,
                                         isPlaying = false,
-                                        body = message.body,
-                                        link = message.link,
-                                        owner = message.owner,
+                                        body = message.transcription,
+                                        link = message.audioReference,
+                                        author = message.author,
                                     )
                                 },
                         )
-                    }
                 } catch (e: Exception) {
                     Log.e("ChatDetailsViewModel", "Error loading chat", e)
-                    _state.update { ChatDetailState.Error(e.message ?: "Unknown error") }
                 }
             }
 
-        fun playAudio(
-            messageId: String,
-            audioUrl: String,
-        ) = viewModelScope.launch {
-            try {
-                Log.i("ChatDetailsViewModel", "Playing audio $audioUrl")
-                updateAudioState { it.copy(isLoading = true, error = null) }
-
-                // Play audio
-                expoPlayer.setMediaItem(MediaItem.fromUri(audioUrl))
-                expoPlayer.prepare()
-                expoPlayer.play()
-                updateAudioState {
-                    it.copy(
-                        isLoading = false,
-                        error = null,
-                        currentMessageIdPlaying = messageId,
-                    )
-                }
-
-                updateMessages {
-                    it.map { message ->
-                        if (message.id == messageId) {
-                            message.copy(isPlaying = true)
-                        } else {
-                            message
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("ChatDetailsViewModel", "Error playing audio", e)
-                updateAudioState { it.copy(isLoading = false, error = e.message) }
-            }
-        }
-
-        fun stopAudio(messageId: String) {
-            expoPlayer.stop()
-            updateAudioState {
-                it.copy(
-                    isLoading = false,
-                    error = null,
-                    currentMessageIdPlaying = null,
-                )
-            }
-            updateMessages {
-                it.map { message ->
-                    if (message.id == messageId) {
-                        message.copy(isPlaying = false)
-                    } else {
-                        message
-                    }
-                }
-            }
-        }
+//        fun playAudio(
+//            messageId: String,
+//            audioUrl: String,
+//        ) = viewModelScope.launch {
+//            try {
+//                Log.i("ChatDetailsViewModel", "Playing audio $audioUrl")
+//                updateAudioState { it.copy(isLoading = true, error = null) }
+//
+//                // Play audio
+//                expoPlayer.setMediaItem(MediaItem.fromUri(audioUrl))
+//                expoPlayer.prepare()
+//                expoPlayer.play()
+//                updateAudioState {
+//                    it.copy(
+//                        isLoading = false,
+//                        error = null,
+//                        currentMessageIdPlaying = messageId,
+//                    )
+//                }
+//
+//                updateMessages {
+//                    it.map { message ->
+//                        if (message.id == messageId) {
+//                            message.copy(isPlaying = true)
+//                        } else {
+//                            message
+//                        }
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                Log.e("ChatDetailsViewModel", "Error playing audio", e)
+//                updateAudioState { it.copy(isLoading = false, error = e.message) }
+//            }
+//        }
+//
+//        fun stopAudio(messageId: String) {
+//            expoPlayer.stop()
+//            updateAudioState {
+//                it.copy(
+//                    isLoading = false,
+//                    error = null,
+//                    currentMessageIdPlaying = null,
+//                )
+//            }
+//            updateMessages {
+//                it.map { message ->
+//                    if (message.id == messageId) {
+//                        message.copy(isPlaying = false)
+//                    } else {
+//                        message
+//                    }
+//                }
+//            }
+//        }
 
         private fun updateAudioState(update: (AudioState) -> AudioState) {
 //            _state.update { state ->
@@ -270,15 +238,5 @@ class ChatDetailsViewModel
 //                    state
 //                }
 //            }
-        }
-
-        private fun updateMessages(update: (List<ChatMessage>) -> List<ChatMessage>) {
-            _state.update { state ->
-                if (state is ChatDetailState.Loaded) {
-                    state.copy(messages = update(state.messages))
-                } else {
-                    state
-                }
-            }
         }
     }

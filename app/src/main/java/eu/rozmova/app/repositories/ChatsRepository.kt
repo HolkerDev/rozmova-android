@@ -48,17 +48,28 @@ class ChatsRepository
                     """
                 *,
                 scenario:scenario_id(*)
-                messages:messages(*)
             """,
                 )
-            return supabaseClient
-                .postgrest
-                .from(Tables.CHATS)
-                .select(columns) {
-                    filter {
-                        ChatWithScenarioModel::id eq chatId
-                    }
-                }.decodeSingle<ChatWithMessagesDto>()
+            val chatModel =
+                supabaseClient
+                    .postgrest
+                    .from(Tables.CHATS)
+                    .select(columns) {
+                        filter {
+                            ChatWithScenarioModel::id eq chatId
+                        }
+                    }.decodeSingle<ChatWithScenarioModel>()
+
+            val messages =
+                supabaseClient.postgrest
+                    .from(Tables.MESSAGES)
+                    .select(Columns.raw("*")) {
+                        filter {
+                            MessageModel::chatId eq chatId
+                        }
+                    }.decodeList<MessageModel>()
+
+            return ChatWithMessagesDto(chatModel.id, chatModel.scenario, messages)
         }
 
         suspend fun createChatFromScenario(scenario: ScenarioModel): String {
@@ -89,6 +100,7 @@ class ChatsRepository
                 val filePath = "$userId/${messageAudioFile.name}"
                 supabaseClient.storage.from("audio-messages").upload(filePath, messageAudioFile.readBytes())
                 val response = supabaseClient.functions.invoke("send-audio-message", mapOf("chatId" to chatId, "audioPath" to filePath))
+                Log.i(tag, "Message sent: ${response.body<String>()}")
                 val messages = response.body<List<MessageModel>>()
                 return messages
             } catch (e: Exception) {

@@ -1,5 +1,6 @@
 package eu.rozmova.app.screens.chatdetails
 
+import android.util.Log
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -50,7 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import eu.rozmova.app.clients.domain.Owner
+import eu.rozmova.app.clients.domain.Author
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.domain.ScenarioModel
 
@@ -69,39 +70,32 @@ fun ChatDetailScreen(
     val chatState by viewModel.state.collectAsState()
     val isRecording by viewModel.isRecording.collectAsState()
 
-    val onRecordStart = {
-        viewModel.startRecording()
-    }
-
-    val onRecordStop = {
-        viewModel.stopRecording()
-    }
-
     Column(modifier = modifier.fillMaxSize()) {
-        when (val viewState = state) {
-            ChatDetailState.Empty -> LoadingComponent(onBackClick)
-            ChatDetailState.Loading -> LoadingComponent(onBackClick)
-
-            is ChatDetailState.Loaded -> {
+        if (state.isLoading) {
+            LoadingComponent(onBackClick)
+        } else if (!state.error.isNullOrBlank()) {
+            ErrorComponent(state.error!!, onBackClick)
+        } else {
+            chatState.chat?.let { chat ->
                 ScenarioInfoCard(
-                    scenario = viewState.chat.scenario,
-                    messages =
-                        viewState.messages.map { message ->
-                            AudioMessage(
-                                id = message.id,
-                                isFromUser = message.owner == Owner.USER,
-                                duration = message.body,
-                                isPlaying = message.isPlaying,
-                            )
-                        },
                     onBackClick = onBackClick,
-                    onRecordStart = onRecordStart,
-                    onRecordStop = onRecordStop,
+                    onRecordStart = { viewModel.startRecording() },
+                    onRecordStop = { viewModel.stopRecording() },
                     isRecording = isRecording,
+                    scenario = chat.scenario,
+                    messages =
+                        chatState.messages?.map {
+                            Log.i("ChatDetailScreen", "ChatMessage: $it")
+                            AudioMessage(
+                                id = it.id,
+                                isFromUser = it.author == Author.USER,
+                                duration = "0",
+                                isPlaying = it.isPlaying,
+                                progress = 0f,
+                            )
+                        } ?: emptyList(),
                 )
-            }
-
-            is ChatDetailState.Error -> ErrorComponent(viewState.msg, onBackClick)
+            } ?: LoadingComponent(onBackClick)
         }
     }
 }
