@@ -19,7 +19,7 @@ import java.io.File
 import javax.inject.Inject
 
 data class ChatDetailState(
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val error: String? = null,
     val chat: ChatWithMessagesDto? = null,
     val messages: List<ChatMessage>? = null,
@@ -63,11 +63,6 @@ class ChatDetailsViewModel
         private val _audioState = MutableStateFlow<AudioState>(AudioState(false, null, null))
         val audioState = _audioState.asStateFlow()
 
-        init {
-            _state.value = ChatDetailState()
-        }
-
-        // Audio recording
         private var mediaRecorder: MediaRecorder? = null
         private var audioFile: File? = null
 
@@ -76,14 +71,14 @@ class ChatDetailsViewModel
 
         val onAudioSaved = {
             viewModelScope.launch {
-                _state.value = _state.value.copy(isLoading = true)
+                _state.update { it.copy(isLoading = true) }
                 val allMessages =
                     chatsRepository.sendMessage(
                         chatId = _state.value.chat!!.id,
                         audioFile!!,
                     )
-                _state.value =
-                    _state.value.copy(
+                _state.update {
+                    it.copy(
                         isLoading = false,
                         messages =
                             allMessages.map { message ->
@@ -96,12 +91,12 @@ class ChatDetailsViewModel
                                 )
                             },
                     )
+                }
             }
         }
 
         fun startRecording() {
             try {
-                // Create output file
                 val outputDir = getApplication<Application>().getExternalFilesDir(Environment.DIRECTORY_MUSIC)
                 audioFile = File(outputDir, "recording_${System.currentTimeMillis()}.mp4")
 
@@ -152,11 +147,11 @@ class ChatDetailsViewModel
 
         fun loadChat(chatId: String) =
             viewModelScope.launch {
-                _state.update { ChatDetailState(isLoading = true) }
+                _state.update { it.copy(isLoading = true) }
                 try {
                     val chat = chatsRepository.fetchChatById(chatId)
-                    _state.value =
-                        _state.value.copy(
+                    _state.update {
+                        it.copy(
                             chat = chat,
                             isLoading = false,
                             messages =
@@ -170,6 +165,7 @@ class ChatDetailsViewModel
                                     )
                                 },
                         )
+                    }
                 } catch (e: Exception) {
                     Log.e("ChatDetailsViewModel", "Error loading chat", e)
                 }
