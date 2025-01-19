@@ -1,11 +1,13 @@
 package eu.rozmova.app.screens.chatdetails
 import android.app.Application
 import android.media.MediaRecorder
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.clients.domain.Author
@@ -171,40 +173,20 @@ class ChatDetailsViewModel
                 }
             }
 
-//        fun playAudio(
-//            messageId: String,
-//            audioUrl: String,
-//        ) = viewModelScope.launch {
-//            try {
-//                Log.i("ChatDetailsViewModel", "Playing audio $audioUrl")
-//                updateAudioState { it.copy(isLoading = true, error = null) }
-//
-//                // Play audio
-//                expoPlayer.setMediaItem(MediaItem.fromUri(audioUrl))
-//                expoPlayer.prepare()
-//                expoPlayer.play()
-//                updateAudioState {
-//                    it.copy(
-//                        isLoading = false,
-//                        error = null,
-//                        currentMessageIdPlaying = messageId,
-//                    )
-//                }
-//
-//                updateMessages {
-//                    it.map { message ->
-//                        if (message.id == messageId) {
-//                            message.copy(isPlaying = true)
-//                        } else {
-//                            message
-//                        }
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                Log.e("ChatDetailsViewModel", "Error playing audio", e)
-//                updateAudioState { it.copy(isLoading = false, error = e.message) }
-//            }
-//        }
+        fun playAudio(messageId: String) =
+            viewModelScope.launch {
+                try {
+                    val message =
+                        _state.value.messages?.first { it.id == messageId }
+                            ?: throw IllegalStateException("Message not found")
+                    val audioUri = buildAudioUri(message.link, message.author == Author.USER)
+                    expoPlayer.setMediaItem(MediaItem.fromUri(audioUri))
+                    expoPlayer.prepare()
+                    expoPlayer.play()
+                } catch (e: Exception) {
+                    Log.e("ChatDetailsViewModel", "Error playing audio", e)
+                }
+            }
 //
 //        fun stopAudio(messageId: String) {
 //            expoPlayer.stop()
@@ -226,13 +208,18 @@ class ChatDetailsViewModel
 //            }
 //        }
 
-        private fun updateAudioState(update: (AudioState) -> AudioState) {
-//            _state.update { state ->
-//                if (state is ChatDetailState.Loaded) {
-//                    state.copy(audioState = update(state.audioState))
-//                } else {
-//                    state
-//                }
-//            }
+        private fun buildAudioUri(
+            audioLink: String,
+            isUser: Boolean,
+        ): Uri {
+            if (isUser) {
+                val audioName = audioLink.split("/").last()
+                val outputDir = getApplication<Application>().getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+                val audioFile = File(outputDir, audioName)
+                val audioUri = Uri.fromFile(audioFile)
+                return audioUri
+            } else {
+                TODO("Not implemented")
+            }
         }
     }

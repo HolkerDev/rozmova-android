@@ -81,6 +81,8 @@ fun ChatDetailScreen(
                     onBackClick = onBackClick,
                     onRecordStart = { viewModel.startRecording() },
                     onRecordStop = { viewModel.stopRecording() },
+                    onPlayMessage = { messageId -> viewModel.playAudio(messageId) },
+                    onStopMessage = { },
                     isRecording = isRecording,
                     scenario = chat.scenario,
                     messages =
@@ -107,6 +109,8 @@ fun ScenarioInfoCard(
     onBackClick: () -> Unit,
     onRecordStart: () -> Unit,
     onRecordStop: () -> Unit,
+    onPlayMessage: (messageId: String) -> Unit,
+    onStopMessage: () -> Unit,
     isRecording: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -184,7 +188,7 @@ fun ScenarioInfoCard(
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
-                AudioMessageList(messages = messages, Modifier.weight(1f))
+                AudioMessageList(messages = messages, onPlayMessage, onStopMessage, Modifier.weight(1f))
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
@@ -201,6 +205,8 @@ fun ScenarioInfoCard(
 @Composable
 fun AudioMessageList(
     messages: List<AudioMessage>,
+    onPlayMessage: (messageId: String) -> Unit,
+    onStopMessage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -210,6 +216,8 @@ fun AudioMessageList(
         items(messages) { message ->
             AudioMessageItem(
                 message = message,
+                onPlayMessage = onPlayMessage,
+                onStopMessage = onStopMessage,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -219,8 +227,18 @@ fun AudioMessageList(
 @Composable
 fun AudioMessageItem(
     message: AudioMessage,
+    onPlayMessage: (messageId: String) -> Unit,
+    onStopMessage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val onIconClick = {
+        if (message.isPlaying) {
+            onStopMessage()
+        } else {
+            onPlayMessage(message.id)
+        }
+    }
+
     val isUserMessage = message.isFromUser
     Row(
         modifier = modifier.padding(vertical = 4.dp),
@@ -249,7 +267,7 @@ fun AudioMessageItem(
                 modifier = Modifier.padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                IconButton(onClick = { /* Play/Pause logic */ }) {
+                IconButton(onClick = onIconClick) {
                     Icon(
                         imageVector =
                             if (message.isPlaying) {
