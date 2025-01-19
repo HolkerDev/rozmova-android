@@ -18,6 +18,7 @@ import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.seconds
 
 @Singleton
 class ChatsRepository
@@ -89,6 +90,11 @@ class ChatsRepository
                 Log.e(tag, "Failed to create chat", e)
                 throw e
             }
+        }
+
+        suspend fun getPublicAudioLink(audioPath: String): String {
+            val userId = supabaseClient.auth.currentUserOrNull()?.id ?: throw IllegalStateException("User is not authenticated")
+            return supabaseClient.storage.from("audio-messages").createSignedUrl("$userId/$audioPath", 60.seconds)
         }
 
         suspend fun sendMessage(

@@ -180,6 +180,7 @@ class ChatDetailsViewModel
                         _state.value.messages?.first { it.id == messageId }
                             ?: throw IllegalStateException("Message not found")
                     val audioUri = buildAudioUri(message.link, message.author == Author.USER)
+                    Log.i("ChatDetailsViewModel", "Playing audio: $audioUri")
                     expoPlayer.setMediaItem(MediaItem.fromUri(audioUri))
                     expoPlayer.prepare()
                     expoPlayer.play()
@@ -208,7 +209,7 @@ class ChatDetailsViewModel
 //            }
 //        }
 
-        private fun buildAudioUri(
+        private suspend fun buildAudioUri(
             audioLink: String,
             isUser: Boolean,
         ): Uri {
@@ -219,7 +220,7 @@ class ChatDetailsViewModel
                 val audioUri = Uri.fromFile(audioFile)
                 return audioUri
             } else {
-                TODO("Not implemented")
+                return Uri.parse(chatsRepository.getPublicAudioLink(audioLink))
             }
         }
     }
