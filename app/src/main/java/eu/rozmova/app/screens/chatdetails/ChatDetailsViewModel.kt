@@ -176,38 +176,24 @@ class ChatDetailsViewModel
         fun playAudio(messageId: String) =
             viewModelScope.launch {
                 try {
+                    stopAudio()
                     val message =
                         _state.value.messages?.first { it.id == messageId }
                             ?: throw IllegalStateException("Message not found")
                     val audioUri = buildAudioUri(message.link, message.author == Author.USER)
-                    Log.i("ChatDetailsViewModel", "Playing audio: $audioUri")
                     expoPlayer.setMediaItem(MediaItem.fromUri(audioUri))
                     expoPlayer.prepare()
                     expoPlayer.play()
+                    _state.update { it.copy(messages = it.messages?.map { msg -> msg.copy(isPlaying = msg.id == messageId) }) }
                 } catch (e: Exception) {
                     Log.e("ChatDetailsViewModel", "Error playing audio", e)
                 }
             }
-//
-//        fun stopAudio(messageId: String) {
-//            expoPlayer.stop()
-//            updateAudioState {
-//                it.copy(
-//                    isLoading = false,
-//                    error = null,
-//                    currentMessageIdPlaying = null,
-//                )
-//            }
-//            updateMessages {
-//                it.map { message ->
-//                    if (message.id == messageId) {
-//                        message.copy(isPlaying = false)
-//                    } else {
-//                        message
-//                    }
-//                }
-//            }
-//        }
+
+        fun stopAudio() {
+            expoPlayer.stop()
+            _state.update { it.copy(messages = it.messages?.map { msg -> msg.copy(isPlaying = false) }) }
+        }
 
         private suspend fun buildAudioUri(
             audioLink: String,

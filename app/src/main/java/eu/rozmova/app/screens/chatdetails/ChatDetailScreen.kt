@@ -82,7 +82,7 @@ fun ChatDetailScreen(
                     onRecordStart = { viewModel.startRecording() },
                     onRecordStop = { viewModel.stopRecording() },
                     onPlayMessage = { messageId -> viewModel.playAudio(messageId) },
-                    onStopMessage = { },
+                    onStopMessage = { viewModel.stopAudio() },
                     isRecording = isRecording,
                     scenario = chat.scenario,
                     messages =
