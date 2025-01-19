@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -33,13 +35,14 @@ fun ChatsListScreen(
     val state by viewModel.state.collectAsState()
 
     Box(modifier = modifier.fillMaxSize()) {
-        Column {
+        Column(modifier = Modifier.fillMaxSize()) {
             SimpleToolBar("Chats")
-            Box(
+            Card(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .padding(16.dp),
+                        .padding(bottom = 8.dp, start = 8.dp, end = 8.dp, top = 16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             ) {
                 when (val viewState = state) {
                     ChatListState.Empty -> Text("No chats")
