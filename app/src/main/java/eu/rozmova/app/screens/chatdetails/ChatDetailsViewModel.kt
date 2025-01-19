@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.clients.domain.Author
@@ -70,6 +71,22 @@ class ChatDetailsViewModel
 
         private val _isRecording = MutableStateFlow(false)
         val isRecording = _isRecording.asStateFlow()
+
+        val onAudioFinished = {
+            _state.update { it.copy(messages = it.messages?.map { msg -> msg.copy(isPlaying = false) }) }
+        }
+
+        init {
+            expoPlayer.addListener(
+                object : Player.Listener {
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        if (playbackState == Player.STATE_ENDED) {
+                            onAudioFinished()
+                        }
+                    }
+                },
+            )
+        }
 
         val onAudioSaved = {
             viewModelScope.launch {
