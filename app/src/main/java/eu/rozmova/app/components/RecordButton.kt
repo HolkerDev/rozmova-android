@@ -7,17 +7,20 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.Stop
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -28,6 +31,7 @@ fun RecordButton(
     onRecord: () -> Unit,
     onStop: () -> Unit,
     isRecording: Boolean,
+    isDisabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "")
@@ -77,7 +81,7 @@ fun RecordButton(
             )
         }
 
-        FloatingActionButton(
+        Button(
             onClick = {
                 if (isRecording) {
                     onStop()
@@ -85,16 +89,23 @@ fun RecordButton(
                     onRecord()
                 }
             },
-            containerColor =
-                if (isRecording) {
-                    MaterialTheme.colorScheme.error
-                } else {
-                    MaterialTheme.colorScheme.primary
-                },
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor =
+                        if (isRecording) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        },
+                ),
+            shape = RoundedCornerShape(percent = 20),
+            enabled = !isDisabled,
+            modifier = Modifier.height(70.dp).width(70.dp),
         ) {
             Icon(
                 imageVector = if (isRecording) Icons.Rounded.Stop else Icons.Rounded.Mic,
                 contentDescription = if (isRecording) "Stop Recording" else "Start Recording",
+                modifier = Modifier.scale(1.3f),
             )
         }
     }

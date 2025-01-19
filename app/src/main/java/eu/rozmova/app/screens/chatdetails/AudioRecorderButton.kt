@@ -105,6 +105,7 @@ fun AudioRecorderButton(
     onRecordStart: () -> Unit,
     onRecordStop: () -> Unit,
     isRecording: Boolean,
+    isDisabled: Boolean,
     modifier: Modifier = Modifier,
     viewModel: AudioRecorderViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
@@ -155,6 +156,7 @@ fun AudioRecorderButton(
             },
             onStop = onRecordStop,
             isRecording = isRecording,
+            isDisabled = isDisabled,
         )
     }
 }

@@ -1,12 +1,6 @@
 package eu.rozmova.app.screens.chatdetails
 
 import android.util.Log
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,23 +12,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.Task
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,7 +37,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.clients.domain.Author
@@ -66,12 +54,11 @@ fun ChatDetailScreen(
         viewModel.loadChat(chatId)
     }
     val state by viewModel.state.collectAsState()
-    val audioState by viewModel.state.collectAsState()
     val chatState by viewModel.state.collectAsState()
     val isRecording by viewModel.isRecording.collectAsState()
 
     Column(modifier = modifier.fillMaxSize()) {
-        if (state.isLoading) {
+        if (state.isLoading && state.chat == null) {
             LoadingComponent(onBackClick)
         } else if (!state.error.isNullOrBlank()) {
             ErrorComponent(state.error!!, onBackClick)
@@ -96,6 +83,7 @@ fun ChatDetailScreen(
                                 progress = 0f,
                             )
                         } ?: emptyList(),
+                    isMessageLoading = state.isLoading,
                 )
             } ?: LoadingComponent(onBackClick)
         }
@@ -111,40 +99,10 @@ fun ScenarioInfoCard(
     onRecordStop: () -> Unit,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
+    isMessageLoading: Boolean,
     isRecording: Boolean,
     modifier: Modifier = Modifier,
 ) {
-//    val messages =
-//        listOf(
-//            AudioMessage(
-//                id = "1",
-//                isFromUser = true,
-//                duration = "1:23",
-//                isPlaying = false,
-//                progress = 0.5f,
-//            ),
-//            AudioMessage(
-//                id = "2",
-//                isFromUser = false,
-//                duration = "2:34",
-//                isPlaying = true,
-//                progress = 0.7f,
-//            ),
-//            AudioMessage(
-//                id = "3",
-//                isFromUser = true,
-//                duration = "3:45",
-//                isPlaying = false,
-//                progress = 0.3f,
-//            ),
-//            AudioMessage(
-//                id = "4",
-//                isFromUser = false,
-//                duration = "4:56",
-//                isPlaying = false,
-//                progress = 0.1f,
-//            ),
-//        )
     Column(modifier = modifier.fillMaxSize()) {
         SimpleToolBar(title = "Speaking practice", onBack = onBackClick)
         Card(
@@ -188,13 +146,14 @@ fun ScenarioInfoCard(
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
-                AudioMessageList(messages = messages, onPlayMessage, onStopMessage, Modifier.weight(1f))
+                AudioMessageList(messages = messages, onPlayMessage, onStopMessage, isMessageLoading, Modifier.weight(1f))
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
                 AudioRecorderButton(
                     onRecordStart = onRecordStart,
                     onRecordStop = onRecordStop,
+                    isDisabled = isMessageLoading,
                     isRecording = isRecording,
                 )
             }
@@ -207,6 +166,7 @@ fun AudioMessageList(
     messages: List<AudioMessage>,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
+    isLoadingMessage: Boolean,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -220,6 +180,19 @@ fun AudioMessageList(
                 onStopMessage = onStopMessage,
                 modifier = Modifier.fillMaxWidth(),
             )
+        }
+        if (isLoadingMessage) {
+            item {
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
         }
     }
 }
@@ -307,78 +280,6 @@ data class AudioMessage(
     val isPlaying: Boolean = false,
     val progress: Float = 0f,
 )
-
-@Composable
-fun AudioRecordButton(
-    isRecording: Boolean,
-    onRecordClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val infiniteTransition = rememberInfiniteTransition(label = "")
-    val scale1 by infiniteTransition.animateFloat(
-        initialValue = 1.7f,
-        targetValue = 1.9f,
-        animationSpec =
-            infiniteRepeatable(
-                animation = tween(850),
-                repeatMode = RepeatMode.Reverse,
-            ),
-        label = "",
-    )
-
-    val scale2 by infiniteTransition.animateFloat(
-        initialValue = 1.9f,
-        targetValue = 2.1f,
-        animationSpec =
-            infiniteRepeatable(
-                animation = tween(800), // Different duration
-                repeatMode = RepeatMode.Reverse,
-            ),
-        label = "",
-    )
-
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        if (isRecording) {
-            // First animation
-            Box(
-                Modifier
-                    .size(48.dp)
-                    .scale(scale1)
-                    .background(
-                        MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
-                        CircleShape,
-                    ),
-            )
-            // Second animation
-            Box(
-                Modifier
-                    .size(48.dp)
-                    .scale(scale2)
-                    .background(
-                        MaterialTheme.colorScheme.error.copy(alpha = 0.15f),
-                        CircleShape,
-                    ),
-            )
-        }
-
-        FloatingActionButton(
-            onClick = {
-                onRecordClick()
-            },
-            containerColor =
-                if (isRecording) {
-                    MaterialTheme.colorScheme.error
-                } else {
-                    MaterialTheme.colorScheme.primary
-                },
-        ) {
-            Icon(
-                imageVector = if (isRecording) Icons.Rounded.Stop else Icons.Rounded.Mic,
-                contentDescription = if (isRecording) "Stop Recording" else "Start Recording",
-            )
-        }
-    }
-}
 
 @Composable
 private fun LoadingComponent(
