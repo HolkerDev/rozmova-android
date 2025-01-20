@@ -36,11 +36,6 @@ data class AudioState(
     val currentMessageIdPlaying: String?,
 )
 
-data class ChatState(
-    val chat: ChatWithMessagesDto,
-    val messages: List<ChatMessage>,
-)
-
 data class ChatMessage(
     val id: String,
     val isPlaying: Boolean,
@@ -62,9 +57,16 @@ class ChatDetailsViewModel
 
         private val _state = MutableStateFlow<ChatDetailState>(ChatDetailState())
         val state = _state.asStateFlow()
+        private val _shouldScrollToBottom = MutableStateFlow(false)
+        val shouldScrollToBottom = _shouldScrollToBottom.asStateFlow()
 
-        private val _audioState = MutableStateFlow<AudioState>(AudioState(false, null, null))
-        val audioState = _audioState.asStateFlow()
+        fun scrollToBottom() {
+            _shouldScrollToBottom.update { true }
+        }
+
+        fun onScrollToBottom() {
+            _shouldScrollToBottom.update { false }
+        }
 
         private var mediaRecorder: MediaRecorder? = null
         private var audioFile: File? = null
@@ -91,6 +93,7 @@ class ChatDetailsViewModel
         val onAudioSaved = {
             viewModelScope.launch {
                 _state.update { it.copy(isLoading = true) }
+                scrollToBottom()
                 val allMessages =
                     chatsRepository.sendMessage(
                         chatId = _state.value.chat!!.id,
@@ -111,6 +114,7 @@ class ChatDetailsViewModel
                             },
                     )
                 }
+                scrollToBottom()
             }
         }
 
@@ -185,6 +189,7 @@ class ChatDetailsViewModel
                                 },
                         )
                     }
+                    scrollToBottom()
                 } catch (e: Exception) {
                     Log.e("ChatDetailsViewModel", "Error loading chat", e)
                 }

@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Pause
@@ -39,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.rozmova.app.clients.domain.Author
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.domain.ScenarioModel
@@ -56,6 +59,15 @@ fun ChatDetailScreen(
     val state by viewModel.state.collectAsState()
     val chatState by viewModel.state.collectAsState()
     val isRecording by viewModel.isRecording.collectAsState()
+    val shouldScrollToBottom by viewModel.shouldScrollToBottom.collectAsStateWithLifecycle()
+    val messageListState = rememberLazyListState()
+
+    LaunchedEffect(shouldScrollToBottom) {
+        if (shouldScrollToBottom && chatState.messages != null) {
+            messageListState.animateScrollToItem(chatState.messages!!.size - 1)
+            viewModel.onScrollToBottom()
+        }
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         if (state.isLoading && state.chat == null) {
@@ -84,6 +96,7 @@ fun ChatDetailScreen(
                             )
                         } ?: emptyList(),
                     isMessageLoading = state.isLoading,
+                    messageListState = messageListState,
                 )
             } ?: LoadingComponent(onBackClick)
         }
@@ -101,6 +114,7 @@ fun ScenarioInfoCard(
     onStopMessage: () -> Unit,
     isMessageLoading: Boolean,
     isRecording: Boolean,
+    messageListState: LazyListState,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -146,7 +160,7 @@ fun ScenarioInfoCard(
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
-                AudioMessageList(messages = messages, onPlayMessage, onStopMessage, isMessageLoading, Modifier.weight(1f))
+                AudioMessageList(messages = messages, onPlayMessage, onStopMessage, messageListState, isMessageLoading, Modifier.weight(1f))
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
@@ -166,12 +180,14 @@ fun AudioMessageList(
     messages: List<AudioMessage>,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
+    messageListState: LazyListState,
     isLoadingMessage: Boolean,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(16.dp),
+        state = messageListState,
     ) {
         items(messages) { message ->
             AudioMessageItem(
