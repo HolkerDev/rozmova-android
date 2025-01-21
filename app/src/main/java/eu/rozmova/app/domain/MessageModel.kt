@@ -1,7 +1,6 @@
-package eu.rozmova.app.clients.domain
+package eu.rozmova.app.domain
 
 import com.google.gson.annotations.SerializedName
-import eu.rozmova.app.domain.ScenarioModel
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -31,4 +30,6 @@ data class MessageModel(
     val chatId: String,
     @SerialName("created_at")
     val createdAt: Instant,
+    @SerialName("audio_duration")
+    val audioDuration: Int,
 )

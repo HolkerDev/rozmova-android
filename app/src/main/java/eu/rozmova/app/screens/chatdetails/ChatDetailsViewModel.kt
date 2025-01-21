@@ -11,8 +11,8 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
-import eu.rozmova.app.clients.domain.Author
-import eu.rozmova.app.clients.domain.ChatWithMessagesDto
+import eu.rozmova.app.domain.Author
+import eu.rozmova.app.domain.ChatWithMessagesDto
 import eu.rozmova.app.repositories.ChatsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -61,6 +61,8 @@ class ChatDetailsViewModel
         val shouldScrollToBottom = _shouldScrollToBottom.asStateFlow()
 
         fun scrollToBottom() {
+            if (_shouldScrollToBottom.value) return
+            if (_state.value.messages.isNullOrEmpty()) return
             _shouldScrollToBottom.update { true }
         }
 
@@ -110,6 +112,7 @@ class ChatDetailsViewModel
                                     body = message.transcription,
                                     link = message.audioReference,
                                     author = message.author,
+                                    duration = message.audioDuration,
                                 )
                             },
                     )
@@ -185,6 +188,7 @@ class ChatDetailsViewModel
                                         body = message.transcription,
                                         link = message.audioReference,
                                         author = message.author,
+                                        duration = message.audioDuration,
                                     )
                                 },
                         )

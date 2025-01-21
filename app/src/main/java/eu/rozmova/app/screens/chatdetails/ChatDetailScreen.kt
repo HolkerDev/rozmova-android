@@ -42,9 +42,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import eu.rozmova.app.clients.domain.Author
 import eu.rozmova.app.components.SimpleToolBar
+import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.ScenarioModel
+import eu.rozmova.app.utils.formatDuration
 
 @Composable
 fun ChatDetailScreen(
@@ -90,7 +91,7 @@ fun ChatDetailScreen(
                             AudioMessage(
                                 id = it.id,
                                 isFromUser = it.author == Author.USER,
-                                duration = "0",
+                                duration = formatDuration(it.duration),
                                 isPlaying = it.isPlaying,
                                 progress = 0f,
                             )

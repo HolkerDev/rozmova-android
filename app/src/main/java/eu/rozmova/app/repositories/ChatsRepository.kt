@@ -1,11 +1,11 @@
 package eu.rozmova.app.repositories
 
 import android.util.Log
-import eu.rozmova.app.clients.domain.ChatWithMessagesDto
-import eu.rozmova.app.clients.domain.MessageModel
 import eu.rozmova.app.domain.ChatModel
 import eu.rozmova.app.domain.ChatStatus
+import eu.rozmova.app.domain.ChatWithMessagesDto
 import eu.rozmova.app.domain.ChatWithScenarioModel
+import eu.rozmova.app.domain.MessageModel
 import eu.rozmova.app.domain.ScenarioModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
