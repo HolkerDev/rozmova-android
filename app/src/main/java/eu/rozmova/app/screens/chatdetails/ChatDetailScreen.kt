@@ -241,6 +241,7 @@ fun AudioMessageItem(
                     bottomStart = if (isUserMessage) 16.dp else 4.dp,
                     bottomEnd = if (isUserMessage) 4.dp else 16.dp,
                 ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         ) {
             Row(
                 modifier = Modifier.padding(12.dp),
