@@ -55,7 +55,7 @@ class ChatDetailsViewModel
     ) : AndroidViewModel(application) {
         private val tag = this::class.simpleName
 
-        private val _state = MutableStateFlow<ChatDetailState>(ChatDetailState())
+        private val _state = MutableStateFlow(ChatDetailState())
         val state = _state.asStateFlow()
         private val _shouldScrollToBottom = MutableStateFlow(false)
         val shouldScrollToBottom = _shouldScrollToBottom.asStateFlow()

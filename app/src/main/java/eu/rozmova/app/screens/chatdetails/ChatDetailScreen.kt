@@ -1,6 +1,5 @@
 package eu.rozmova.app.screens.chatdetails
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -85,17 +84,7 @@ fun ChatDetailScreen(
                     onStopMessage = { viewModel.stopAudio() },
                     isRecording = isRecording,
                     scenario = chat.scenario,
-                    messages =
-                        chatState.messages?.map {
-                            Log.i("ChatDetailScreen", "ChatMessage: $it")
-                            AudioMessage(
-                                id = it.id,
-                                isFromUser = it.author == Author.USER,
-                                duration = formatDuration(it.duration),
-                                isPlaying = it.isPlaying,
-                                progress = 0f,
-                            )
-                        } ?: emptyList(),
+                    messages = chatState.messages ?: emptyList(),
                     isMessageLoading = state.isLoading,
                     messageListState = messageListState,
                 )
@@ -107,7 +96,7 @@ fun ChatDetailScreen(
 @Composable
 fun ScenarioInfoCard(
     scenario: ScenarioModel,
-    messages: List<AudioMessage>,
+    messages: List<ChatMessage>,
     onBackClick: () -> Unit,
     onRecordStart: () -> Unit,
     onRecordStop: () -> Unit,
@@ -178,7 +167,7 @@ fun ScenarioInfoCard(
 
 @Composable
 fun AudioMessageList(
-    messages: List<AudioMessage>,
+    messages: List<ChatMessage>,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
     messageListState: LazyListState,
@@ -216,7 +205,7 @@ fun AudioMessageList(
 
 @Composable
 fun AudioMessageItem(
-    message: AudioMessage,
+    message: ChatMessage,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
     modifier: Modifier = Modifier,
@@ -229,7 +218,7 @@ fun AudioMessageItem(
         }
     }
 
-    val isUserMessage = message.isFromUser
+    val isUserMessage = message.author == Author.USER
     Row(
         modifier = modifier.padding(vertical = 4.dp),
         horizontalArrangement = if (isUserMessage) Arrangement.End else Arrangement.Start,
@@ -271,32 +260,33 @@ fun AudioMessageItem(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                LinearProgressIndicator(
-                    progress = { message.progress },
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .height(4.dp),
-                )
+                if (message.isPlaying) {
+                    LinearProgressIndicator(
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .height(4.dp),
+                    )
+                } else {
+                    LinearProgressIndicator(
+                        progress = { 0f },
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .height(4.dp),
+                    )
+                }
 
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = message.duration,
+                    text = formatDuration(message.duration),
                     style = MaterialTheme.typography.labelMedium,
                 )
             }
         }
     }
 }
-
-data class AudioMessage(
-    val id: String,
-    val isFromUser: Boolean,
-    val duration: String,
-    val isPlaying: Boolean = false,
-    val progress: Float = 0f,
-)
 
 @Composable
 private fun LoadingComponent(
