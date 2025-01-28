@@ -30,7 +30,7 @@ fun ChatItem(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
                 .clickable(onClick = { onChatClick(chat.id) }),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),

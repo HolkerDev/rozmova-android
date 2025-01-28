@@ -3,9 +3,11 @@ package eu.rozmova.app.screens.createchat
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,7 +25,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import eu.rozmova.app.components.Chip
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.domain.ScenarioModel
 
@@ -67,24 +69,25 @@ fun CreateChatScreen(
                 // Keep track of expanded sections
                 var expandedSections by remember { mutableStateOf(setOf(uiState.levelGroups[0].groupName)) }
 
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(uiState.levelGroups) { group ->
-                        ScenarioGroup(
-                            levelGroup = group,
-                            isExpanded = expandedSections.contains(group.groupName),
-                            onHeaderClick = { level ->
-                                expandedSections =
-                                    if (expandedSections.contains(level)) {
-                                        expandedSections - level
-                                    } else {
-                                        expandedSections + level
-                                    }
-                            },
-                            onScenarioSelect = onScenarioSelect,
-                        )
+                Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        items(uiState.levelGroups) { group ->
+                            ScenarioGroup(
+                                levelGroup = group,
+                                isExpanded = expandedSections.contains(group.groupName),
+                                onHeaderClick = { level ->
+                                    expandedSections =
+                                        if (expandedSections.contains(level)) {
+                                            expandedSections - level
+                                        } else {
+                                            expandedSections + level
+                                        }
+                                },
+                                onScenarioSelect = onScenarioSelect,
+                            )
+                        }
                     }
                 }
             }
@@ -179,10 +182,7 @@ private fun ScenarioItem(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
         ) {
             scenario.labels.forEach { label ->
-                SuggestionChip(
-                    onClick = { },
-                    label = { Text(label) },
-                )
+                Chip(label)
             }
         }
     }
