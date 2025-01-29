@@ -47,31 +47,31 @@ sealed class AppState {
 
 @HiltViewModel
 class AppViewModel
-    @Inject
-    constructor(
-        private val authRepository: AuthRepository,
-    ) : ViewModel() {
-        init {
-            viewModelScope.launch {
-                authRepository.observeAuthState()
-            }
+@Inject
+constructor(
+    private val authRepository: AuthRepository,
+) : ViewModel() {
+    init {
+        viewModelScope.launch {
+            authRepository.observeAuthState()
         }
-
-        val appState =
-            authRepository.authState
-                .map { authState ->
-                    Log.i("AppViewModel", "authState: $authState")
-                    when (authState) {
-                        is AuthState.Loading -> AppState.Loading
-                        is AuthState.Authenticated -> AppState.Authenticated
-                        is AuthState.Unauthenticated -> AppState.Unauthenticated
-                    }
-                }.stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.Eagerly,
-                    initialValue = AppState.Loading,
-                )
     }
+
+    val appState =
+        authRepository.authState
+            .map { authState ->
+                Log.i("AppViewModel", "authState: $authState")
+                when (authState) {
+                    is AuthState.Loading -> AppState.Loading
+                    is AuthState.Authenticated -> AppState.Authenticated
+                    is AuthState.Unauthenticated -> AppState.Unauthenticated
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = AppState.Loading,
+            )
+}
 
 @Composable
 private fun App(viewModel: AppViewModel = hiltViewModel()) {

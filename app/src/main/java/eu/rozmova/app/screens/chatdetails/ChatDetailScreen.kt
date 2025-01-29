@@ -1,6 +1,5 @@
 package eu.rozmova.app.screens.chatdetails
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,23 +11,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Pause
-import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Task
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -41,10 +35,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import eu.rozmova.app.components.AudioMessageItem
 import eu.rozmova.app.components.SimpleToolBar
-import eu.rozmova.app.domain.Author
+import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.domain.ScenarioModel
-import eu.rozmova.app.utils.formatDuration
 
 @Composable
 fun ChatDetailScreen(
@@ -87,6 +81,7 @@ fun ChatDetailScreen(
                     messages = chatState.messages ?: emptyList(),
                     isMessageLoading = state.isLoading,
                     messageListState = messageListState,
+                    onChatFinish = { },
                 )
             } ?: LoadingComponent(onBackClick)
         }
@@ -102,6 +97,7 @@ fun ScenarioInfoCard(
     onRecordStop: () -> Unit,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
+    onChatFinish: () -> Unit,
     isMessageLoading: Boolean,
     isRecording: Boolean,
     messageListState: LazyListState,
@@ -150,7 +146,15 @@ fun ScenarioInfoCard(
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
-                AudioMessageList(messages = messages, onPlayMessage, onStopMessage, messageListState, isMessageLoading, Modifier.weight(1f))
+                AudioMessageList(
+                    messages = messages,
+                    onPlayMessage,
+                    onStopMessage,
+                    onChatFinish,
+                    messageListState,
+                    isMessageLoading,
+                    Modifier.weight(1f),
+                )
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
@@ -170,6 +174,7 @@ fun AudioMessageList(
     messages: List<ChatMessage>,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
+    onChatFinish: () -> Unit,
     messageListState: LazyListState,
     isLoadingMessage: Boolean,
     modifier: Modifier = Modifier,
@@ -199,90 +204,11 @@ fun AudioMessageList(
                     CircularProgressIndicator()
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun AudioMessageItem(
-    message: ChatMessage,
-    onPlayMessage: (messageId: String) -> Unit,
-    onStopMessage: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val onIconClick = {
-        if (message.isPlaying) {
-            onStopMessage()
-        } else {
-            onPlayMessage(message.id)
-        }
-    }
-
-    val isUserMessage = message.author == Author.USER
-    Row(
-        modifier = modifier.padding(vertical = 4.dp),
-        horizontalArrangement = if (isUserMessage) Arrangement.End else Arrangement.Start,
-    ) {
-        Card(
-            modifier = Modifier.widthIn(max = 280.dp),
-            colors =
-                CardDefaults.cardColors(
-                    containerColor =
-                        if (isUserMessage) {
-                            MaterialTheme.colorScheme.primaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.secondaryContainer
-                        },
-                ),
-            shape =
-                RoundedCornerShape(
-                    topStart = 16.dp,
-                    topEnd = 16.dp,
-                    bottomStart = if (isUserMessage) 16.dp else 4.dp,
-                    bottomEnd = if (isUserMessage) 4.dp else 16.dp,
-                ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        ) {
-            Row(
-                modifier = Modifier.padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                IconButton(onClick = onIconClick) {
-                    Icon(
-                        imageVector =
-                            if (message.isPlaying) {
-                                Icons.Rounded.Pause
-                            } else {
-                                Icons.Rounded.PlayArrow
-                            },
-                        contentDescription = null,
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                if (message.isPlaying) {
-                    LinearProgressIndicator(
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .height(4.dp),
-                    )
-                } else {
-                    LinearProgressIndicator(
-                        progress = { 0f },
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .height(4.dp),
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Text(
-                    text = formatDuration(message.duration),
-                    style = MaterialTheme.typography.labelMedium,
+        } else if (messages.size > 1) {
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                StopChatButton(
+                    onClick = onChatFinish,
                 )
             }
         }
