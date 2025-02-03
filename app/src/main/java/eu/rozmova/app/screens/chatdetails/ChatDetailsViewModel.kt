@@ -165,6 +165,19 @@ class ChatDetailsViewModel
             }
         }
 
+        fun finishChat() {
+            viewModelScope.launch {
+                _state.update { it.copy(isLoading = true) }
+                try {
+                    val analysis = chatsRepository.finishChat(_state.value.chat!!.id)
+                    Log.i(tag, "Chat finished: $analysis")
+                    _state.update { it.copy(isLoading = false) }
+                } catch (e: Exception) {
+                    Log.e(tag, "Error finishing chat: ${e.message}")
+                }
+            }
+        }
+
         override fun onCleared() {
             super.onCleared()
             mediaRecorder?.release()

@@ -81,7 +81,7 @@ fun ChatDetailScreen(
                     messages = chatState.messages ?: emptyList(),
                     isMessageLoading = state.isLoading,
                     messageListState = messageListState,
-                    onChatFinish = { },
+                    onChatFinish = { viewModel.finishChat() },
                 )
             } ?: LoadingComponent(onBackClick)
         }

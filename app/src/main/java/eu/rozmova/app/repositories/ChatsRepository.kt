@@ -1,6 +1,7 @@
 package eu.rozmova.app.repositories
 
 import android.util.Log
+import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.ChatModel
 import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ChatWithMessagesDto
@@ -95,6 +96,16 @@ class ChatsRepository
         suspend fun getPublicAudioLink(audioPath: String): String {
             val userId = supabaseClient.auth.currentUserOrNull()?.id ?: throw IllegalStateException("User is not authenticated")
             return supabaseClient.storage.from("audio-messages").createSignedUrl("$userId/$audioPath", 60.seconds)
+        }
+
+        suspend fun finishChat(chatId: String): ChatAnalysis {
+            try {
+                val response = supabaseClient.functions.invoke("finish-chat", mapOf("chatId" to chatId))
+                return response.body<ChatAnalysis>()
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to finish chat", e)
+                throw e
+            }
         }
 
         suspend fun sendMessage(

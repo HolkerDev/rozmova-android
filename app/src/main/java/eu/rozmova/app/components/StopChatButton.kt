@@ -13,7 +13,7 @@ fun StopChatButton(
     modifier: Modifier = Modifier,
 ) {
     Button(
-        onClick = {},
+        onClick = onClick,
         modifier = modifier.fillMaxSize(),
         shape = MaterialTheme.shapes.medium,
     ) {
