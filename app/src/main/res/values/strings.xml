@@ -20,4 +20,7 @@
     <string name="incompleted">Incompleted</string>
     <string name="met_requirements">Met requirements</string>
     <string name="missed_requirements">Missed requirements</string>
+    <string name="chat_details_title">Speaking practice</string>
+    <string name="bottom_nav_chats">Chats</string>
+    <string name="bottom_nav_settings">Settings</string>
 </resources>

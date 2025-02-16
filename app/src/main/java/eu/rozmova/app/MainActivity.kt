@@ -17,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -47,31 +48,31 @@ sealed class AppState {
 
 @HiltViewModel
 class AppViewModel
-@Inject
-constructor(
-    private val authRepository: AuthRepository,
-) : ViewModel() {
-    init {
-        viewModelScope.launch {
-            authRepository.observeAuthState()
+    @Inject
+    constructor(
+        private val authRepository: AuthRepository,
+    ) : ViewModel() {
+        init {
+            viewModelScope.launch {
+                authRepository.observeAuthState()
+            }
         }
-    }
 
-    val appState =
-        authRepository.authState
-            .map { authState ->
-                Log.i("AppViewModel", "authState: $authState")
-                when (authState) {
-                    is AuthState.Loading -> AppState.Loading
-                    is AuthState.Authenticated -> AppState.Authenticated
-                    is AuthState.Unauthenticated -> AppState.Unauthenticated
-                }
-            }.stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.Eagerly,
-                initialValue = AppState.Loading,
-            )
-}
+        val appState =
+            authRepository.authState
+                .map { authState ->
+                    Log.i("AppViewModel", "authState: $authState")
+                    when (authState) {
+                        is AuthState.Loading -> AppState.Loading
+                        is AuthState.Authenticated -> AppState.Authenticated
+                        is AuthState.Unauthenticated -> AppState.Unauthenticated
+                    }
+                }.stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = AppState.Loading,
+                )
+    }
 
 @Composable
 private fun App(viewModel: AppViewModel = hiltViewModel()) {
@@ -127,10 +128,10 @@ private fun BottomNavBar(
                 icon = {
                     Icon(
                         screen.icon!!,
-                        contentDescription = screen.label,
+                        contentDescription = stringResource(screen.labelResourceId!!),
                     )
                 },
-                label = { Text(screen.label!!) },
+                label = { Text(stringResource(screen.labelResourceId!!)) },
                 selected = currentRoute == screen.route,
                 onClick = {
                     navController.navigate(screen.route) {

@@ -126,7 +126,7 @@ fun ScenarioInfoCard(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        SimpleToolBar(title = "Speaking practice", onBack = onBackClick)
+        SimpleToolBar(title = stringResource(R.string.chat_details_title), onBack = onBackClick)
         Card(
             modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 50.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
