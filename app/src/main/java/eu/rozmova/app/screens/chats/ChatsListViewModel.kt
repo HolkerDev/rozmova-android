@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ChatWithScenarioModel
 import eu.rozmova.app.repositories.ChatsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,7 +46,10 @@ class ChatsListViewModel
             viewModelScope.launch {
                 _state.update { ChatListState.Loading }
                 try {
-                    val chats = chatsRepository.fetchChats()
+                    val chats =
+                        chatsRepository.fetchChats().filter { status ->
+                            status.status == ChatStatus.IN_PROGRESS || status.status == ChatStatus.FINISHED
+                        }
                     _state.update {
                         ChatListState.Success(chats)
                     }
