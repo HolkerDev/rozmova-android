@@ -33,9 +33,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import eu.rozmova.app.R
 import eu.rozmova.app.components.AudioMessageItem
 import eu.rozmova.app.components.ChatAnalysisDialog
 import eu.rozmova.app.components.SimpleToolBar
@@ -87,7 +89,7 @@ fun ChatDetailScreen(
         if (state.isLoading && state.chat == null) {
             LoadingComponent(onBackClick)
         } else if (!state.error.isNullOrBlank()) {
-            ErrorComponent(state.error!!, onBackClick)
+            ErrorComponent(onBackClick)
         } else {
             chatState.chat?.let { chat ->
                 ScenarioInfoCard(
@@ -241,17 +243,14 @@ private fun LoadingComponent(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        SimpleToolBar("Loading...", onBack = onBackClick)
+        SimpleToolBar(title = stringResource(R.string.loading_progress), onBack = onBackClick)
         Spacer(modifier = Modifier.height(16.dp))
         CircularProgressIndicator()
     }
 }
 
 @Composable
-private fun ErrorComponent(
-    errorMessage: String,
-    onBackClick: () -> Unit,
-) {
-    SimpleToolBar("Error", onBack = onBackClick)
-    Text("Error: $errorMessage")
+private fun ErrorComponent(onBackClick: () -> Unit) {
+    SimpleToolBar(title = stringResource(R.string.error), onBack = onBackClick)
+    Text(text = stringResource(R.string.error_message))
 }

@@ -42,10 +42,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import eu.rozmova.app.R
 import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.Requirements
 import eu.rozmova.app.domain.TaskCompletion
@@ -81,7 +83,7 @@ fun ChatAnalysisDialog(
             ) {
                 // Header
                 TopAppBar(
-                    title = { Text("Chat Analysis") },
+                    title = { Text(text = stringResource(R.string.chat_analysis_title)) },
                     navigationIcon = {
                         IconButton(onClick = onConfirm) {
                             Icon(Icons.Default.Close, contentDescription = "Close")
@@ -122,7 +124,7 @@ fun ChatAnalysisDialog(
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     Text(
-                                        text = "Task Completion",
+                                        text = stringResource(R.string.chat_analysis_task_completion),
                                         style = MaterialTheme.typography.titleLarge,
                                     )
                                     CompletionStatusChip(chatAnalysis.taskCompletion.isCompleted)
@@ -140,7 +142,7 @@ fun ChatAnalysisDialog(
                         // Topics to Review Section
                         if (chatAnalysis.topicsToReview.isNotEmpty()) {
                             Text(
-                                text = "Topics to Review",
+                                text = stringResource(R.string.chat_analysis_topics_to_refresh),
                                 style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.padding(bottom = 8.dp),
                             )
@@ -154,9 +156,9 @@ fun ChatAnalysisDialog(
                     shape = RoundedCornerShape(16.dp),
                 ) {
                     if (isLoading) {
-                        Text("Loading...")
+                        Text(text = stringResource(R.string.loading_progress))
                     } else {
-                        Text("Confirm")
+                        Text(text = stringResource(R.string.confirm))
                     }
                 }
             }
@@ -208,7 +210,7 @@ private fun CompletionStatusChip(isCompleted: Boolean) {
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = if (isCompleted) "Completed" else "Incomplete",
+                text = if (isCompleted) stringResource(R.string.completed) else stringResource(R.string.incompleted),
                 style = MaterialTheme.typography.labelMedium,
                 color =
                     if (isCompleted) {
@@ -253,7 +255,7 @@ private fun RequirementsSection(requirements: Requirements) {
     Column {
         if (requirements.met.isNotEmpty()) {
             Text(
-                text = "Met Requirements",
+                text = stringResource(R.string.met_requirements),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -269,7 +271,7 @@ private fun RequirementsSection(requirements: Requirements) {
         if (requirements.missed.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Missed Requirements",
+                text = stringResource(R.string.missed_requirements),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.error,
             )

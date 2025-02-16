@@ -13,8 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import eu.rozmova.app.R
 import eu.rozmova.app.components.SimpleToolBar
 
 @Composable
@@ -36,7 +38,7 @@ fun SettingsScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         SimpleToolBar(
-            title = "Settings",
+            title = stringResource(R.string.settings_page_title),
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
@@ -45,8 +47,8 @@ fun SettingsScreen(
             shape = MaterialTheme.shapes.small,
         ) {
             when (state.value) {
-                SettingsViewState.Loading -> Text("Loading...")
-                else -> Text("Log out")
+                SettingsViewState.Loading -> Text(text = stringResource(R.string.loading_progress))
+                else -> Text(text = stringResource(R.string.logout))
             }
         }
     }

@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,8 +33,6 @@ import eu.rozmova.app.R
 fun GoogleSignInButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    text: String = "Sign in with Google",
-    loadingText: String = "Signing in...",
     isLoading: Boolean = false,
     enabled: Boolean = true,
 ) {
@@ -72,7 +71,7 @@ fun GoogleSignInButton(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = if (isLoading) loadingText else text,
+                text = if (isLoading) stringResource(R.string.sign_in_loading_progress) else stringResource(R.string.sign_in_message),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 1f else 0.6f),

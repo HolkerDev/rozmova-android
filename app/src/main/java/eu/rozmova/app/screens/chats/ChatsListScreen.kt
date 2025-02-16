@@ -21,8 +21,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import eu.rozmova.app.R
 import eu.rozmova.app.components.ChatItem
 import eu.rozmova.app.components.SimpleToolBar
 
@@ -41,7 +43,7 @@ fun ChatsListScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            SimpleToolBar("Chats")
+            SimpleToolBar(title = stringResource(R.string.chats_screen_title))
             Card(
                 modifier =
                     Modifier
@@ -50,8 +52,8 @@ fun ChatsListScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             ) {
                 when (val viewState = state) {
-                    ChatListState.Empty -> Text("No chats")
-                    is ChatListState.Error -> Text("Error: ${viewState.msg}")
+                    ChatListState.Empty -> Text(text = stringResource(R.string.chats_screen_no_chats))
+                    is ChatListState.Error -> Text(text = stringResource(R.string.error_message))
                     ChatListState.Loading -> CircularProgressIndicator()
                     is ChatListState.Success -> {
                         LazyColumn {

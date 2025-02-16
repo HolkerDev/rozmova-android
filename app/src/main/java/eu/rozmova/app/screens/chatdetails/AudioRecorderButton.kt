@@ -19,10 +19,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.AndroidViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import eu.rozmova.app.R
 import eu.rozmova.app.components.RecordButton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -111,6 +113,7 @@ fun AudioRecorderButton(
     context: Context = LocalContext.current,
 ) {
     val tag = "AudioRecorderComponent"
+    val permissionErrorMessage = stringResource(R.string.audio_recorder_permission_denied)
 
     val recordedFilePath by viewModel.recordedFilePath.collectAsState()
 
@@ -118,12 +121,6 @@ fun AudioRecorderButton(
         null -> {}
         else -> {
             Log.i(tag, "Audio recorded to: $recordedFilePath")
-            Toast
-                .makeText(
-                    context,
-                    "Recording saved to: $recordedFilePath",
-                    Toast.LENGTH_SHORT,
-                ).show()
             viewModel.stopRecording()
         }
     }
@@ -138,7 +135,7 @@ fun AudioRecorderButton(
                     Toast
                         .makeText(
                             context,
-                            "Permission denied, cannot access microphone.",
+                            permissionErrorMessage,
                             Toast.LENGTH_SHORT,
                         ).show()
                 }

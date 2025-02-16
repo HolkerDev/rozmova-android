@@ -8,10 +8,10 @@ import androidx.compose.ui.Modifier
 import eu.rozmova.app.components.ThemedLogo
 
 @Composable
-fun MainScreen() {
+fun MainScreen(modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
     ) {
         ThemedLogo()
     }
