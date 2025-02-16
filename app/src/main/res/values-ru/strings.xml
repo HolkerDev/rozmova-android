@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rozmova</string>
+    <string name="loading">Загрузка</string>
+    <string name="loading_progress">Загрузка...</string>
+    <string name="sign_in_message">Войти через Google</string>
+    <string name="sign_in_loading_progress">Вход...</string>
+    <string name="settings_page_title">Настройки</string>
+    <string name="logout">Выйти</string>
+    <string name="scenarios_page_title">Выбрать сценарий</string>
+    <string name="chats_screen_title">Чаты</string>
+    <string name="chats_screen_no_chats">Пока нет чатов</string>
+    <string name="error_message">Что-то пошло не так. Пожалуйста, сообщите о проблеме через Настройки.</string>
+    <string name="error">Ошибка</string>
+    <string name="audio_recorder_permission_denied">Вы отказали в доступе к микрофону</string>
+    <string name="chat_analysis_title">Анализ чата</string>
+    <string name="chat_analysis_task_completion">Выполнение задания</string>
+    <string name="chat_analysis_topics_to_refresh">Темы для повторения</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="completed">Завершено</string>
+    <string name="incompleted">Не завершено</string>
+    <string name="met_requirements">Получилось</string>
+    <string name="missed_requirements">Не получилось</string>
+    <string name="chat_details_title">Практика речи</string>
+    <string name="bottom_nav_chats">Чаты</string>
+    <string name="bottom_nav_settings">Настройки</string>
+</resources>
