@@ -41,7 +41,7 @@ class ChatsListViewModel
             loadChats()
         }
 
-        private fun loadChats() =
+        fun loadChats() =
             viewModelScope.launch {
                 _state.update { ChatListState.Loading }
                 try {
