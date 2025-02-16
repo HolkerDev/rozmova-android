@@ -58,7 +58,15 @@ fun NavigationHost(
             arguments = listOf(navArgument("chatId") { type = NavType.StringType }),
         ) { backStackEntry ->
             val chatId: String = backStackEntry.arguments?.getString("chatId") ?: ""
-            ChatDetailScreen(onBackClick = { navController.navigateUp() }, chatId)
+            ChatDetailScreen(
+                onBackClick = { navController.navigateUp() },
+                onChatArchive = {
+                    navController.navigate(NavRoutes.Chats.route) {
+                        popUpTo(NavRoutes.Chats.route)
+                    }
+                },
+                chatId,
+            )
         }
     }
 }

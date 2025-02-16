@@ -11,6 +11,7 @@ import eu.rozmova.app.domain.ScenarioModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.functions.functions
+import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.storage.storage
@@ -42,6 +43,23 @@ class ChatsRepository
                 .from(Tables.CHATS)
                 .select(columns)
                 .decodeList<ChatWithScenarioModel>()
+        }
+
+        suspend fun archiveChat(chatId: String) {
+            try {
+                supabaseClient.from(Tables.CHATS).update(
+                    {
+                        ChatModel::status setTo ChatStatus.ARCHIVED
+                    },
+                ) {
+                    filter {
+                        ChatModel::id eq chatId
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to archive chat", e)
+                throw e
+            }
         }
 
         suspend fun fetchChatById(chatId: String): ChatWithMessagesDto {

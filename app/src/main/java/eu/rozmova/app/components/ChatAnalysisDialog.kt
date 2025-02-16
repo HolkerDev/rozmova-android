@@ -36,6 +36,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,14 +55,16 @@ import eu.rozmova.app.domain.TopicToReview
 @Composable
 fun ChatAnalysisDialog(
     chatAnalysis: ChatAnalysis,
+    isLoading: Boolean,
+    onConfirm: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Dialog(
-        onDismissRequest = {},
+        onDismissRequest = onConfirm,
         properties =
             DialogProperties(
                 dismissOnBackPress = true,
-                dismissOnClickOutside = true,
+                dismissOnClickOutside = false,
                 usePlatformDefaultWidth = false,
             ),
     ) {
@@ -77,7 +83,7 @@ fun ChatAnalysisDialog(
                 TopAppBar(
                     title = { Text("Chat Analysis") },
                     navigationIcon = {
-                        IconButton(onClick = {}) {
+                        IconButton(onClick = onConfirm) {
                             Icon(Icons.Default.Close, contentDescription = "Close")
                         }
                     },
@@ -143,11 +149,15 @@ fun ChatAnalysisDialog(
                     }
                 }
                 Button(
-                    onClick = {},
+                    onClick = onConfirm,
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     shape = RoundedCornerShape(16.dp),
                 ) {
-                    Text("Confirm")
+                    if (isLoading) {
+                        Text("Loading...")
+                    } else {
+                        Text("Confirm")
+                    }
                 }
             }
         }
@@ -356,6 +366,8 @@ private fun TopicItem(topic: TopicToReview) {
 @Preview
 @Composable
 private fun ChatAnalysisDialogPreview() {
+    var isLoading by remember { mutableStateOf(false) }
+
     ChatAnalysisDialog(
         chatAnalysis =
             ChatAnalysis(
@@ -376,5 +388,7 @@ private fun ChatAnalysisDialogPreview() {
                         TopicToReview("Topic 3"),
                     ),
             ),
+        onConfirm = { isLoading = !isLoading },
+        isLoading = isLoading,
     )
 }

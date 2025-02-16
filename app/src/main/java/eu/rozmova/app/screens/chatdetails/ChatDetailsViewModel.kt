@@ -29,6 +29,7 @@ data class ChatDetailState(
     val messages: List<ChatMessage>? = null,
     val audioPlayback: AudioState = AudioState(false, null, null),
     val isRecording: Boolean = false,
+    val isChatAnalysisSubmitLoading: Boolean = false,
     val chatAnalysis: ChatAnalysis? = null,
 )
 
@@ -62,6 +63,9 @@ class ChatDetailsViewModel
         private val _shouldScrollToBottom = MutableStateFlow(false)
         val shouldScrollToBottom = _shouldScrollToBottom.asStateFlow()
 
+        private val _navigateToChatList = MutableStateFlow(false)
+        val navigateToChatList = _navigateToChatList.asStateFlow()
+
         fun scrollToBottom() {
             if (_shouldScrollToBottom.value) return
             if (_state.value.messages.isNullOrEmpty()) return
@@ -93,6 +97,18 @@ class ChatDetailsViewModel
                 },
             )
         }
+
+        fun onChatAnalysisSubmit() =
+            viewModelScope.launch {
+                _state.update { it.copy(isChatAnalysisSubmitLoading = true) }
+                try {
+                    chatsRepository.archiveChat(_state.value.chat!!.id)
+                    _state.update { it.copy(isChatAnalysisSubmitLoading = true) }
+                    _navigateToChatList.update { true }
+                } catch (e: Exception) {
+                    Log.e(tag, "Error finishing chat: ${e.message}")
+                }
+            }
 
         val onAudioSaved = {
             viewModelScope.launch {

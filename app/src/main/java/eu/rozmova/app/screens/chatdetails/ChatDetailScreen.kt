@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -44,6 +45,7 @@ import eu.rozmova.app.domain.ScenarioModel
 @Composable
 fun ChatDetailScreen(
     onBackClick: () -> Unit,
+    onChatArchive: () -> Unit,
     chatId: String,
     modifier: Modifier = Modifier,
     viewModel: ChatDetailsViewModel = hiltViewModel(),
@@ -51,10 +53,13 @@ fun ChatDetailScreen(
     LaunchedEffect(chatId) {
         viewModel.loadChat(chatId)
     }
+
+    val onChatArchiveState = rememberUpdatedState(onChatArchive)
     val state by viewModel.state.collectAsState()
     val chatState by viewModel.state.collectAsState()
     val isRecording by viewModel.isRecording.collectAsState()
     val shouldScrollToBottom by viewModel.shouldScrollToBottom.collectAsStateWithLifecycle()
+    val chatArchived by viewModel.navigateToChatList.collectAsStateWithLifecycle()
     val messageListState = rememberLazyListState()
 
     LaunchedEffect(shouldScrollToBottom) {
@@ -64,9 +69,19 @@ fun ChatDetailScreen(
         }
     }
 
+    LaunchedEffect(chatArchived) {
+        if (chatArchived) {
+            onChatArchiveState.value()
+        }
+    }
+
     Column(modifier = modifier.fillMaxSize()) {
         state.chatAnalysis?.let {
-            ChatAnalysisDialog(chatAnalysis = it)
+            ChatAnalysisDialog(
+                chatAnalysis = it,
+                onConfirm = { viewModel.onChatAnalysisSubmit() },
+                isLoading = chatState.isChatAnalysisSubmitLoading,
+            )
         }
 
         if (state.isLoading && state.chat == null) {
