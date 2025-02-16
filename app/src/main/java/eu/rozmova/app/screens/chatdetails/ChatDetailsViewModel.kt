@@ -12,6 +12,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.Author
+import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.ChatWithMessagesDto
 import eu.rozmova.app.repositories.ChatsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +29,7 @@ data class ChatDetailState(
     val messages: List<ChatMessage>? = null,
     val audioPlayback: AudioState = AudioState(false, null, null),
     val isRecording: Boolean = false,
+    val chatAnalysis: ChatAnalysis? = null,
 )
 
 data class AudioState(
@@ -170,8 +172,7 @@ class ChatDetailsViewModel
                 _state.update { it.copy(isLoading = true) }
                 try {
                     val analysis = chatsRepository.finishChat(_state.value.chat!!.id)
-                    Log.i(tag, "Chat finished: $analysis")
-                    _state.update { it.copy(isLoading = false) }
+                    _state.update { it.copy(isLoading = false, chatAnalysis = analysis) }
                 } catch (e: Exception) {
                     Log.e(tag, "Error finishing chat: ${e.message}")
                 }

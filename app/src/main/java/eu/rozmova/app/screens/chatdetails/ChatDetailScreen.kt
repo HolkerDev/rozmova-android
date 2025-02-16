@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.rozmova.app.components.AudioMessageItem
+import eu.rozmova.app.components.ChatAnalysisDialog
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.domain.ScenarioModel
@@ -64,6 +65,10 @@ fun ChatDetailScreen(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
+        state.chatAnalysis?.let {
+            ChatAnalysisDialog(chatAnalysis = it)
+        }
+
         if (state.isLoading && state.chat == null) {
             LoadingComponent(onBackClick)
         } else if (!state.error.isNullOrBlank()) {
