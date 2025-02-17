@@ -39,13 +39,13 @@ class SettingsScreenViewModel
             fetchCurrentLangPreferences()
         }
 
-        fun fetchCurrentLangPreferences() {
+        private fun fetchCurrentLangPreferences() {
             val selectedLocale = localeManager.getCurrentLocale()
             getLanguageByCode(selectedLocale.language).let { interfaceLang ->
                 _state.value =
                     SettingsViewState.Success(
                         interfaceLang = interfaceLang,
-                        learningLang = interfaceLang,
+                        learningLang = Language.GERMAN,
                     )
             }
         }
