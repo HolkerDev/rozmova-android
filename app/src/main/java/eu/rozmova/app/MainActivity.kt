@@ -1,5 +1,6 @@
 package eu.rozmova.app
 
+import android.app.LocaleManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -155,6 +156,8 @@ private fun getCurrentRoute(navController: NavHostController): String? {
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private lateinit var localeManager: LocaleManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

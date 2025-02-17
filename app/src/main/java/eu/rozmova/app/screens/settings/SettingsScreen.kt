@@ -1,5 +1,6 @@
 package eu.rozmova.app.screens.settings
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -25,8 +26,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,6 +43,9 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsScreenViewModel = hiltViewModel(),
 ) {
+    val activity = LocalContext.current as? Activity
+    val activityState = rememberUpdatedState(activity)
+
     val state = viewModel.state.collectAsState()
     val englishLang = Language(stringResource(R.string.lang_en), "en")
     val germanLang = Language(stringResource(R.string.lang_de), "de")
@@ -183,15 +189,13 @@ fun SettingsScreen(
                             leadingContent = {
                                 RadioButton(
                                     selected = language == interfaceLanguage,
-                                    onClick = {
-                                        interfaceLanguage = language
-                                        showNativeLanguageDialog = false
-                                    },
+                                    onClick = null,
                                 )
                             },
                             modifier =
                                 Modifier
                                     .clickable {
+                                        viewModel.setLocale(language.code)
                                         interfaceLanguage = language
                                         showNativeLanguageDialog = false
                                     }.background(MaterialTheme.colorScheme.surface),
