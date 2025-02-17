@@ -3,6 +3,8 @@ package eu.rozmova.app.screens.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import eu.rozmova.app.domain.Language
+import eu.rozmova.app.domain.getLanguageByCode
 import eu.rozmova.app.repositories.AuthRepository
 import eu.rozmova.app.utils.LocaleManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +15,10 @@ import javax.inject.Inject
 sealed class SettingsViewState {
     data object Loading : SettingsViewState()
 
-    data object Success : SettingsViewState()
+    data class Success(
+        val interfaceLang: Language,
+        val learningLang: Language,
+    ) : SettingsViewState()
 
     data class Error(
         val msg: String,
@@ -27,8 +32,23 @@ class SettingsScreenViewModel
         private val authRepository: AuthRepository,
         private val localeManager: LocaleManager,
     ) : ViewModel() {
-        private val _state = MutableStateFlow<SettingsViewState>(SettingsViewState.Success)
+        private val _state = MutableStateFlow<SettingsViewState>(SettingsViewState.Loading)
         val state = _state.asStateFlow()
+
+        init {
+            fetchCurrentLangPreferences()
+        }
+
+        fun fetchCurrentLangPreferences() {
+            val selectedLocale = localeManager.getCurrentLocale()
+            getLanguageByCode(selectedLocale.language).let { interfaceLang ->
+                _state.value =
+                    SettingsViewState.Success(
+                        interfaceLang = interfaceLang,
+                        learningLang = interfaceLang,
+                    )
+            }
+        }
 
         fun signOut() {
             viewModelScope.launch {

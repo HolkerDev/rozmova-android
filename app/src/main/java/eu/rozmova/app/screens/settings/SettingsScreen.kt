@@ -1,6 +1,5 @@
 package eu.rozmova.app.screens.settings
 
-import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -16,6 +15,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -26,55 +26,78 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
+import eu.rozmova.app.domain.INTERFACE_LANGUAGES
+import eu.rozmova.app.domain.LEARN_LANGUAGES
 import eu.rozmova.app.domain.Language
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsScreenViewModel = hiltViewModel(),
 ) {
-    val activity = LocalContext.current as? Activity
-    val activityState = rememberUpdatedState(activity)
-
-    val state = viewModel.state.collectAsState()
-    val englishLang = Language(stringResource(R.string.lang_en), "en")
-    val germanLang = Language(stringResource(R.string.lang_de), "de")
-    val greekLang = Language(stringResource(R.string.lang_el), "el")
-    val ukrainianLang = Language(stringResource(R.string.lang_uk), "uk")
-    val russianLang = Language(stringResource(R.string.lang_ru), "ru")
-
+    val state by viewModel.state.collectAsState()
     val onLogOutClicked: () -> Unit = {
         viewModel.signOut()
     }
     var showLanguageDialog by remember { mutableStateOf(false) }
-    var showNativeLanguageDialog by remember { mutableStateOf(false) }
-    var learnLanguage by remember { mutableStateOf(englishLang) }
-    var interfaceLanguage by remember { mutableStateOf(englishLang) }
+    var showInterfaceSelectionDialog by remember { mutableStateOf(false) }
+    var learnLanguage by remember { mutableStateOf<Language>(Language.GERMAN) }
+    var interfaceLanguage by remember { mutableStateOf<Language>(Language.ENGLISH) }
 
-    val languagesToLearn = listOf(germanLang, greekLang)
+    when (val viewState = state) {
+        is SettingsViewState.Error -> Text(stringResource(R.string.error))
+        SettingsViewState.Loading -> LinearProgressIndicator()
+        is SettingsViewState.Success -> {
+            interfaceLanguage = viewState.interfaceLang
+            SettingsContent(
+                showInterfaceLanguageDialog = showInterfaceSelectionDialog,
+                showLearnLanguageDialog = showLanguageDialog,
+                onLogOutClick = onLogOutClicked,
+                onLearningLangSelectClick = { showLanguageDialog = true },
+                onInterfaceLangSelectClick = { showInterfaceSelectionDialog = true },
+                onInterfaceLangSelect = { language ->
+                    showInterfaceSelectionDialog = false
+                    viewModel.setLocale(language.code)
+                },
+                learnLanguage = learnLanguage,
+                interfaceLanguage = interfaceLanguage,
+                onLearningDialogDismiss = { showLanguageDialog = false },
+                onInterfaceDialogDismiss = { showInterfaceSelectionDialog = false },
+                onLearnLangSelect = { language ->
+                    learnLanguage = language
+                    showLanguageDialog = false
+                },
+                state = viewState,
+                modifier = modifier,
+            )
+        }
+    }
+}
 
-    val interfaceLanguages =
-        listOf(
-            englishLang,
-            ukrainianLang,
-            russianLang,
-        )
-
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize(),
-    ) {
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsContent(
+    showInterfaceLanguageDialog: Boolean,
+    showLearnLanguageDialog: Boolean,
+    onLogOutClick: () -> Unit,
+    onInterfaceLangSelectClick: () -> Unit,
+    onLearningLangSelectClick: () -> Unit,
+    onLearningDialogDismiss: () -> Unit,
+    onInterfaceDialogDismiss: () -> Unit,
+    onInterfaceLangSelect: (Language) -> Unit,
+    onLearnLangSelect: (Language) -> Unit,
+    learnLanguage: Language,
+    interfaceLanguage: Language,
+    state: SettingsViewState.Success,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier.fillMaxSize()) {
         CenterAlignedTopAppBar(
             title = { Text(stringResource(R.string.settings_page_title)) },
             navigationIcon = {},
@@ -89,7 +112,7 @@ fun SettingsScreen(
         // Learning Language
         ListItem(
             headlineContent = { Text(stringResource(R.string.language_to_learn)) },
-            supportingContent = { Text(learnLanguage.name) },
+            supportingContent = { Text(stringResource(state.learningLang.resId)) },
             leadingContent = {
                 Icon(Icons.Default.Language, contentDescription = null)
             },
@@ -99,13 +122,13 @@ fun SettingsScreen(
                     contentDescription = "Select language",
                 )
             },
-            modifier = Modifier.clickable { showLanguageDialog = true },
+            modifier = Modifier.clickable { onLearningLangSelectClick() },
         )
 
-        // Native Language
+        // Interface Language
         ListItem(
             headlineContent = { Text(stringResource(R.string.interace_language)) },
-            supportingContent = { Text(text = interfaceLanguage.name) },
+            supportingContent = { Text(text = stringResource(state.interfaceLang.resId)) },
             leadingContent = {
                 Icon(Icons.Default.Translate, contentDescription = null)
             },
@@ -115,7 +138,7 @@ fun SettingsScreen(
                     contentDescription = "Select native language",
                 )
             },
-            modifier = Modifier.clickable { showNativeLanguageDialog = true },
+            modifier = Modifier.clickable { onInterfaceLangSelectClick() },
         )
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -136,78 +159,72 @@ fun SettingsScreen(
                     tint = MaterialTheme.colorScheme.error,
                 )
             },
-            modifier = Modifier.clickable(onClick = onLogOutClicked),
+            modifier = Modifier.clickable(onClick = onLogOutClick),
         )
-    }
 
-    // Language Selection Dialog
-    if (showLanguageDialog) {
-        AlertDialog(
-            onDismissRequest = { showLanguageDialog = false },
-            title = { Text(stringResource(R.string.learn_lang_select)) },
-            text = {
-                Column {
-                    languagesToLearn.forEach { language ->
-                        ListItem(
-                            headlineContent = { Text(language.name) },
-                            leadingContent = {
-                                RadioButton(
-                                    selected = language == learnLanguage,
-                                    onClick = {
-                                        learnLanguage = language
-                                        showLanguageDialog = false
-                                    },
-                                )
-                            },
-                            modifier =
-                                Modifier.clickable {
-                                    learnLanguage = language
-                                    showLanguageDialog = false
+        // Language Selection Dialog
+        if (showLearnLanguageDialog) {
+            AlertDialog(
+                onDismissRequest = { onLearningDialogDismiss() },
+                title = { Text(stringResource(R.string.learn_lang_select)) },
+                text = {
+                    Column {
+                        LEARN_LANGUAGES.forEach { language ->
+                            ListItem(
+                                headlineContent = { Text(stringResource(language.resId)) },
+                                leadingContent = {
+                                    RadioButton(
+                                        selected = language == learnLanguage,
+                                        onClick = null,
+                                    )
                                 },
-                        )
+                                modifier =
+                                    Modifier.clickable {
+                                        onLearnLangSelect(language)
+                                    },
+                            )
+                        }
                     }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showLanguageDialog = false }) {
-                    Text("Cancel")
-                }
-            },
-        )
-    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { onLearningDialogDismiss() }) {
+                        Text("Cancel")
+                    }
+                },
+            )
+        }
 
-    // Interface Language Selection Dialog
-    if (showNativeLanguageDialog) {
-        AlertDialog(
-            onDismissRequest = { showNativeLanguageDialog = false },
-            title = { Text(stringResource(R.string.interface_lang_select)) },
-            text = {
-                Column {
-                    interfaceLanguages.forEach { language ->
-                        ListItem(
-                            headlineContent = { Text(language.name) },
-                            leadingContent = {
-                                RadioButton(
-                                    selected = language == interfaceLanguage,
-                                    onClick = null,
-                                )
-                            },
-                            modifier =
-                                Modifier
-                                    .clickable {
-                                        viewModel.setLocale(language.code)
-                                        interfaceLanguage = language
-                                        showNativeLanguageDialog = false
-                                    }.background(MaterialTheme.colorScheme.surface),
-                        )
+        // Interface Language Selection Dialog
+        if (showInterfaceLanguageDialog) {
+            AlertDialog(
+                onDismissRequest = { onInterfaceDialogDismiss() },
+                title = { Text(stringResource(R.string.interface_lang_select)) },
+                text = {
+                    Column {
+                        INTERFACE_LANGUAGES.forEach { language ->
+                            ListItem(
+                                headlineContent = { Text(stringResource(language.resId)) },
+                                leadingContent = {
+                                    RadioButton(
+                                        selected = language == interfaceLanguage,
+                                        onClick = null,
+                                    )
+                                },
+                                modifier =
+                                    Modifier
+                                        .clickable {
+                                            onInterfaceLangSelect(language)
+                                        }.background(MaterialTheme.colorScheme.surface),
+                            )
+                        }
                     }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showNativeLanguageDialog = false }) {
-                    Text("Cancel")
-                }
-            },
-        )
+                },
+                confirmButton = {
+                    TextButton(onClick = { onInterfaceDialogDismiss() }) {
+                        Text("Cancel")
+                    }
+                },
+            )
+        }
     }
 }

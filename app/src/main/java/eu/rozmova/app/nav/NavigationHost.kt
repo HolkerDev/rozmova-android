@@ -37,7 +37,7 @@ fun NavigationHost(
             MainScreen()
         }
         composable(route = NavRoutes.Settings.route) {
-            SettingsScreen(onBack = { navController.navigateUp() })
+            SettingsScreen()
         }
 
         composable(route = NavRoutes.Login.route) {
