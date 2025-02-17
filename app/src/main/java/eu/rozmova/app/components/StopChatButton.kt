@@ -6,6 +6,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import eu.rozmova.app.R
 
 @Composable
 fun StopChatButton(
@@ -17,6 +19,6 @@ fun StopChatButton(
         modifier = modifier.fillMaxSize(),
         shape = MaterialTheme.shapes.medium,
     ) {
-        Text("Finish discussion")
+        Text(stringResource(R.string.finish_discussion))
     }
 }

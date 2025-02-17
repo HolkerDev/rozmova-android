@@ -23,4 +23,5 @@
     <string name="chat_details_title">Speaking practice</string>
     <string name="bottom_nav_chats">Chats</string>
     <string name="bottom_nav_settings">Settings</string>
+    <string name="finish_discussion">FInish discussion</string>
 </resources>

@@ -24,4 +24,5 @@
     <string name="chat_details_title">Практика мовлення</string>
     <string name="bottom_nav_chats">Чати</string>
     <string name="bottom_nav_settings">Налаштування</string>
+    <string name="finish_discussion">Завершити чат</string>
 </resources>
