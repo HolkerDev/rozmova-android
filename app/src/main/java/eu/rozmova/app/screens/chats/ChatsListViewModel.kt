@@ -22,9 +22,7 @@ sealed interface ChatListState {
         val chats: List<ChatWithScenarioModel>,
     ) : ChatListState
 
-    data class Error(
-        val msg: String,
-    ) : ChatListState
+    data object Error : ChatListState
 }
 
 @HiltViewModel
@@ -45,17 +43,20 @@ class ChatsListViewModel
         fun loadChats() =
             viewModelScope.launch {
                 _state.update { ChatListState.Loading }
-                try {
-                    val chats =
-                        chatsRepository.fetchChats().filter { status ->
-                            status.status == ChatStatus.IN_PROGRESS || status.status == ChatStatus.FINISHED
+                chatsRepository
+                    .fetchChats()
+                    .map { chats ->
+                        chats.filter { chat ->
+                            chat.status in listOf(ChatStatus.IN_PROGRESS, ChatStatus.FINISHED)
                         }
-                    _state.update {
-                        ChatListState.Success(chats)
-                    }
-                } catch (e: Exception) {
-                    Log.e(tag, "Error loading chats", e)
-                    _state.update { ChatListState.Error(e.message ?: "Unknown error") }
-                }
+                    }.fold(
+                        { error ->
+                            Log.e(tag, "Error loading chats", error)
+                            _state.update { ChatListState.Error }
+                        },
+                        { chats ->
+                            _state.update { ChatListState.Success(chats) }
+                        },
+                    )
             }
     }

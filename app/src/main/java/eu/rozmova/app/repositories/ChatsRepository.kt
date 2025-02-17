@@ -1,6 +1,8 @@
 package eu.rozmova.app.repositories
 
 import android.util.Log
+import arrow.core.Either
+import arrow.core.raise.either
 import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.ChatModel
 import eu.rozmova.app.domain.ChatStatus
@@ -22,6 +24,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
 
+sealed class InfraErrors(
+    msg: String,
+) : Exception(msg) {
+    data class DatabaseError(
+        val msg: String,
+    ) : InfraErrors(msg)
+}
+
 @Singleton
 class ChatsRepository
     @Inject
@@ -30,20 +40,26 @@ class ChatsRepository
     ) {
         private val tag = this::class.simpleName
 
-        suspend fun fetchChats(): List<ChatWithScenarioModel> {
-            val columns =
-                Columns.raw(
-                    """
-                    *,
-                    scenario:scenario_id(*)
-                """,
-                )
-            return supabaseClient
-                .postgrest
-                .from(Tables.CHATS)
-                .select(columns)
-                .decodeList<ChatWithScenarioModel>()
-        }
+        suspend fun fetchChats(): Either<InfraErrors, List<ChatWithScenarioModel>> =
+            either {
+                try {
+                    val columns =
+                        Columns.raw(
+                            """
+                                    *,
+                                    scenario:scenario_id(*)
+                                  """,
+                        )
+                    supabaseClient
+                        .postgrest
+                        .from(Tables.CHATS)
+                        .select(columns)
+                        .decodeList<ChatWithScenarioModel>()
+                } catch (e: Exception) {
+                    Log.e(tag, "Failed to fetch chats", e)
+                    raise(InfraErrors.DatabaseError("Failed to fetch chats"))
+                }
+            }
 
         suspend fun archiveChat(chatId: String) {
             try {
@@ -112,8 +128,12 @@ class ChatsRepository
         }
 
         suspend fun getPublicAudioLink(audioPath: String): String {
-            val userId = supabaseClient.auth.currentUserOrNull()?.id ?: throw IllegalStateException("User is not authenticated")
-            return supabaseClient.storage.from("audio-messages").createSignedUrl("$userId/$audioPath", 60.seconds)
+            val userId =
+                supabaseClient.auth.currentUserOrNull()?.id
+                    ?: throw IllegalStateException("User is not authenticated")
+            return supabaseClient.storage
+                .from("audio-messages")
+                .createSignedUrl("$userId/$audioPath", 60.seconds)
         }
 
         suspend fun finishChat(chatId: String): ChatAnalysis {
@@ -131,10 +151,19 @@ class ChatsRepository
             messageAudioFile: File,
         ): List<MessageModel> {
             try {
-                val userId = supabaseClient.auth.currentUserOrNull()?.id ?: throw IllegalStateException("User is not authenticated")
+                val userId =
+                    supabaseClient.auth.currentUserOrNull()?.id ?: throw IllegalStateException(
+                        "User is not authenticated",
+                    )
                 val filePath = "$userId/${messageAudioFile.name}"
-                supabaseClient.storage.from("audio-messages").upload(filePath, messageAudioFile.readBytes())
-                val response = supabaseClient.functions.invoke("send-audio-message", mapOf("chatId" to chatId, "audioPath" to filePath))
+                supabaseClient.storage
+                    .from("audio-messages")
+                    .upload(filePath, messageAudioFile.readBytes())
+                val response =
+                    supabaseClient.functions.invoke(
+                        "send-audio-message",
+                        mapOf("chatId" to chatId, "audioPath" to filePath),
+                    )
                 Log.i(tag, "Message sent: ${response.body<String>()}")
                 val messages = response.body<List<MessageModel>>()
                 return messages

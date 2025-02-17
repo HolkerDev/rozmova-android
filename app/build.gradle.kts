@@ -62,17 +62,19 @@ android {
             )
         }
     }
-    compileOptions {
-        isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
-    }
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 }
 
@@ -87,6 +89,10 @@ dependencies {
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
+    implementation("io.arrow-kt:arrow-core:2.0.1")
+    implementation("io.arrow-kt:arrow-fx-coroutines:2.0.1")
+
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
