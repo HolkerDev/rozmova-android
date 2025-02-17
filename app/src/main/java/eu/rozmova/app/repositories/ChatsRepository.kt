@@ -30,6 +30,10 @@ sealed class InfraErrors(
     data class DatabaseError(
         val msg: String,
     ) : InfraErrors(msg)
+
+    data class AuthError(
+        val msg: String,
+    ) : InfraErrors(msg)
 }
 
 @Singleton
@@ -150,27 +154,25 @@ class ChatsRepository
         suspend fun sendMessage(
             chatId: String,
             messageAudioFile: File,
-        ): List<MessageModel> {
-            try {
-                val userId =
-                    supabaseClient.auth.currentUserOrNull()?.id ?: throw IllegalStateException(
-                        "User is not authenticated",
-                    )
-                val filePath = "$userId/${messageAudioFile.name}"
-                supabaseClient.storage
-                    .from("audio-messages")
-                    .upload(filePath, messageAudioFile.readBytes())
-                val response =
-                    supabaseClient.functions.invoke(
-                        "send-audio-message",
-                        mapOf("chatId" to chatId, "audioPath" to filePath),
-                    )
-                Log.i(tag, "Message sent: ${response.body<String>()}")
-                val messages = response.body<List<MessageModel>>()
-                return messages
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to send message", e)
-                throw e
+        ): Either<InfraErrors, List<MessageModel>> =
+            either {
+                try {
+                    val userId =
+                        supabaseClient.auth.currentUserOrNull()?.id ?: raise(InfraErrors.AuthError("User is not authenticated"))
+                    val filePath = "$userId/${messageAudioFile.name}"
+                    supabaseClient.storage
+                        .from("audio-messages")
+                        .upload(filePath, messageAudioFile.readBytes())
+                    val response =
+                        supabaseClient.functions.invoke(
+                            "send-audio-message",
+                            mapOf("chatId" to chatId, "audioPath" to filePath),
+                        )
+                    Log.i(tag, "Message sent: ${response.body<String>()}")
+                    response.body<List<MessageModel>>()
+                } catch (e: Exception) {
+                    Log.e(tag, "Failed to send message", e)
+                    raise(InfraErrors.DatabaseError("Failed to send message"))
+                }
             }
-        }
     }

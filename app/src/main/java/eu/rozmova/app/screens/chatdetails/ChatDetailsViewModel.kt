@@ -113,27 +113,34 @@ class ChatDetailsViewModel
             viewModelScope.launch {
                 _state.update { it.copy(isLoading = true) }
                 scrollToBottom()
-                val allMessages =
-                    chatsRepository.sendMessage(
+                chatsRepository
+                    .sendMessage(
                         chatId = _state.value.chat!!.id,
                         audioFile!!,
-                    )
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        messages =
-                            allMessages.map { message ->
-                                ChatMessage(
-                                    id = message.id,
-                                    isPlaying = false,
-                                    body = message.transcription,
-                                    link = message.audioReference,
-                                    author = message.author,
-                                    duration = message.audioDuration,
+                    ).map { messages ->
+                        messages.map { message ->
+                            ChatMessage(
+                                id = message.id,
+                                isPlaying = false,
+                                body = message.transcription,
+                                link = message.audioReference,
+                                author = message.author,
+                                duration = message.audioDuration,
+                            )
+                        }
+                    }.fold(
+                        { error ->
+                            _state.update { it.copy(isLoading = false, error = error.message) }
+                        },
+                        { chatMessages ->
+                            _state.update {
+                                it.copy(
+                                    isLoading = false,
+                                    messages = chatMessages,
                                 )
-                            },
+                            }
+                        },
                     )
-                }
                 scrollToBottom()
             }
         }
