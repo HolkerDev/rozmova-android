@@ -90,6 +90,9 @@ dependencies {
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
+    testImplementation("io.mockk:mockk:1.13.9")
+    androidTestImplementation("io.mockk:mockk-android:1.13.9")
+
     implementation("io.arrow-kt:arrow-core:2.0.1")
     implementation("io.arrow-kt:arrow-fx-coroutines:2.0.1")
 

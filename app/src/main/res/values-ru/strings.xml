@@ -25,4 +25,15 @@
     <string name="bottom_nav_chats">Чаты</string>
     <string name="bottom_nav_settings">Настройки</string>
     <string name="finish_discussion">Завершить чат</string>
+    <string name="lang_en">Английский</string>
+    <string name="lang_de">Немецкий</string>
+    <string name="lang_el">Греческий</string>
+    <string name="lang_uk">Украинский</string>
+    <string name="lang_ru">Русский</string>
+    <string name="settings_account">Настройки аккаунта</string>
+    <string name="language_to_learn">Язык для обучения</string>
+    <string name="interace_language">Язык интерфейса</string>
+    <string name="language_settings">Настройки языка</string>
+    <string name="interface_lang_select">Выберите язык интерфейса</string>
+    <string name="learn_lang_select">Выберите язык для обучения</string>
 </resources>
