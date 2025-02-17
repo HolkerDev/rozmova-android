@@ -101,13 +101,12 @@ class ChatDetailsViewModel
         fun onChatAnalysisSubmit() =
             viewModelScope.launch {
                 _state.update { it.copy(isChatAnalysisSubmitLoading = true) }
-                try {
-                    chatsRepository.archiveChat(_state.value.chat!!.id)
-                    _state.update { it.copy(isChatAnalysisSubmitLoading = true) }
-                    _navigateToChatList.update { true }
-                } catch (e: Exception) {
-                    Log.e(tag, "Error finishing chat: ${e.message}")
-                }
+                chatsRepository.archiveChat(_state.value.chat!!.id).fold(
+                    { error ->
+                        _state.update { it.copy(isChatAnalysisSubmitLoading = false, error = error.message) }
+                    },
+                    { _navigateToChatList.update { true } },
+                )
             }
 
         val onAudioSaved = {

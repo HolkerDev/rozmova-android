@@ -61,22 +61,23 @@ class ChatsRepository
                 }
             }
 
-        suspend fun archiveChat(chatId: String) {
-            try {
-                supabaseClient.from(Tables.CHATS).update(
-                    {
-                        ChatModel::status setTo ChatStatus.ARCHIVED
-                    },
-                ) {
-                    filter {
-                        ChatModel::id eq chatId
+        suspend fun archiveChat(chatId: String): Either<InfraErrors, Unit> =
+            either {
+                try {
+                    supabaseClient.from(Tables.CHATS).update(
+                        {
+                            ChatModel::status setTo ChatStatus.ARCHIVED
+                        },
+                    ) {
+                        filter {
+                            ChatModel::id eq chatId
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.e(tag, "Failed to archive chat", e)
+                    raise(InfraErrors.DatabaseError("Failed to archive chat"))
                 }
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to archive chat", e)
-                throw e
             }
-        }
 
         suspend fun fetchChatById(chatId: String): ChatWithMessagesDto {
             val columns =
