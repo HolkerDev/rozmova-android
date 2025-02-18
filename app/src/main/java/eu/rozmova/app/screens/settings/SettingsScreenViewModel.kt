@@ -7,7 +7,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.Language
 import eu.rozmova.app.domain.UserPreference
 import eu.rozmova.app.domain.getLanguageByCode
-import eu.rozmova.app.domain.getLanguageByDisplayName
+import eu.rozmova.app.domain.getLanguageByDatabaseName
+import eu.rozmova.app.domain.toDatabaseName
 import eu.rozmova.app.repositories.AuthRepository
 import eu.rozmova.app.repositories.UserPreferencesRepository
 import eu.rozmova.app.utils.LocaleManager
@@ -47,21 +48,27 @@ class SettingsScreenViewModel
 
         private fun fetchCurrentLangPreferences() =
             viewModelScope.launch {
-                val selectedLocale = localeManager.getCurrentLocale()
-                val userPrefs =
+                _state.value =
                     userPreferencesRepository
                         .fetchUserPreferences()
                         .getOrElse { UserPreference.DEFAULT }
-
-                getLanguageByCode(selectedLocale.language).let { interfaceLang ->
-                    _state.value =
-                        SettingsViewState.Success(
-                            interfaceLang = interfaceLang,
-                            learningLang = getLanguageByDisplayName(userPrefs.learningLanguage),
-                            isGreekEnabled = userPrefs.hasGreekEnabled ?: false,
-                        )
-                }
+                        .let { userPrefs ->
+                            SettingsViewState.Success(
+                                interfaceLang = getLanguageByCode(localeManager.getCurrentLocale().language),
+                                learningLang = getLanguageByDatabaseName(userPrefs.learningLanguage),
+                                isGreekEnabled = userPrefs.hasGreekEnabled ?: false,
+                            )
+                        }
             }
+
+        fun setLeaningLanguage(
+            language: Language,
+            isGreekEnabled: Boolean,
+        ) = viewModelScope.launch {
+            userPreferencesRepository.updateUserPreferences(
+                UserPreference(learningLanguage = language.toDatabaseName(), hasGreekEnabled = isGreekEnabled),
+            )
+        }
 
         fun signOut() {
             viewModelScope.launch {

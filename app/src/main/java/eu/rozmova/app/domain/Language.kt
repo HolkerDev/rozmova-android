@@ -27,7 +27,16 @@ fun getLanguageByCode(code: String): Language =
         else -> Language.ENGLISH
     }
 
-fun getLanguageByDisplayName(displayName: String): Language =
+fun Language.toDatabaseName(): String =
+    when (this) {
+        Language.ENGLISH -> "English"
+        Language.GERMAN -> "German"
+        Language.GREEK -> "Greek"
+        Language.UKRAINIAN -> "Ukrainian"
+        Language.RUSSIAN -> "Russian"
+    }
+
+fun getLanguageByDatabaseName(displayName: String): Language =
     when (displayName) {
         "English" -> Language.ENGLISH
         "German" -> Language.GERMAN

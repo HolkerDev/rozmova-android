@@ -71,6 +71,7 @@ fun SettingsScreen(
                 onInterfaceDialogDismiss = { showInterfaceSelectionDialog = false },
                 onLearnLangSelect = { language ->
                     learnLanguage = language
+                    viewModel.setLeaningLanguage(language, viewState.isGreekEnabled)
                     showLanguageDialog = false
                 },
                 state = viewState,
