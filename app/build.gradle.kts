@@ -19,6 +19,13 @@ android {
     namespace = "eu.rozmova.app"
     compileSdk = 35
 
+    packaging {
+        resources {
+            excludes.add("/META-INF/LICENSE.md")
+            excludes.add("/META-INF/LICENSE-notice.md")
+        }
+    }
+
     defaultConfig {
         applicationId = "eu.rozmova.app"
         minSdk = 24

@@ -61,13 +61,14 @@ class SettingsScreenViewModel
                         }
             }
 
-        fun setLeaningLanguage(
+        fun setLearningLanguage(
             language: Language,
             isGreekEnabled: Boolean,
         ) = viewModelScope.launch {
             userPreferencesRepository.updateUserPreferences(
                 UserPreference(learningLanguage = language.toDatabaseName(), hasGreekEnabled = isGreekEnabled),
             )
+            fetchCurrentLangPreferences()
         }
 
         fun signOut() {

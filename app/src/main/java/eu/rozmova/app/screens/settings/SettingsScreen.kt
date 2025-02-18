@@ -55,6 +55,7 @@ fun SettingsScreen(
         SettingsViewState.Loading -> LinearProgressIndicator()
         is SettingsViewState.Success -> {
             interfaceLanguage = viewState.interfaceLang
+            learnLanguage = viewState.learningLang
             SettingsContent(
                 showInterfaceLanguageDialog = showInterfaceSelectionDialog,
                 showLearnLanguageDialog = showLanguageDialog,
@@ -71,7 +72,7 @@ fun SettingsScreen(
                 onInterfaceDialogDismiss = { showInterfaceSelectionDialog = false },
                 onLearnLangSelect = { language ->
                     learnLanguage = language
-                    viewModel.setLeaningLanguage(language, viewState.isGreekEnabled)
+                    viewModel.setLearningLanguage(language, viewState.isGreekEnabled)
                     showLanguageDialog = false
                 },
                 state = viewState,
