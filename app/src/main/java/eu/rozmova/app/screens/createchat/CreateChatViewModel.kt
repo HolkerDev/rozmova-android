@@ -3,10 +3,16 @@ package eu.rozmova.app.screens.createchat
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import arrow.core.getOrElse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ScenarioModel
+import eu.rozmova.app.domain.UserPreference
+import eu.rozmova.app.domain.getLanguageByCode
+import eu.rozmova.app.domain.toDatabaseName
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
+import eu.rozmova.app.repositories.UserPreferencesRepository
+import eu.rozmova.app.utils.LocaleManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -57,7 +63,9 @@ class CreateChatViewModel
     @Inject
     constructor(
         private val scenariosRepository: ScenariosRepository,
+        private val localeManager: LocaleManager,
         private val chatsRepository: ChatsRepository,
+        private val userPreferencesRepository: UserPreferencesRepository,
     ) : ViewModel() {
         private val tag = this::class.simpleName
 
@@ -67,7 +75,21 @@ class CreateChatViewModel
         private fun fetchLevelGroups() =
             viewModelScope.launch {
                 _state.value = CreateChatState.Loading
-                val scenarios = scenariosRepository.getAll()
+                val userLearnLanguage =
+                    userPreferencesRepository
+                        .fetchUserPreferences()
+                        .getOrElse { UserPreference.DEFAULT }
+                        .learningLanguage
+                val intefaceLanguage = getLanguageByCode(localeManager.getCurrentLocale().language).toDatabaseName()
+                Log.i(
+                    "CreateChatViewModel",
+                    "User learning language: $userLearnLanguage, interface language: $intefaceLanguage",
+                )
+                val scenarios =
+                    scenariosRepository.getAll(
+                        userLearnLanguage,
+                        intefaceLanguage,
+                    )
                 val levelGroups = scenariosToLevelGroups(scenarios)
                 if (levelGroups.isEmpty()) {
                     Log.e(tag, "No scenarios found")

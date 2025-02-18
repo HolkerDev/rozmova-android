@@ -12,9 +12,18 @@ class ScenariosRepository
     constructor(
         private val supabaseClient: SupabaseClient,
     ) {
-        suspend fun getAll(): List<ScenarioModel> =
+        suspend fun getAll(
+            learningLanguage: String,
+            interfaceLanguage: String,
+        ): List<ScenarioModel> =
             supabaseClient.postgrest
                 .from(Tables.SCENARIOS)
-                .select()
-                .decodeAs<List<ScenarioModel>>()
+                .select {
+                    filter {
+                        and {
+                            ScenarioModel::targetLanguage eq learningLanguage
+                            ScenarioModel::userLanguage eq interfaceLanguage
+                        }
+                    }
+                }.decodeAs<List<ScenarioModel>>()
     }
