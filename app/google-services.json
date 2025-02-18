@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "989536018980",
+    "project_id": "rozmova-b037c",
+    "storage_bucket": "rozmova-b037c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:989536018980:android:ebaaeb99076e80ea8e2eb1",
+        "android_client_info": {
+          "package_name": "eu.rozmova.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxK1sAJNdlj--468LAN2oU7FhC81hjMao"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
