@@ -1,6 +1,12 @@
 package eu.rozmova.app.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -9,6 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Card
@@ -19,8 +27,13 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.domain.Author
 import eu.rozmova.app.screens.chatdetails.ChatMessage
@@ -33,6 +46,7 @@ fun AudioMessageItem(
     onStopMessage: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var showTranscription by remember { mutableStateOf(false) }
     val onIconClick = {
         if (message.isPlaying) {
             onStopMessage()
@@ -66,48 +80,102 @@ fun AudioMessageItem(
                 ),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         ) {
-            Row(
+            Column(
                 modifier = Modifier.padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
             ) {
-                IconButton(onClick = onIconClick) {
-                    Icon(
-                        imageVector =
-                            if (message.isPlaying) {
-                                Icons.Rounded.Pause
-                            } else {
-                                Icons.Rounded.PlayArrow
-                            },
-                        contentDescription = null,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    IconButton(onClick = onIconClick) {
+                        Icon(
+                            imageVector =
+                                if (message.isPlaying) {
+                                    Icons.Rounded.Pause
+                                } else {
+                                    Icons.Rounded.PlayArrow
+                                },
+                            contentDescription = null,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    if (message.isPlaying) {
+                        LinearProgressIndicator(
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .height(4.dp),
+                        )
+                    } else {
+                        LinearProgressIndicator(
+                            progress = { 0f },
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .height(4.dp),
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = formatDuration(message.duration),
+                        style = MaterialTheme.typography.labelMedium,
                     )
+
+                    // Transcription toggle button
+                    IconButton(
+                        onClick = { showTranscription = !showTranscription },
+                    ) {
+                        Icon(
+                            imageVector =
+                                if (showTranscription) {
+                                    Icons.Rounded.ExpandLess
+                                } else {
+                                    Icons.Rounded.ExpandMore
+                                },
+                            contentDescription =
+                                if (showTranscription) {
+                                    "Hide transcription"
+                                } else {
+                                    "Show transcription"
+                                },
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
-
-                if (message.isPlaying) {
-                    LinearProgressIndicator(
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .height(4.dp),
-                    )
-                } else {
-                    LinearProgressIndicator(
-                        progress = { 0f },
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .height(4.dp),
+                // Animated transcription text
+                AnimatedVisibility(
+                    visible = showTranscription,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut(),
+                ) {
+                    Text(
+                        text = message.body,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(horizontal = 8.dp),
                     )
                 }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Text(
-                    text = formatDuration(message.duration),
-                    style = MaterialTheme.typography.labelMedium,
-                )
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun AudioMessageItemPreview() {
+    AudioMessageItem(
+        message =
+            ChatMessage(
+                id = "1",
+                author = Author.USER,
+                body = "Hello, how are you?",
+                duration = 10000,
+                isPlaying = false,
+                link = "randomLink",
+            ),
+        onPlayMessage = {},
+        onStopMessage = {},
+    )
 }
