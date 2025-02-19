@@ -35,4 +35,5 @@
     <string name="language_settings">Language settings</string>
     <string name="interface_lang_select">Select interface language</string>
     <string name="learn_lang_select">Select language to learn</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
 </resources>

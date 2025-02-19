@@ -1,5 +1,11 @@
 package eu.rozmova.app.components
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.os.Build
+import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +30,7 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,6 +49,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -336,6 +345,19 @@ private fun TopicsToReviewSection(topics: List<TopicToReview>) {
 
 @Composable
 private fun TopicItem(topic: TopicToReview) {
+    val context = LocalContext.current
+    val clipboardManager = remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+    val copiedToClipboardMsg = stringResource(R.string.copied_to_clipboard)
+
+    val onCopyClick = {
+        val clip = ClipData.newPlainText("topic", topic.topic)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            clipboardManager.setPrimaryClip(clip)
+        } else {
+            clipboardManager.setPrimaryClip(clip)
+            Toast.makeText(context, copiedToClipboardMsg, Toast.LENGTH_SHORT).show()
+        }
+    }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors =
@@ -346,20 +368,27 @@ private fun TopicItem(topic: TopicToReview) {
         Row(
             modifier =
                 Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .clickable { onCopyClick() }
+                    .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Icon(
                 imageVector = Icons.Rounded.Book,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.secondary,
             )
-            Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = topic.topic,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+            Icon(
+                imageVector = Icons.Rounded.ContentCopy,
+                contentDescription = "Copy ${topic.topic}",
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(start = 12.dp),
             )
         }
     }
