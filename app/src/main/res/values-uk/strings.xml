@@ -18,7 +18,7 @@
     <string name="chat_analysis_topics_to_refresh">Теми для повторення</string>
     <string name="confirm">Підтвердити</string>
     <string name="completed">Завершено</string>
-    <string name="incompleted">Не завершено</string>
+    <string name="incompleted">Провалено</string>
     <string name="met_requirements">Вдалося</string>
     <string name="missed_requirements">Не вдалося</string>
     <string name="chat_details_title">Практика мовлення</string>

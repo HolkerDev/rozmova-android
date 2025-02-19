@@ -17,8 +17,8 @@
     <string name="chat_analysis_task_completion">Выполнение задания</string>
     <string name="chat_analysis_topics_to_refresh">Темы для повторения</string>
     <string name="confirm">Подтвердить</string>
-    <string name="completed">Завершено</string>
-    <string name="incompleted">Не завершено</string>
+    <string name="completed">Пройдено</string>
+    <string name="incompleted">Провалено</string>
     <string name="met_requirements">Получилось</string>
     <string name="missed_requirements">Не получилось</string>
     <string name="chat_details_title">Практика речи</string>

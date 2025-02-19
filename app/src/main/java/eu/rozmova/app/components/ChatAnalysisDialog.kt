@@ -50,6 +50,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -132,7 +134,7 @@ fun ChatAnalysisDialog(
                                 ) {
                                     Text(
                                         text = stringResource(R.string.chat_analysis_task_completion),
-                                        style = MaterialTheme.typography.titleLarge,
+                                        style = MaterialTheme.typography.titleMedium,
                                     )
                                     CompletionStatusChip(chatAnalysis.taskCompletion.isCompleted)
                                 }
@@ -365,17 +367,23 @@ private fun TopicItem(topic: TopicToReview) {
                 imageVector = Icons.Rounded.Book,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(end = 8.dp),
             )
             Text(
                 text = topic.topic,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.weight(1f),
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
             )
+
             Icon(
                 imageVector = Icons.Rounded.ContentCopy,
                 contentDescription = "Copy ${topic.topic}",
                 tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.padding(start = 12.dp),
+                modifier = Modifier.padding(start = 8.dp),
             )
         }
     }
@@ -401,7 +409,7 @@ private fun ChatAnalysisDialogPreview() {
                     ),
                 topicsToReview =
                     listOf(
-                        TopicToReview("Topic 1"),
+                        TopicToReview("Very long topic name, that is longer and longer 1"),
                         TopicToReview("Topic 2"),
                         TopicToReview("Topic 3"),
                     ),
