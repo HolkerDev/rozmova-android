@@ -18,13 +18,23 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_FILE }}" > keystore.jks.base64
+          base64 -d keystore.jks.base64 > app/keystore.jks
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build Release APK
-        run: ./gradlew assembleRelease
+      - name: Build APK
+        run: |
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=keystore.jks \
+            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
+            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
+            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
 
-      - name: Upload APK to Firebase App Distribution
+      - name: Upload APK to Firebase
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{secrets.FIREBASE_APP_ID}}
@@ -32,5 +42,5 @@ jobs:
           groups: testers
           file: app/build/outputs/apk/release/app-release.apk
           releaseNotes: |
-            Changes in this build:
-            - ${{ github.event.head_commit.message }}
+            Build from branch: ${{ github.ref }}
+            Commit: ${{ github.event.head_commit.message }}
