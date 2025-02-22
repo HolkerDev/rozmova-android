@@ -34,6 +34,15 @@ jobs:
           pwd
           ls -l app/release.keystore
 
+      - name: Read Current Version
+        id: version
+        run: |
+          VERSION_NAME=$(git tag --sort=-v:refname | head -n 1 || echo "0.1")
+          NEW_VERSION_NAME=$(awk "BEGIN {print $VERSION_NAME + 0.1}")
+          VERSION_CODE=$(date +%s)  
+          echo "VERSION_NAME=$NEW_VERSION_NAME" >> $GITHUB_ENV
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+
       - name: Build Signed APK
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
