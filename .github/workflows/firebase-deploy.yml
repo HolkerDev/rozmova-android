@@ -33,6 +33,10 @@ jobs:
           ls -l app/release.keystore
 
       - name: Build Signed APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           ./gradlew assembleRelease \
             -Pandroid.injected.signing.config.storePassword="${{ secrets.KEYSTORE_PASSWORD }}" \
