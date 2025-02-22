@@ -1,4 +1,4 @@
-name: Upload APK to Firebase
+name: Upload Signed APK to Firebase
 
 on:
   push:
@@ -22,11 +22,20 @@ jobs:
       - name: Set Up Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Decode Keystore File
+        run: |
+          echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > release.keystore
+
       - name: Grant Execute Permission to Gradlew
         run: chmod +x gradlew
 
-      - name: Build APK
-        run: ./gradlew assembleRelease
+      - name: Build Signed APK
+        run: |
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=release.keystore \
+            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
+            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
+            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
@@ -36,4 +45,4 @@ jobs:
           firebase appdistribution:distribute app/build/outputs/apk/release/app-release.apk \
             --app ${{ secrets.FIREBASE_APP_ID }} \
             --token ${{ secrets.FIREBASE_TOKEN }} \
-            --groups testers  # Modify the tester group as needed
+            --groups testers
