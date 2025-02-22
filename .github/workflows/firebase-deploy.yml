@@ -25,18 +25,23 @@ jobs:
       - name: Decode Keystore File
         run: |
           echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > release.keystore
+          ls -l release.keystore  # Debugging step
 
-      - name: Grant Execute Permission to Gradlew
-        run: chmod +x gradlew
+      - name: Move Keystore to App Directory
+        run: mv release.keystore app/release.keystore
+
+      - name: Debug Keystore File
+        run: |
+          ls -l app/release.keystore
+          file app/release.keystore
 
       - name: Build Signed APK
         run: |
           ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=release.keystore \
+            -Pandroid.injected.signing.store.file=app/release.keystore \
             -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
             -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
             -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
-
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
