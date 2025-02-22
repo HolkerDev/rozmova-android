@@ -25,10 +25,7 @@ jobs:
       - name: Decode Keystore File
         run: |
           echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > release.keystore
-          ls -l release.keystore  # Debugging step
-
-      - name: Move Keystore to App Directory
-        run: mv release.keystore app/release.keystore
+          ls -l release.keystore  
 
       - name: Check Keystore Path for Gradle
         run: |
