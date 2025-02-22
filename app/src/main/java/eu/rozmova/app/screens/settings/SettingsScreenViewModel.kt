@@ -11,6 +11,8 @@ import eu.rozmova.app.domain.getLanguageByDatabaseName
 import eu.rozmova.app.domain.toDatabaseName
 import eu.rozmova.app.repositories.AuthRepository
 import eu.rozmova.app.repositories.UserPreferencesRepository
+import eu.rozmova.app.services.Feature
+import eu.rozmova.app.services.FeatureService
 import eu.rozmova.app.utils.LocaleManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,12 +39,17 @@ class SettingsScreenViewModel
     constructor(
         private val authRepository: AuthRepository,
         private val userPreferencesRepository: UserPreferencesRepository,
+        private val featureService: FeatureService,
         private val localeManager: LocaleManager,
     ) : ViewModel() {
         private val _state = MutableStateFlow<SettingsViewState>(SettingsViewState.Loading)
         val state = _state.asStateFlow()
 
+        private val _isNewLearningLanguagesEnabled = MutableStateFlow(false)
+        val isNewLearningLanguagesEnabled = _isNewLearningLanguagesEnabled.asStateFlow()
+
         init {
+            fetchFF()
             fetchCurrentLangPreferences()
         }
 
@@ -60,6 +67,12 @@ class SettingsScreenViewModel
                             )
                         }
             }
+
+        private fun fetchFF() {
+            featureService.isFeatureEnabled(Feature.MoreLearningLanguages).let {
+                _isNewLearningLanguagesEnabled.value = it
+            }
+        }
 
         fun setLearningLanguage(
             language: Language,

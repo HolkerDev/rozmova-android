@@ -102,6 +102,8 @@ dependencies {
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation(libs.firebase.config.ktx)
 
     testImplementation("io.mockk:mockk:1.13.9")
     androidTestImplementation("io.mockk:mockk-android:1.13.9")
@@ -111,7 +113,7 @@ dependencies {
 
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
     implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-crashlytics")
+    implementation(libs.firebase.crashlytics)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.hilt.android)
@@ -135,7 +137,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.core.kotlin)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     testImplementation(libs.junit)

@@ -49,6 +49,7 @@ fun SettingsScreen(
     var showInterfaceSelectionDialog by remember { mutableStateOf(false) }
     var learnLanguage by remember { mutableStateOf<Language>(Language.GERMAN) }
     var interfaceLanguage by remember { mutableStateOf<Language>(Language.ENGLISH) }
+    val isNewLanguagesEnabled by viewModel.isNewLearningLanguagesEnabled.collectAsState()
 
     when (val viewState = state) {
         is SettingsViewState.Error -> Text(stringResource(R.string.error))
@@ -75,6 +76,7 @@ fun SettingsScreen(
                     viewModel.setLearningLanguage(language, viewState.isGreekEnabled)
                     showLanguageDialog = false
                 },
+                showLearningLanguageSelector = isNewLanguagesEnabled,
                 state = viewState,
                 modifier = modifier,
             )
@@ -87,6 +89,7 @@ fun SettingsScreen(
 fun SettingsContent(
     showInterfaceLanguageDialog: Boolean,
     showLearnLanguageDialog: Boolean,
+    showLearningLanguageSelector: Boolean,
     onLogOutClick: () -> Unit,
     onInterfaceLangSelectClick: () -> Unit,
     onLearningLangSelectClick: () -> Unit,
@@ -112,20 +115,22 @@ fun SettingsContent(
         )
 
         // Learning Language
-        ListItem(
-            headlineContent = { Text(stringResource(R.string.language_to_learn)) },
-            supportingContent = { Text(stringResource(state.learningLang.resId)) },
-            leadingContent = {
-                Icon(Icons.Default.Language, contentDescription = null)
-            },
-            trailingContent = {
-                Icon(
-                    Icons.AutoMirrored.Default.KeyboardArrowRight,
-                    contentDescription = "Select language",
-                )
-            },
-            modifier = Modifier.clickable { onLearningLangSelectClick() },
-        )
+        if (showLearningLanguageSelector) {
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.language_to_learn)) },
+                supportingContent = { Text(stringResource(state.learningLang.resId)) },
+                leadingContent = {
+                    Icon(Icons.Default.Language, contentDescription = null)
+                },
+                trailingContent = {
+                    Icon(
+                        Icons.AutoMirrored.Default.KeyboardArrowRight,
+                        contentDescription = "Select language",
+                    )
+                },
+                modifier = Modifier.clickable { onLearningLangSelectClick() },
+            )
+        }
 
         // Interface Language
         ListItem(

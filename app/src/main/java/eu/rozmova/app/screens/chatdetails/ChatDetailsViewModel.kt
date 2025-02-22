@@ -160,6 +160,8 @@ class ChatDetailsViewModel
                 mediaRecorder?.apply {
                     setAudioSource(MediaRecorder.AudioSource.MIC)
                     setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                    setAudioEncodingBitRate(128000) // 128 kbps
+                    setAudioSamplingRate(44100) // 44.1 kHz
                     setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
                     setOutputFile(audioFile?.absolutePath)
                     prepare()

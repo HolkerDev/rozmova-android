@@ -1,6 +1,5 @@
 package eu.rozmova.app
 
-import android.app.LocaleManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -25,6 +24,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import arrow.core.getOrElse
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.nav.NavRoutes
@@ -32,7 +32,10 @@ import eu.rozmova.app.nav.NavigationHost
 import eu.rozmova.app.nav.bottomNavigationItems
 import eu.rozmova.app.repositories.AuthRepository
 import eu.rozmova.app.repositories.AuthState
+import eu.rozmova.app.repositories.UserRepository
+import eu.rozmova.app.services.FeatureService
 import eu.rozmova.app.ui.theme.RozmovaTheme
+import io.github.jan.supabase.auth.user.UserSession
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -52,6 +55,8 @@ class AppViewModel
     @Inject
     constructor(
         private val authRepository: AuthRepository,
+        private val userRepository: UserRepository,
+        private val featureService: FeatureService,
     ) : ViewModel() {
         init {
             viewModelScope.launch {
@@ -59,13 +64,28 @@ class AppViewModel
             }
         }
 
+        fun initializeFeatureService(userSession: UserSession) =
+            viewModelScope.launch {
+                val userId = userSession.user?.id ?: throw IllegalStateException("User not found")
+                userRepository
+                    .fetchUserGroups(userId)
+                    .also { Log.i("AppViewModel", "userGroups: $it") }
+                    .getOrElse { emptyList() }
+                    .let { userGroups ->
+                        featureService.initialize(userGroups)
+                    }
+            }
+
         val appState =
             authRepository.authState
                 .map { authState ->
                     Log.i("AppViewModel", "authState: $authState")
                     when (authState) {
                         is AuthState.Loading -> AppState.Loading
-                        is AuthState.Authenticated -> AppState.Authenticated
+                        is AuthState.Authenticated -> {
+                            initializeFeatureService(authState.userSession)
+                            AppState.Authenticated
+                        }
                         is AuthState.Unauthenticated -> AppState.Unauthenticated
                     }
                 }.stateIn(
@@ -156,8 +176,6 @@ private fun getCurrentRoute(navController: NavHostController): String? {
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private lateinit var localeManager: LocaleManager
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
