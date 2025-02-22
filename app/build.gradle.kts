@@ -84,6 +84,23 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    signingConfigs {
+        signingConfigs {
+            create("release") {
+                storeFile = file("release.keystore")
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
+        }
+
+        buildTypes {
+            getByName("release") {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
+    }
+
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }

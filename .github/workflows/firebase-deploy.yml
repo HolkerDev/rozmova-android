@@ -30,15 +30,15 @@ jobs:
       - name: Move Keystore to App Directory
         run: mv release.keystore app/release.keystore
 
-      - name: Debug Keystore File
+      - name: Check Keystore Path for Gradle
         run: |
-          ls -l app/release.keystore
-          file app/release.keystore
+          pwd
+          ls -l release.keystore
 
       - name: Build Signed APK
         run: |
           ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file=app/release.keystore \
+            -Pandroid.injected.signing.store.file=release.keystore \
             -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
             -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
             -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
