@@ -25,7 +25,7 @@ jobs:
       - name: Decode Keystore File
         run: |
           echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > app/release.keystore
-          ls -l release.keystore  
+          ls -l app/release.keystore  
 
       - name: Check Keystore Path for Gradle
         run: |
