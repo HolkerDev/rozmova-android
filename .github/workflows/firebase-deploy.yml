@@ -63,5 +63,4 @@ jobs:
           firebase appdistribution:distribute app/build/outputs/apk/release/app-release.apk \
             --app ${{ secrets.FIREBASE_APP_ID }} \
             --token ${{ secrets.FIREBASE_TOKEN }} \
-            --groups testers \
             --release-notes "Version $VERSION_NAME"
