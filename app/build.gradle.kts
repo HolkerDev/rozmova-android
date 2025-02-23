@@ -17,10 +17,6 @@ if (secretsFile.exists()) {
     secrets.load(secretsFile.inputStream())
 }
 
-fun getVersionCode(): Int = (System.getenv("VERSION_CODE") ?: "1").toInt()
-
-fun getVersionName(): String = System.getenv("VERSION_NAME") ?: "0.1"
-
 android {
     namespace = "eu.rozmova.app"
     compileSdk = 35
@@ -36,8 +32,8 @@ android {
         applicationId = "eu.rozmova.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = getVersionCode()
-        versionName = getVersionName()
+        versionCode = (project.findProperty("versionCode") as? String)?.toIntOrNull() ?: 1
+        versionName = (project.findProperty("versionName") as? String) ?: "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
