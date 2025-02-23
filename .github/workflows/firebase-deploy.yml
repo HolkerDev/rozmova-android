@@ -29,13 +29,17 @@ jobs:
         env:
           KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
         run: |
-          base64 --decode > app/release.keystore
+          echo "$KEYSTORE_FILE" | base64 --decode > app/release.keystore
+          # Add verification
+          ls -la app/release.keystore
 
       - name: Decode Secrets file
         env:
           SECRETS_FILE: ${{ secrets.SECRETS_FILE }}
         run: |
-          base64 --decode > secrets.properties
+          echo "$SECRETS_FILE" | base64 --decode > secrets.properties
+          # Add verification
+          ls -la secrets.properties
 
       - name: Build Signed APK
         env:
