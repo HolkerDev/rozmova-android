@@ -29,8 +29,7 @@ jobs:
         env:
           KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
         run: |
-          echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > app/release.keystore
-          ls -l app/release.keystore  
+          base64 --decode > app/release.keystore
 
       - name: Build Signed APK
         env:
