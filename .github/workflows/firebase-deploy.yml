@@ -32,37 +32,6 @@ jobs:
           echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > app/release.keystore
           ls -l app/release.keystore  
 
-      - name: Read Current Version and Create Tag
-        id: version
-        run: |
-          # Get the latest tag or default to 0.1 if no tags exist
-          VERSION_NAME=$(git tag --sort=-v:refname | head -n 1 || echo "0.1")
-          # Increment the version
-          NEW_VERSION_NAME=$(awk "BEGIN {print $VERSION_NAME + 0.1}")
-          # Use timestamp for version code
-          VERSION_CODE=$(date +%s)
-          
-          # Export variables for later steps
-          echo "VERSION_NAME=$NEW_VERSION_NAME" >> $GITHUB_ENV
-          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
-          
-          # Create and push new tag
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git tag -a "v$NEW_VERSION_NAME" -m "Release version $NEW_VERSION_NAME"
-          git push origin "v$NEW_VERSION_NAME"
-
-      - name: Update build.gradle
-        run: |
-          # Update version in build.gradle
-          sed -i "s/versionCode .*$/versionCode $VERSION_CODE/" app/build.gradle
-          sed -i "s/versionName \".*\"$/versionName \"$VERSION_NAME\"/" app/build.gradle
-          
-          # Commit the changes
-          git add app/build.gradle
-          git commit -m "chore: Update version to $VERSION_NAME [skip ci]"
-          git push
-
       - name: Build Signed APK
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -73,8 +42,6 @@ jobs:
             -Pandroid.injected.signing.config.storePassword="${{ secrets.KEYSTORE_PASSWORD }}" \
             -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
             -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}" \
-            -PversionName="$VERSION_NAME" \
-            -PversionCode="$VERSION_CODE"
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
