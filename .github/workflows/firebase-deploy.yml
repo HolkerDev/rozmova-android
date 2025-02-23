@@ -54,6 +54,8 @@ jobs:
             -Pandroid.injected.signing.config.storePassword="${{ secrets.KEYSTORE_PASSWORD }}" \
             -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
             -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
+            -PVERSION_NAME=$VERSION_NAME \
+            -PVERSION_CODE=$VERSION_CODE
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
