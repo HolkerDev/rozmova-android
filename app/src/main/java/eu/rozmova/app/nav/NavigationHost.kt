@@ -36,7 +36,11 @@ fun NavigationHost(
         }
 
         composable(NavRoutes.Learn.route) {
-            LearnScreen()
+            LearnScreen(
+                onChatCreate = { id ->
+                    navController.navigate(NavRoutes.ChatDetails.routeWith(id))
+                },
+            )
         }
 
         composable(route = NavRoutes.Main.route) {
@@ -67,8 +71,8 @@ fun NavigationHost(
             ChatDetailScreen(
                 onBackClick = { navController.navigateUp() },
                 onChatArchive = {
-                    navController.navigate(NavRoutes.Chats.route) {
-                        popUpTo(NavRoutes.Chats.route)
+                    navController.navigate(NavRoutes.Learn.route) {
+                        popUpTo(NavRoutes.Learn.route)
                     }
                 },
                 chatId,

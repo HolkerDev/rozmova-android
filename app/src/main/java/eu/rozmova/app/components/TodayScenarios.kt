@@ -80,7 +80,7 @@ fun TodaysScenarioSelection(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Today's scenario selection",
+                    text = stringResource(R.string.today_selection_title),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -101,7 +101,7 @@ fun TodaysScenarioSelection(
                         hardScenario = state.data.hardScenario,
                     )
                 }
-                is ViewState.Error -> {
+                else -> {
                     ErrorState()
                 }
             }
