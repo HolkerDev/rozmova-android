@@ -2,7 +2,6 @@ package eu.rozmova.app.repositories
 
 import android.util.Log
 import arrow.core.Either
-import com.google.firebase.firestore.FirebaseFirestore
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.TodayScenarioSelectionModel
 import io.github.jan.supabase.SupabaseClient
@@ -18,12 +17,7 @@ class ScenariosRepository
     @Inject
     constructor(
         private val supabaseClient: SupabaseClient,
-        private val firestore: FirebaseFirestore,
     ) {
-        private val globalCollection = firestore.collection("global")
-
-        private val scenariosCollection = firestore.collection("scenarios")
-
         suspend fun getAll(
             learningLanguage: String,
             interfaceLanguage: String,

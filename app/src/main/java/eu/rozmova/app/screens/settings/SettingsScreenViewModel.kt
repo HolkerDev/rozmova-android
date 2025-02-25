@@ -8,7 +8,6 @@ import eu.rozmova.app.domain.Language
 import eu.rozmova.app.domain.UserPreference
 import eu.rozmova.app.domain.getLanguageByCode
 import eu.rozmova.app.domain.getLanguageByDatabaseName
-import eu.rozmova.app.domain.toDatabaseName
 import eu.rozmova.app.repositories.AuthRepository
 import eu.rozmova.app.repositories.UserPreferencesRepository
 import eu.rozmova.app.services.Feature
@@ -79,7 +78,7 @@ class SettingsScreenViewModel
             isGreekEnabled: Boolean,
         ) = viewModelScope.launch {
             userPreferencesRepository.updateUserPreferences(
-                UserPreference(learningLanguage = language.toDatabaseName(), hasGreekEnabled = isGreekEnabled),
+                UserPreference(learningLanguage = language.code, hasGreekEnabled = isGreekEnabled),
             )
             fetchCurrentLangPreferences()
         }

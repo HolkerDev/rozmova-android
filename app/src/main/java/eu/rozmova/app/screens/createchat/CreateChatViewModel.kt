@@ -8,7 +8,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.UserPreference
 import eu.rozmova.app.domain.getLanguageByCode
-import eu.rozmova.app.domain.toDatabaseName
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
 import eu.rozmova.app.repositories.UserPreferencesRepository
@@ -80,15 +79,15 @@ class CreateChatViewModel
                         .fetchUserPreferences()
                         .getOrElse { UserPreference.DEFAULT }
                         .learningLanguage
-                val intefaceLanguage = getLanguageByCode(localeManager.getCurrentLocale().language).toDatabaseName()
+                val interfaceLanguage = getLanguageByCode(localeManager.getCurrentLocale().language)
                 Log.i(
                     "CreateChatViewModel",
-                    "User learning language: $userLearnLanguage, interface language: $intefaceLanguage",
+                    "User learning language: $userLearnLanguage, interface language: $interfaceLanguage",
                 )
                 val scenarios =
                     scenariosRepository.getAll(
                         userLearnLanguage,
-                        intefaceLanguage,
+                        interfaceLanguage.code,
                     )
                 val levelGroups = scenariosToLevelGroups(scenarios)
                 if (levelGroups.isEmpty()) {
