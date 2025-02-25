@@ -36,4 +36,8 @@
     <string name="interface_lang_select">Select interface language</string>
     <string name="learn_lang_select">Select language to learn</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="bottom_nav_learn">Learn</string>
+    <string name="level_easy">Easy</string>
+    <string name="level_medium">Medium</string>
+    <string name="level_hard">Hard</string>
 </resources>

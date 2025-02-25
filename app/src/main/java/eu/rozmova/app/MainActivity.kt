@@ -64,7 +64,7 @@ class AppViewModel
             }
         }
 
-        fun initializeFeatureService(userSession: UserSession) =
+        private fun initializeFeatureService(userSession: UserSession) =
             viewModelScope.launch {
                 val userId = userSession.user?.id ?: throw IllegalStateException("User not found")
                 userRepository
@@ -98,7 +98,7 @@ class AppViewModel
 @Composable
 private fun App(viewModel: AppViewModel = hiltViewModel()) {
     val navController = rememberNavController()
-    val bottomNavScreens = listOf(NavRoutes.Chats, NavRoutes.Settings)
+    val bottomNavScreens = listOf(NavRoutes.Learn, NavRoutes.Chats, NavRoutes.Settings)
     val appState by viewModel.appState.collectAsState()
 
     RozmovaTheme {
@@ -120,7 +120,7 @@ private fun App(viewModel: AppViewModel = hiltViewModel()) {
                     }
 
                     AppState.Authenticated -> {
-                        navController.navigate(NavRoutes.Chats.route) {
+                        navController.navigate(NavRoutes.Learn.route) {
                             popUpTo(0) { inclusive = true }
                             launchSingleTop = true
                         }

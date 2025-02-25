@@ -17,7 +17,7 @@ sealed class UserRepositoryError {
 class UserRepository
     @Inject
     constructor(
-        private val firestore: FirebaseFirestore,
+        firestore: FirebaseFirestore,
     ) {
         private val usersCollection = firestore.collection("users")
 

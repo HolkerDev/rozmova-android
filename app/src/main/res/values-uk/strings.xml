@@ -37,4 +37,8 @@
     <string name="interface_lang_select">Виберіть мову інтерфейсу</string>
     <string name="learn_lang_select">Виберіть мову для вивчання</string>
     <string name="copied_to_clipboard">Скопійовано</string>
+    <string name="bottom_nav_learn">Практика</string>
+    <string name="level_easy">Легкий</string>
+    <string name="level_medium">Середній</string>
+    <string name="level_hard">Тяжкий</string>
 </resources>
