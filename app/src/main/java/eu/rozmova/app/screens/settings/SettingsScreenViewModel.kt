@@ -7,7 +7,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.Language
 import eu.rozmova.app.domain.UserPreference
 import eu.rozmova.app.domain.getLanguageByCode
-import eu.rozmova.app.domain.getLanguageByDatabaseName
 import eu.rozmova.app.repositories.AuthRepository
 import eu.rozmova.app.repositories.UserPreferencesRepository
 import eu.rozmova.app.services.Feature
@@ -61,7 +60,7 @@ class SettingsScreenViewModel
                         .let { userPrefs ->
                             SettingsViewState.Success(
                                 interfaceLang = getLanguageByCode(localeManager.getCurrentLocale().language),
-                                learningLang = getLanguageByDatabaseName(userPrefs.learningLanguage),
+                                learningLang = getLanguageByCode(userPrefs.learningLanguage),
                                 isGreekEnabled = userPrefs.hasGreekEnabled ?: false,
                             )
                         }

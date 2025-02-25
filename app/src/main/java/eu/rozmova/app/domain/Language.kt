@@ -27,25 +27,6 @@ fun getLanguageByCode(code: String): Language =
         else -> Language.ENGLISH
     }
 
-fun Language.toDatabaseName(): String =
-    when (this) {
-        Language.ENGLISH -> "English"
-        Language.GERMAN -> "German"
-        Language.GREEK -> "Greek"
-        Language.UKRAINIAN -> "Ukrainian"
-        Language.RUSSIAN -> "Russian"
-    }
-
-fun getLanguageByDatabaseName(displayName: String): Language =
-    when (displayName) {
-        "English" -> Language.ENGLISH
-        "German" -> Language.GERMAN
-        "Greek" -> Language.GREEK
-        "Ukrainian" -> Language.UKRAINIAN
-        "Russian" -> Language.RUSSIAN
-        else -> Language.ENGLISH
-    }
-
 val LEARN_LANGUAGES = listOf(Language.GERMAN, Language.GREEK)
 
 val INTERFACE_LANGUAGES =
