@@ -37,7 +37,7 @@ fun NavigationHost(
 
         composable(NavRoutes.Learn.route) {
             LearnScreen(
-                onChatCreate = { id ->
+                navigateToChat = { id ->
                     navController.navigate(NavRoutes.ChatDetails.routeWith(id))
                 },
             )

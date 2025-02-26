@@ -76,10 +76,12 @@ class SettingsScreenViewModel
             language: Language,
             isGreekEnabled: Boolean,
         ) = viewModelScope.launch {
-            userPreferencesRepository.updateUserPreferences(
-                UserPreference(learningLanguage = language.code, hasGreekEnabled = isGreekEnabled),
-            )
-            fetchCurrentLangPreferences()
+            userPreferencesRepository
+                .updateUserPreferences(
+                    UserPreference(learningLanguage = language.code, hasGreekEnabled = isGreekEnabled),
+                ).also {
+                    fetchCurrentLangPreferences()
+                }
         }
 
         fun signOut() {

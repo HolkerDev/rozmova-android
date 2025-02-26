@@ -42,4 +42,6 @@
     <string name="level_medium">Середній</string>
     <string name="level_hard">Тяжкий</string>
     <string name="today_selection_title">Сьогоднішня рекомендація</string>
+    <string name="resume_scenario">Продовжити сценарій</string>
+    <string name="scenario_continue">Продовжити</string>
 </resources>

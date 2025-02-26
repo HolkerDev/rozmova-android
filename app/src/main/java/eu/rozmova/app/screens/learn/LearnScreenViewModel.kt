@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.getOrElse
 import dagger.hilt.android.lifecycle.HiltViewModel
+import eu.rozmova.app.domain.ChatStatus
+import eu.rozmova.app.domain.ChatWithScenarioModel
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.TodayScenarioSelectionModel
 import eu.rozmova.app.repositories.ChatsRepository
@@ -38,8 +40,12 @@ class LearnScreenViewModel
             MutableStateFlow<ViewState<TodayScenarioSelectionModel>>(ViewState.Loading)
         val todaySelectionState = _todaySelectionState.asStateFlow()
 
+        private val _latestChat = MutableStateFlow<ViewState<ChatWithScenarioModel>>(ViewState.Loading)
+        val latestChat = _latestChat.asStateFlow()
+
         init {
             fetchTodayScenarios()
+            fetchLatestChat()
         }
 
         fun resetChatCreationState() {
@@ -60,6 +66,21 @@ class LearnScreenViewModel
                     }.map { todaySelection ->
                         _todaySelectionState.value = ViewState.Success(todaySelection)
                     }.mapLeft { _todaySelectionState.value = ViewState.Error(it) }
+            }
+
+        private fun fetchLatestChat() =
+            viewModelScope.launch {
+                chatsRepository
+                    .fetchChats()
+                    .map { chats ->
+                        chats
+                            .filter { it.status == ChatStatus.IN_PROGRESS }
+                            .takeIf { it.isNotEmpty() }
+                            ?.last()
+                            ?.let {
+                                _latestChat.value = ViewState.Success(it)
+                            } ?: { _latestChat.value = ViewState.Empty }
+                    }.mapLeft { _latestChat.value = ViewState.Error(it) }
             }
 
         fun createChatFromScenario(scenario: ScenarioModel) {

@@ -1,5 +1,6 @@
 package eu.rozmova.app.screens.learn
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -9,25 +10,26 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import eu.rozmova.app.components.QuickResumeCard
 import eu.rozmova.app.components.TodaysScenarioSelection
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.utils.ViewState
 
 @Composable
 fun LearnScreen(
-    onChatCreate: (scenarioId: String) -> Unit,
+    navigateToChat: (chatId: String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LearnScreenViewModel = hiltViewModel(),
 ) {
     val todaySelectionState by viewModel.todaySelectionState.collectAsState()
     val chatCreationState by viewModel.chatCreationState.collectAsState()
-
-    val latestOnChatCreate = rememberUpdatedState(onChatCreate)
+    val navigate = rememberUpdatedState(navigateToChat)
+    val latestChatState by viewModel.latestChat.collectAsState()
 
     LaunchedEffect(chatCreationState) {
         when (val state = chatCreationState) {
             is ViewState.Success -> {
-                latestOnChatCreate.value(state.data)
+                navigate.value(state.data)
                 viewModel.resetChatCreationState()
             }
             else -> {}
@@ -38,9 +40,16 @@ fun LearnScreen(
         viewModel.createChatFromScenario(scenarioModel)
     }
 
-    TodaysScenarioSelection(
-        onScenarioClick = onScenarioSelect,
-        state = todaySelectionState,
-        modifier = modifier.padding(8.dp),
-    )
+    Column(modifier = modifier) {
+        TodaysScenarioSelection(
+            onScenarioClick = onScenarioSelect,
+            state = todaySelectionState,
+            modifier = Modifier.padding(8.dp),
+        )
+        QuickResumeCard(
+            chat = latestChatState,
+            onContinueClick = { chatId -> navigateToChat(chatId) },
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        )
+    }
 }
