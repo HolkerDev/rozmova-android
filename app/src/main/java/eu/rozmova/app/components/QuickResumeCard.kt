@@ -40,6 +40,8 @@ fun QuickResumeCard(
     onContinueClick: (chatId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (chat is ViewState.Empty) return
+
     Card(
         modifier =
             modifier
@@ -53,7 +55,7 @@ fun QuickResumeCard(
             ),
     ) {
         when (chat) {
-            is ViewState.Loading, ViewState.Empty -> {
+            is ViewState.Loading -> {
                 Box(
                     modifier =
                         Modifier
@@ -153,6 +155,8 @@ fun QuickResumeCard(
                     }
                 }
             }
+
+            else -> {}
         }
     }
 }
