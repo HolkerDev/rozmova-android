@@ -44,4 +44,5 @@
     <string name="today_selection_title">Сьогоднішня рекомендація</string>
     <string name="resume_scenario">Продовжити сценарій</string>
     <string name="scenario_continue">Продовжити</string>
+    <string name="categories">Категорії</string>
 </resources>

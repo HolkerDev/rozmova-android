@@ -1,5 +1,6 @@
 package eu.rozmova.app.domain
 
+import eu.rozmova.app.components.Difficulty
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -9,6 +10,13 @@ enum class ScenarioDifficulty {
     MEDIUM,
     HARD,
 }
+
+fun ScenarioDifficulty.toDifficulty(): Difficulty =
+    when (this) {
+        ScenarioDifficulty.EASY -> Difficulty.BEGINNER
+        ScenarioDifficulty.MEDIUM -> Difficulty.INTERMEDIATE
+        ScenarioDifficulty.HARD -> Difficulty.ADVANCED
+    }
 
 @Serializable
 data class ScenarioModel(
