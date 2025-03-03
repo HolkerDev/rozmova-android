@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,27 +51,44 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.R
 import eu.rozmova.app.domain.ScenarioDifficulty
+import eu.rozmova.app.domain.ScenarioModel
+import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.toDifficulty
+import kotlinx.datetime.Clock
 
 // Data models
 data class CategoryItem(
-    val id: String,
-    val title: String,
+    val type: ScenarioType,
+    val titleResId: Int,
     val icon: ImageVector,
 )
 
-data class ScenarioItem(
-    val id: String,
-    val title: String,
-    val categoryId: String,
-    val difficulty: ScenarioDifficulty,
-    val description: String,
-)
+val categories =
+    listOf(
+        CategoryItem(
+            type = ScenarioType.CONVERSATION,
+            titleResId = R.string.category_conversation,
+            icon = Icons.Default.RecordVoiceOver,
+        ),
+        CategoryItem(
+            type = ScenarioType.MESSAGES,
+            titleResId = R.string.category_message,
+            icon = Icons.Default.Chat,
+        ),
+        CategoryItem(
+            type = ScenarioType.EMAIL,
+            titleResId = R.string.category_email,
+            icon = Icons.Default.Email,
+        ),
+    )
 
 @Composable
-fun CategorySelection(modifier: Modifier = Modifier) {
+fun CategorySelection(
+    scenarios: List<ScenarioModel>,
+    modifier: Modifier = Modifier,
+) {
     // State for selected category - shared between components
-    var selectedCategoryId by remember { mutableStateOf("conversations") }
+    var selectedCategory by remember { mutableStateOf(ScenarioType.CONVERSATION) }
 
     val gradientBackground = MaterialTheme.colorScheme.background
 
@@ -116,41 +132,25 @@ fun CategorySelection(modifier: Modifier = Modifier) {
 
             // Categories section
             CategorySection(
-                selectedCategoryId = selectedCategoryId,
-                onCategorySelect = { selectedCategoryId = it },
+                selectedCategoryType = selectedCategory,
+                onCategorySelect = { selectedCategory = it },
             )
 
             // Scenarios grid
-            ScenariosGrid(selectedCategoryId = selectedCategoryId)
+            ScenariosGrid(
+                selectedCategoryType = selectedCategory,
+                allScenarios = scenarios,
+            )
         }
     }
 }
 
 @Composable
 fun CategorySection(
-    selectedCategoryId: String,
-    onCategorySelect: (String) -> Unit,
+    selectedCategoryType: ScenarioType,
+    onCategorySelect: (ScenarioType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val categories =
-        listOf(
-            CategoryItem(
-                id = "conversations",
-                title = "Conversations",
-                icon = Icons.Default.RecordVoiceOver,
-            ),
-            CategoryItem(
-                id = "messages",
-                title = "Messages",
-                icon = Icons.Default.Chat,
-            ),
-            CategoryItem(
-                id = "emails",
-                title = "Emails",
-                icon = Icons.Default.Email,
-            ),
-        )
-
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -164,7 +164,7 @@ fun CategorySection(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(categories) { category ->
-                val isSelected = category.id == selectedCategoryId
+                val isSelected = category.type == selectedCategoryType
 
                 // Animate color changes
                 val backgroundColor by animateColorAsState(
@@ -189,7 +189,7 @@ fun CategorySection(
 
                 ElevatedFilterChip(
                     selected = isSelected,
-                    onClick = { onCategorySelect(category.id) },
+                    onClick = { onCategorySelect(category.type) },
                     label = {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -203,7 +203,7 @@ fun CategorySection(
                                 tint = textColor,
                             )
                             Text(
-                                text = category.title,
+                                text = stringResource(category.titleResId),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                             )
@@ -229,66 +229,14 @@ fun CategorySection(
 
 @Composable
 fun ScenariosGrid(
-    selectedCategoryId: String,
+    allScenarios: List<ScenarioModel>,
+    selectedCategoryType: ScenarioType,
     modifier: Modifier = Modifier,
 ) {
-    // Sample data
-    val allScenarios =
-        remember {
-            listOf(
-                ScenarioItem(
-                    id = "1",
-                    title = "At the Restaurant",
-                    categoryId = "conversations",
-                    difficulty = ScenarioDifficulty.EASY,
-                    description = "Practice ordering food and making special requests at a restaurant.",
-                ),
-                ScenarioItem(
-                    id = "2",
-                    title = "Job Interview",
-                    categoryId = "conversations",
-                    difficulty = ScenarioDifficulty.HARD,
-                    description = "Practice answering common interview questions and discussing your qualifications.",
-                ),
-                ScenarioItem(
-                    id = "3",
-                    title = "Vacation Planning",
-                    categoryId = "messages",
-                    difficulty = ScenarioDifficulty.EASY,
-                    description = "Exchange messages about planning a trip with friends.",
-                ),
-                ScenarioItem(
-                    id = "4",
-                    title = "Customer Support",
-                    categoryId = "emails",
-                    difficulty = ScenarioDifficulty.MEDIUM,
-                    description = "Write an email to resolve an issue with a product you purchased.",
-                ),
-                ScenarioItem(
-                    id = "5",
-                    title = "Making New Friends",
-                    categoryId = "conversations",
-                    difficulty = ScenarioDifficulty.HARD,
-                    description = "Practice introducing yourself and making small talk with new acquaintances.",
-                ),
-                ScenarioItem(
-                    id = "6",
-                    title = "Birthday Invitation",
-                    categoryId = "messages",
-                    difficulty = ScenarioDifficulty.EASY,
-                    description = "Send a message inviting a friend to your birthday celebration.",
-                ),
-            )
-        }
-
     // Filter scenarios based on selected category
     val scenarios =
-        remember(selectedCategoryId) {
-            if (selectedCategoryId == "all") {
-                allScenarios
-            } else {
-                allScenarios.filter { it.categoryId == selectedCategoryId }
-            }
+        remember(selectedCategoryType) {
+            allScenarios.filter { it.type == selectedCategoryType }
         }
 
     Column(modifier = modifier.fillMaxHeight()) {
@@ -331,8 +279,8 @@ fun ScenariosGrid(
 
 @Composable
 fun ScenarioCard(
-    scenario: ScenarioItem,
-    onScenarioSelect: (ScenarioItem) -> Unit,
+    scenario: ScenarioModel,
+    onScenarioSelect: (ScenarioModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ElevatedCard(
@@ -373,11 +321,10 @@ fun ScenarioCard(
                     contentAlignment = Alignment.Center,
                 ) {
                     val icon =
-                        when (scenario.categoryId) {
-                            "conversations" -> Icons.Default.RecordVoiceOver
-                            "messages" -> Icons.Default.Chat
-                            "emails" -> Icons.Default.Email
-                            else -> Icons.Default.Message
+                        when (scenario.type) {
+                            ScenarioType.CONVERSATION -> Icons.Default.RecordVoiceOver
+                            ScenarioType.MESSAGES -> Icons.Default.Chat
+                            ScenarioType.EMAIL -> Icons.Default.Email
                         }
 
                     Icon(
@@ -419,7 +366,7 @@ fun ScenarioCard(
 
             // Description
             Text(
-                text = scenario.description,
+                text = scenario.situation,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
@@ -431,8 +378,26 @@ fun ScenarioCard(
 
 @Preview(showBackground = true)
 @Composable
-private fun LanguageLearningScreenPreview() {
+private fun CategorySelectionPreview() {
     MaterialTheme {
-        CategorySelection()
+        CategorySelection(
+            scenarios =
+                listOf(
+                    ScenarioModel(
+                        id = "1",
+                        createdAt = Clock.System.now(),
+                        title = "Scenario 1",
+                        labels = emptyList(),
+                        languageLevel = "A1",
+                        botInstruction = "Bot instruction",
+                        situation = "Situation",
+                        userInstruction = "User instruction",
+                        targetLanguage = "English",
+                        userLanguage = "Spanish",
+                        type = ScenarioType.CONVERSATION,
+                        difficulty = ScenarioDifficulty.EASY,
+                    ),
+                ),
+        )
     }
 }

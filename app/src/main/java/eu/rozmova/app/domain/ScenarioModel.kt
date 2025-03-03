@@ -18,6 +18,12 @@ fun ScenarioDifficulty.toDifficulty(): Difficulty =
         ScenarioDifficulty.HARD -> Difficulty.ADVANCED
     }
 
+enum class ScenarioType {
+    CONVERSATION,
+    MESSAGES,
+    EMAIL,
+}
+
 @Serializable
 data class ScenarioModel(
     val id: String,
@@ -36,6 +42,7 @@ data class ScenarioModel(
     val targetLanguage: String,
     @SerialName("user_language")
     val userLanguage: String,
+    val type: ScenarioType,
     val difficulty: ScenarioDifficulty,
 )
 

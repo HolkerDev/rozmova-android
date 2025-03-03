@@ -45,4 +45,7 @@
     <string name="resume_scenario">Продовжити сценарій</string>
     <string name="scenario_continue">Продовжити</string>
     <string name="categories">Категорії</string>
+    <string name="category_conversation">Розмова</string>
+    <string name="category_message">Переписка</string>
+    <string name="category_email">Імейл</string>
 </resources>

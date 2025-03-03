@@ -44,4 +44,7 @@
     <string name="resume_scenario">Resume scenario</string>
     <string name="scenario_continue">Continue</string>
     <string name="categories">Categories</string>
+    <string name="category_conversation">Conversation</string>
+    <string name="category_message">Message</string>
+    <string name="category_email">Email</string>
 </resources>
