@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,6 +25,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -54,6 +53,7 @@ import eu.rozmova.app.domain.ScenarioDifficulty
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.toDifficulty
+import eu.rozmova.app.utils.ViewState
 import kotlinx.datetime.Clock
 
 // Data models
@@ -84,7 +84,7 @@ val categories =
 
 @Composable
 fun CategorySelection(
-    scenarios: List<ScenarioModel>,
+    scenariosState: ViewState<List<ScenarioModel>>,
     modifier: Modifier = Modifier,
 ) {
     // State for selected category - shared between components
@@ -92,56 +92,63 @@ fun CategorySelection(
 
     val gradientBackground = MaterialTheme.colorScheme.background
 
-    Card(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-            ),
-    ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(gradientBackground)
-                    .padding(16.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Category,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.categories),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-
-            // Categories section
-            CategorySection(
-                selectedCategoryType = selectedCategory,
-                onCategorySelect = { selectedCategory = it },
-            )
-
-            // Scenarios grid
-            ScenariosGrid(
-                selectedCategoryType = selectedCategory,
-                allScenarios = scenarios,
-            )
+    when (scenariosState) {
+        ViewState.Loading -> {
+            CircularProgressIndicator()
         }
+        is ViewState.Success -> {
+            val scenarios = scenariosState.data
+            Card(
+                modifier =
+                    modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                colors =
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    ),
+            ) {
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Category,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.categories),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+
+                    // Categories section
+                    CategorySection(
+                        selectedCategoryType = selectedCategory,
+                        onCategorySelect = { selectedCategory = it },
+                    )
+
+                    // Scenarios grid
+                    ScenariosGrid(
+                        selectedCategoryType = selectedCategory,
+                        allScenarios = scenarios,
+                    )
+                }
+            }
+        }
+        else -> {}
     }
 }
 
@@ -236,7 +243,7 @@ fun ScenariosGrid(
     // Filter scenarios based on selected category
     val scenarios =
         remember(selectedCategoryType) {
-            allScenarios.filter { it.type == selectedCategoryType }
+            allScenarios.filter { it.scenarioType == selectedCategoryType }
         }
 
     Column(modifier = modifier.fillMaxHeight()) {
@@ -255,22 +262,25 @@ fun ScenariosGrid(
                 )
             }
         } else {
-            // Staggered grid with scenarios
-            LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Fixed(2),
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                        .padding(vertical = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalItemSpacing = 12.dp,
-            ) {
-                items(scenarios) { scenario ->
-                    ScenarioCard(
-                        scenario = scenario,
-                        onScenarioSelect = { },
-                    )
+            scenarios.chunked(2).forEach { rowItems ->
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    rowItems.forEach { scenario ->
+                        ScenarioCard(
+                            scenario = scenario,
+                            onScenarioSelect = { },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+
+                    if (rowItems.size == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
                 }
             }
         }
@@ -321,7 +331,7 @@ fun ScenarioCard(
                     contentAlignment = Alignment.Center,
                 ) {
                     val icon =
-                        when (scenario.type) {
+                        when (scenario.scenarioType) {
                             ScenarioType.CONVERSATION -> Icons.Default.RecordVoiceOver
                             ScenarioType.MESSAGES -> Icons.Default.Chat
                             ScenarioType.EMAIL -> Icons.Default.Email
@@ -381,21 +391,23 @@ fun ScenarioCard(
 private fun CategorySelectionPreview() {
     MaterialTheme {
         CategorySelection(
-            scenarios =
-                listOf(
-                    ScenarioModel(
-                        id = "1",
-                        createdAt = Clock.System.now(),
-                        title = "Scenario 1",
-                        labels = emptyList(),
-                        languageLevel = "A1",
-                        botInstruction = "Bot instruction",
-                        situation = "Situation",
-                        userInstruction = "User instruction",
-                        targetLanguage = "English",
-                        userLanguage = "Spanish",
-                        type = ScenarioType.CONVERSATION,
-                        difficulty = ScenarioDifficulty.EASY,
+            scenariosState =
+                ViewState.Success(
+                    listOf(
+                        ScenarioModel(
+                            id = "1",
+                            createdAt = Clock.System.now(),
+                            title = "Scenario 1",
+                            labels = emptyList(),
+                            languageLevel = "A1",
+                            botInstruction = "Bot instruction",
+                            situation = "Situation",
+                            userInstruction = "User instruction",
+                            targetLanguage = "English",
+                            userLanguage = "Spanish",
+                            scenarioType = ScenarioType.CONVERSATION,
+                            difficulty = ScenarioDifficulty.EASY,
+                        ),
                     ),
                 ),
         )

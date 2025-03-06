@@ -46,6 +46,7 @@ class LearnScreenViewModel
         init {
             fetchTodayScenarios()
             fetchLatestChat()
+            fetchScenarios()
         }
 
         fun resetChatCreationState() {
@@ -90,4 +91,21 @@ class LearnScreenViewModel
                 }
             }
         }
+
+        fun fetchScenarios() =
+            viewModelScope.launch {
+                userPreferencesRepository
+                    .fetchUserPreferences()
+                    .map { it.learningLanguage }
+                    .getOrElse { DEFAULT_LEARNING_LANGUAGE }
+                    .let { learnLang ->
+                        scenariosRepository.getAll(
+                            learnLang,
+                            localeManager.getCurrentLocale().language,
+                        )
+                    }.takeIf { it.isNotEmpty() }
+                    ?.let { todaySelection ->
+                        _scenariosState.value = ViewState.Success(todaySelection)
+                    } ?: run { _scenariosState.value = ViewState.Empty }
+            }
     }

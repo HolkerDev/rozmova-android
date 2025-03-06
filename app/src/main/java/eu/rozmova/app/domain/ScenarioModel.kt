@@ -42,7 +42,8 @@ data class ScenarioModel(
     val targetLanguage: String,
     @SerialName("user_language")
     val userLanguage: String,
-    val type: ScenarioType,
+    @SerialName("scenario_type")
+    val scenarioType: ScenarioType,
     val difficulty: ScenarioDifficulty,
 )
 
