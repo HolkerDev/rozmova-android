@@ -66,8 +66,7 @@ fun LearnScreen(
         }
 
         item {
-            // Modified CategorySelection that doesn't use LazyVerticalStaggeredGrid with fillMaxHeight
-            CategorySelection(scenariosState = scenariosState)
+            CategorySelection(scenariosState = scenariosState, onScenarioSelect = onScenarioSelect)
         }
     }
 }

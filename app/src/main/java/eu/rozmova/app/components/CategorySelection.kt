@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
@@ -75,22 +74,21 @@ val categories =
             titleResId = R.string.category_message,
             icon = Icons.Default.Chat,
         ),
-        CategoryItem(
-            type = ScenarioType.EMAIL,
-            titleResId = R.string.category_email,
-            icon = Icons.Default.Email,
-        ),
+//        CategoryItem(
+//            type = ScenarioType.EMAIL,
+//            titleResId = R.string.category_email,
+//            icon = Icons.Default.Email,
+//        ),
     )
 
 @Composable
 fun CategorySelection(
     scenariosState: ViewState<List<ScenarioModel>>,
+    onScenarioSelect: (ScenarioModel) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // State for selected category - shared between components
     var selectedCategory by remember { mutableStateOf(ScenarioType.CONVERSATION) }
-
-    val gradientBackground = MaterialTheme.colorScheme.background
 
     when (scenariosState) {
         ViewState.Loading -> {
@@ -144,6 +142,7 @@ fun CategorySelection(
                     ScenariosGrid(
                         selectedCategoryType = selectedCategory,
                         allScenarios = scenarios,
+                        onScenarioSelect = onScenarioSelect,
                     )
                 }
             }
@@ -237,6 +236,7 @@ fun CategorySection(
 @Composable
 fun ScenariosGrid(
     allScenarios: List<ScenarioModel>,
+    onScenarioSelect: (ScenarioModel) -> Unit,
     selectedCategoryType: ScenarioType,
     modifier: Modifier = Modifier,
 ) {
@@ -273,7 +273,7 @@ fun ScenariosGrid(
                     rowItems.forEach { scenario ->
                         ScenarioCard(
                             scenario = scenario,
-                            onScenarioSelect = { },
+                            onScenarioSelect = onScenarioSelect,
                             modifier = Modifier.weight(1f),
                         )
                     }
@@ -411,6 +411,7 @@ private fun CategorySelectionPreview() {
                         ),
                     ),
                 ),
+            onScenarioSelect = {},
         )
     }
 }
