@@ -17,6 +17,7 @@ data class ChatWithMessagesDto(
     val id: String,
     val scenario: ScenarioModel,
     val messages: List<MessageModel>,
+    val words: List<WordModel>,
 )
 
 @Serializable

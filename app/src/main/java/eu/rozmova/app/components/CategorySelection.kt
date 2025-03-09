@@ -407,6 +407,7 @@ private fun CategorySelectionPreview() {
                             userLanguage = "Spanish",
                             scenarioType = ScenarioType.CONVERSATION,
                             difficulty = ScenarioDifficulty.EASY,
+                            wordIds = emptyList(),
                         ),
                     ),
                 ),

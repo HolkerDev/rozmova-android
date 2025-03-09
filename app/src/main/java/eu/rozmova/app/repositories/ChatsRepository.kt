@@ -10,6 +10,7 @@ import eu.rozmova.app.domain.ChatWithMessagesDto
 import eu.rozmova.app.domain.ChatWithScenarioModel
 import eu.rozmova.app.domain.MessageModel
 import eu.rozmova.app.domain.ScenarioModel
+import eu.rozmova.app.domain.WordModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.functions.functions
@@ -101,6 +102,17 @@ class ChatsRepository
                         }
                     }.decodeSingle<ChatWithScenarioModel>()
 
+            val words =
+                chatModel.scenario.wordIds?.let { wordIds ->
+                    supabaseClient.postgrest
+                        .from(Tables.WORDS)
+                        .select(Columns.raw("*")) {
+                            filter {
+                                WordModel::id isIn wordIds
+                            }
+                        }.decodeList<WordModel>()
+                } ?: emptyList()
+
             val messages =
                 supabaseClient.postgrest
                     .from(Tables.MESSAGES)
@@ -110,7 +122,7 @@ class ChatsRepository
                         }
                     }.decodeList<MessageModel>()
 
-            return ChatWithMessagesDto(chatModel.id, chatModel.scenario, messages)
+            return ChatWithMessagesDto(chatModel.id, chatModel.scenario, messages, words)
         }
 
         suspend fun createChatFromScenario(scenario: ScenarioModel): String {

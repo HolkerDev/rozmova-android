@@ -25,6 +25,13 @@ enum class ScenarioType {
 }
 
 @Serializable
+data class WordModel(
+    val id: String,
+    val word: String,
+    val translation: String,
+)
+
+@Serializable
 data class ScenarioModel(
     val id: String,
     @SerialName("created_at")
@@ -45,6 +52,8 @@ data class ScenarioModel(
     @SerialName("scenario_type")
     val scenarioType: ScenarioType,
     val difficulty: ScenarioDifficulty,
+    @SerialName("word_ids")
+    val wordIds: List<String>?,
 )
 
 @Serializable
