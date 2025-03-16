@@ -52,4 +52,7 @@
     <string name="select_native_language_content_description">Select native language</string>
     <string name="cancel">Cancel</string>
     <string name="google_sign_in_content_description">Google Sign In</string>
+    <string name="helper_words">Helper words</string>
+    <string name="create_chat_content_description">Create new chat</string>
+    <string name="close_content_description">Close</string>
 </resources>

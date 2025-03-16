@@ -53,4 +53,7 @@
     <string name="select_native_language_content_description">Обрати рідну мову</string>
     <string name="cancel">Скасувати</string>
     <string name="google_sign_in_content_description">Вхід через Google</string>
+    <string name="helper_words">Допоміжні слова</string>
+    <string name="create_chat_content_description">Створити новий чат</string>
+    <string name="close_content_description">Закрити</string>
 </resources>

@@ -95,7 +95,7 @@ fun ChatAnalysisDialog(
                     title = { Text(text = stringResource(R.string.chat_analysis_title)) },
                     navigationIcon = {
                         IconButton(onClick = onConfirm) {
-                            Icon(Icons.Default.Close, contentDescription = "Close")
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close_content_description))
                         }
                     },
                     colors =

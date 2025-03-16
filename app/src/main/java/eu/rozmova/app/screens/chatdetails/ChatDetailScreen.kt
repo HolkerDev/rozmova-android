@@ -346,7 +346,7 @@ fun HelperWordsBottomSheet(
                     .padding(bottom = 32.dp),
         ) {
             Text(
-                text = "helper_words",
+                text = stringResource(R.string.helper_words),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
             )

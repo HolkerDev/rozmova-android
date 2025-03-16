@@ -76,7 +76,7 @@ fun ChatsListScreen(
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Create new chat",
+                contentDescription = stringResource(R.string.create_chat_content_description),
             )
         }
     }
