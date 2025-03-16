@@ -32,7 +32,7 @@
     <string name="lang_ru">Російська</string>
     <string name="settings_account">Налаштування акаунту</string>
     <string name="language_to_learn">Мова для вивчання</string>
-    <string name="interace_language">Мова інтерфейсу</string>
+    <string name="interface_language">Мова інтерфейсу</string>
     <string name="language_settings">Налаштування мови</string>
     <string name="interface_lang_select">Виберіть мову інтерфейсу</string>
     <string name="learn_lang_select">Виберіть мову для вивчання</string>

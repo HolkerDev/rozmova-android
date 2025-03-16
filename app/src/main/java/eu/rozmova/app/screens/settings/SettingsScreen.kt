@@ -134,7 +134,7 @@ fun SettingsContent(
 
         // Interface Language
         ListItem(
-            headlineContent = { Text(stringResource(R.string.interace_language)) },
+            headlineContent = { Text(stringResource(R.string.interface_language)) },
             supportingContent = { Text(text = stringResource(state.interfaceLang.resId)) },
             leadingContent = {
                 Icon(Icons.Default.Translate, contentDescription = null)
