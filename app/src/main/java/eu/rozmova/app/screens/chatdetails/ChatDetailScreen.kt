@@ -53,6 +53,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.rozmova.app.R
 import eu.rozmova.app.components.AudioMessageItem
 import eu.rozmova.app.components.ChatAnalysisDialog
+import eu.rozmova.app.components.ShouldFinishChatDialog
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.components.WordItem
@@ -78,13 +79,21 @@ fun ChatDetailScreen(
     val chatState by viewModel.state.collectAsState()
     val isRecording by viewModel.isRecording.collectAsState()
     val shouldScrollToBottom by viewModel.shouldScrollToBottom.collectAsStateWithLifecycle()
+    val shouldProposeToFinishChat by viewModel.shouldProposeToFinishChat.collectAsState()
     val chatArchived by viewModel.navigateToChatList.collectAsStateWithLifecycle()
     val messageListState = rememberLazyListState()
+    var showModal by remember { mutableStateOf(false) }
 
     LaunchedEffect(shouldScrollToBottom) {
         if (shouldScrollToBottom && chatState.messages != null) {
             messageListState.animateScrollToItem(chatState.messages!!.size - 1)
             viewModel.onScrollToBottom()
+        }
+    }
+
+    LaunchedEffect(shouldProposeToFinishChat) {
+        if (shouldProposeToFinishChat) {
+            showModal = true
         }
     }
 
@@ -95,6 +104,23 @@ fun ChatDetailScreen(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
+        ShouldFinishChatDialog(
+            showDialog = showModal,
+            onYesClick = {
+                showModal = false
+                viewModel.finishChat(chatState.chat!!.id)
+                viewModel.resetProposal()
+            },
+            onNoClick = {
+                showModal = false
+                viewModel.resetProposal()
+            },
+            onDismiss = {
+                showModal = false
+                viewModel.resetProposal()
+            },
+        )
+
         state.chatAnalysis?.let {
             ChatAnalysisDialog(
                 chatAnalysis = it,

@@ -63,6 +63,8 @@ class ChatDetailsViewModel
         val state = _state.asStateFlow()
         private val _shouldScrollToBottom = MutableStateFlow(false)
         val shouldScrollToBottom = _shouldScrollToBottom.asStateFlow()
+        private val _shouldProposeToFinishChat = MutableStateFlow(false)
+        val shouldProposeToFinishChat = _shouldProposeToFinishChat.asStateFlow()
 
         private val _navigateToChatList = MutableStateFlow(false)
         val navigateToChatList = _navigateToChatList.asStateFlow()
@@ -71,6 +73,10 @@ class ChatDetailsViewModel
             if (_shouldScrollToBottom.value) return
             if (_state.value.messages.isNullOrEmpty()) return
             _shouldScrollToBottom.update { true }
+        }
+
+        fun resetProposal() {
+            _shouldProposeToFinishChat.update { false }
         }
 
         fun onScrollToBottom() {
@@ -118,8 +124,11 @@ class ChatDetailsViewModel
                     .sendMessage(
                         chatId = _state.value.chat!!.id,
                         audioFile!!,
-                    ).map { messages ->
-                        messages.map { message ->
+                    ).map { response ->
+                        if (response.shouldFinishChat) {
+                            _shouldProposeToFinishChat.update { true }
+                        }
+                        response.messages.map { message ->
                             ChatMessage(
                                 id = message.id,
                                 isPlaying = false,

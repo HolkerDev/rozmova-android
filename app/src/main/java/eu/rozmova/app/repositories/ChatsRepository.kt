@@ -19,6 +19,7 @@ import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.storage.storage
 import io.ktor.client.call.body
+import kotlinx.serialization.Serializable
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
@@ -36,6 +37,12 @@ sealed class InfraErrors(
         val msg: String,
     ) : InfraErrors(msg)
 }
+
+@Serializable
+data class ChatResponse(
+    val messages: List<MessageModel>,
+    val shouldFinishChat: Boolean,
+)
 
 @Singleton
 class ChatsRepository
@@ -197,7 +204,7 @@ class ChatsRepository
         suspend fun sendMessage(
             chatId: String,
             messageAudioFile: File,
-        ): Either<InfraErrors, List<MessageModel>> =
+        ): Either<InfraErrors, ChatResponse> =
             either {
                 try {
                     val userId =
@@ -212,7 +219,7 @@ class ChatsRepository
                             mapOf("chatId" to chatId, "audioPath" to filePath),
                         )
                     Log.i(tag, "Message sent: ${response.body<String>()}")
-                    response.body<List<MessageModel>>()
+                    response.body<ChatResponse>()
                 } catch (e: Exception) {
                     Log.e(tag, "Failed to send message", e)
                     raise(InfraErrors.DatabaseError("Failed to send message"))
