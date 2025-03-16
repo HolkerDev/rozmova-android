@@ -49,4 +49,8 @@
     <string name="category_message">Переписка</string>
     <string name="category_email">Имейл</string>
     <string name="no_scenarios">Нету доступных сценариев</string>
+    <string name="select_language_content_description">Выбрать язык</string>
+    <string name="select_native_language_content_description">Выбрать родной язык</string>
+    <string name="cancel">Отмена</string>
+    <string name="google_sign_in_content_description">Вход через Google</string>
 </resources>

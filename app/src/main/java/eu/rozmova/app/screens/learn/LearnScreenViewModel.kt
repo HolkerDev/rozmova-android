@@ -17,8 +17,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import eu.rozmova.app.domain.Language
 
-private const val DEFAULT_LEARNING_LANGUAGE = "de"
+private val DEFAULT_LEARNING_LANGUAGE = Language.GERMAN.code
 
 @HiltViewModel
 class LearnScreenViewModel

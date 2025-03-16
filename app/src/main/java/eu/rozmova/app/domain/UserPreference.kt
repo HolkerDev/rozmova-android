@@ -13,7 +13,7 @@ data class UserPreference(
     companion object {
         val DEFAULT =
             UserPreference(
-                learningLanguage = "German",
+                learningLanguage = Language.GERMAN.code,
                 hasGreekEnabled = false,
             )
     }

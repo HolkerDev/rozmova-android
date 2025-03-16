@@ -125,7 +125,7 @@ fun SettingsContent(
                 trailingContent = {
                     Icon(
                         Icons.AutoMirrored.Default.KeyboardArrowRight,
-                        contentDescription = "Select language",
+                        contentDescription = stringResource(R.string.select_language_content_description),
                     )
                 },
                 modifier = Modifier.clickable { onLearningLangSelectClick() },
@@ -142,7 +142,7 @@ fun SettingsContent(
             trailingContent = {
                 Icon(
                     Icons.AutoMirrored.Default.KeyboardArrowRight,
-                    contentDescription = "Select native language",
+                    contentDescription = stringResource(R.string.select_native_language_content_description),
                 )
             },
             modifier = Modifier.clickable { onInterfaceLangSelectClick() },
@@ -195,7 +195,7 @@ fun SettingsContent(
                 },
                 confirmButton = {
                     TextButton(onClick = { onLearningDialogDismiss() }) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
                 },
             )
@@ -228,7 +228,7 @@ fun SettingsContent(
                 },
                 confirmButton = {
                     TextButton(onClick = { onInterfaceDialogDismiss() }) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
                 },
             )
