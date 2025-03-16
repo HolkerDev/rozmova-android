@@ -56,4 +56,7 @@
     <string name="helper_words">Допоміжні слова</string>
     <string name="create_chat_content_description">Створити новий чат</string>
     <string name="close_content_description">Закрити</string>
+    <string name="should_finish_chat_title">Завершити чат?</string>
+    <string name="should_finish_chat_confirm">Завершити</string>
+    <string name="should_finish_chat_dismiss">Продовжити</string>
 </resources>

@@ -10,7 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import eu.rozmova.app.R
 
 @Composable
 fun ShouldFinishChatDialog(
@@ -24,7 +26,7 @@ fun ShouldFinishChatDialog(
             onDismissRequest = onDismiss,
             title = {
                 Text(
-                    text = "Should finish chat?",
+                    text = stringResource(R.string.should_finish_chat_title),
                     style = MaterialTheme.typography.headlineSmall,
                 )
             },
@@ -36,7 +38,7 @@ fun ShouldFinishChatDialog(
                     },
                     shape = MaterialTheme.shapes.medium,
                 ) {
-                    Text("Finish")
+                    Text(stringResource(R.string.should_finish_chat_confirm))
                 }
             },
             dismissButton = {
@@ -47,7 +49,7 @@ fun ShouldFinishChatDialog(
                     },
                     shape = MaterialTheme.shapes.medium,
                 ) {
-                    Text("Continue")
+                    Text(stringResource(R.string.should_finish_chat_dismiss))
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,

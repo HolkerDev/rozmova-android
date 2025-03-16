@@ -55,4 +55,7 @@
     <string name="helper_words">Helper words</string>
     <string name="create_chat_content_description">Create new chat</string>
     <string name="close_content_description">Close</string>
+    <string name="should_finish_chat_title">Should finish chat?</string>
+    <string name="should_finish_chat_confirm">Finish</string>
+    <string name="should_finish_chat_dismiss">Continue</string>
 </resources>
