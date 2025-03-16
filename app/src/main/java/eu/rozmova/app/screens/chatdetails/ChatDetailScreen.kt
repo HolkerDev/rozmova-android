@@ -265,7 +265,7 @@ fun ScenarioInfoCard(
                 AudioRecorderButton(
                     onRecordStart = onRecordStart,
                     onRecordStop = onRecordStop,
-                    isDisabled = isMessageLoading || chatModel.status == ChatStatus.ARCHIVED || chatModel.status == ChatStatus.FINISHED,
+                    isDisabled = isMessageLoading,
                     shouldAnalyse = chatModel.status == ChatStatus.FINISHED,
                     onChatAnalyticsRequest = onChatArchive,
                     isRecording = isRecording,

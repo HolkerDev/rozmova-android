@@ -150,8 +150,14 @@ fun AudioRecorderButton(
 
     Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxWidth()) {
         if (shouldAnalyse) {
-            Button(onClick = onChatAnalyticsRequest, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth()) {
-                Text("Get analytics")
+            Button(onClick = {
+                if (!isDisabled) onChatAnalyticsRequest()
+            }, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth()) {
+                if (isDisabled) {
+                    Text("Analyzing...")
+                } else {
+                    Text("Get analytics")
+                }
             }
         } else {
             RecordButton(
