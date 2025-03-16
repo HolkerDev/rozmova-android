@@ -48,4 +48,5 @@
     <string name="category_conversation">Розмова</string>
     <string name="category_message">Переписка</string>
     <string name="category_email">Імейл</string>
+    <string name="no_scenarios">Немає доступних сценаріїв</string>
 </resources>

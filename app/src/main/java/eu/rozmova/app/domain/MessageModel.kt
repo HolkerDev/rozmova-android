@@ -16,6 +16,7 @@ enum class Author {
 data class ChatWithMessagesDto(
     val id: String,
     val scenario: ScenarioModel,
+    val chatModel: ChatModel,
     val messages: List<MessageModel>,
     val words: List<WordModel>,
 )

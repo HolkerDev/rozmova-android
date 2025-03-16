@@ -47,4 +47,5 @@
     <string name="category_conversation">Conversation</string>
     <string name="category_message">Message</string>
     <string name="category_email">Email</string>
+    <string name="no_scenarios">No scenarios available</string>
 </resources>

@@ -56,6 +56,8 @@ import eu.rozmova.app.components.ChatAnalysisDialog
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.components.WordItem
+import eu.rozmova.app.domain.ChatModel
+import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.WordModel
 
@@ -116,10 +118,12 @@ fun ChatDetailScreen(
                     isRecording = isRecording,
                     scenario = chat.scenario,
                     messages = chatState.messages ?: emptyList(),
+                    chatModel = chat.chatModel,
                     words = chat.words,
                     isMessageLoading = state.isLoading,
                     messageListState = messageListState,
-                    onChatFinish = { viewModel.finishChat() },
+                    onChatFinish = { viewModel.finishChat(chat.id) },
+                    onChatArchive = { viewModel.prepareAnalytics(chat.id) },
                 )
             } ?: LoadingComponent(onBackClick)
         }
@@ -131,12 +135,14 @@ fun ScenarioInfoCard(
     scenario: ScenarioModel,
     messages: List<ChatMessage>,
     words: List<WordModel>,
+    chatModel: ChatModel,
     onBackClick: () -> Unit,
     onRecordStart: () -> Unit,
     onRecordStop: () -> Unit,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
     onChatFinish: () -> Unit,
+    onChatArchive: () -> Unit,
     isMessageLoading: Boolean,
     isRecording: Boolean,
     messageListState: LazyListState,
@@ -224,6 +230,7 @@ fun ScenarioInfoCard(
                     onChatFinish,
                     messageListState,
                     isMessageLoading,
+                    chatModel.status == ChatStatus.IN_PROGRESS,
                     Modifier.weight(1f),
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -232,7 +239,9 @@ fun ScenarioInfoCard(
                 AudioRecorderButton(
                     onRecordStart = onRecordStart,
                     onRecordStop = onRecordStop,
-                    isDisabled = isMessageLoading,
+                    isDisabled = isMessageLoading || chatModel.status == ChatStatus.ARCHIVED || chatModel.status == ChatStatus.FINISHED,
+                    shouldAnalyse = chatModel.status == ChatStatus.FINISHED,
+                    onChatAnalyticsRequest = onChatArchive,
                     isRecording = isRecording,
                 )
             }
@@ -255,6 +264,7 @@ fun AudioMessageList(
     onChatFinish: () -> Unit,
     messageListState: LazyListState,
     isLoadingMessage: Boolean,
+    showFinishButton: Boolean,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -282,7 +292,7 @@ fun AudioMessageList(
                     CircularProgressIndicator()
                 }
             }
-        } else if (messages.size > 1) {
+        } else if (messages.size > 1 && showFinishButton) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
                 StopChatButton(

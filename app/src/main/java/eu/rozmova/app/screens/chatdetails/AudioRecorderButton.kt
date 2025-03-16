@@ -13,6 +13,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.AndroidViewModel
@@ -108,6 +112,8 @@ fun AudioRecorderButton(
     onRecordStop: () -> Unit,
     isRecording: Boolean,
     isDisabled: Boolean,
+    shouldAnalyse: Boolean,
+    onChatAnalyticsRequest: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AudioRecorderViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
@@ -143,17 +149,36 @@ fun AudioRecorderButton(
         )
 
     Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxWidth()) {
-        RecordButton(
-            onRecord = {
-                when {
-                    ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
-                        == PackageManager.PERMISSION_GRANTED -> onRecordStart()
-                    else -> permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                }
-            },
-            onStop = onRecordStop,
-            isRecording = isRecording,
-            isDisabled = isDisabled,
-        )
+        if (shouldAnalyse) {
+            Button(onClick = onChatAnalyticsRequest, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth()) {
+                Text("Get analytics")
+            }
+        } else {
+            RecordButton(
+                onRecord = {
+                    when {
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
+                            == PackageManager.PERMISSION_GRANTED -> onRecordStart()
+                        else -> permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                    }
+                },
+                onStop = onRecordStop,
+                isRecording = isRecording,
+                isDisabled = isDisabled,
+            )
+        }
     }
+}
+
+@Preview
+@Composable
+private fun AudioRecorderButtonPreview() {
+    AudioRecorderButton(
+        onRecordStart = {},
+        onRecordStop = {},
+        isRecording = false,
+        isDisabled = false,
+        shouldAnalyse = true,
+        onChatAnalyticsRequest = {},
+    )
 }

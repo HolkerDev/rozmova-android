@@ -122,7 +122,19 @@ class ChatsRepository
                         }
                     }.decodeList<MessageModel>()
 
-            return ChatWithMessagesDto(chatModel.id, chatModel.scenario, messages, words)
+            return ChatWithMessagesDto(
+                chatModel.id,
+                chatModel.scenario,
+                chatModel =
+                    ChatModel(
+                        id = chatId,
+                        scenarioId = chatModel.scenario.id,
+                        status = chatModel.status,
+                        userId = chatModel.userId,
+                    ),
+                messages,
+                words,
+            )
         }
 
         suspend fun createChatFromScenario(scenario: ScenarioModel): String {
@@ -153,15 +165,34 @@ class ChatsRepository
                 .createSignedUrl("$userId/$audioPath", 60.seconds)
         }
 
-        suspend fun finishChat(chatId: String): ChatAnalysis {
-            try {
-                val response = supabaseClient.functions.invoke("finish-chat", mapOf("chatId" to chatId))
-                return response.body<ChatAnalysis>()
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to finish chat", e)
-                throw e
+        suspend fun getAnalytics(chatId: String): Either<InfraErrors, ChatAnalysis> =
+            either {
+                try {
+                    val response = supabaseClient.functions.invoke("finish-chat", mapOf("chatId" to chatId))
+                    response.body<ChatAnalysis>()
+                } catch (e: Exception) {
+                    Log.e(tag, "Failed to prepare chat analytics", e)
+                    raise(InfraErrors.DatabaseError("Failed to prepare chat analytics"))
+                }
             }
-        }
+
+        suspend fun finishChat(chatId: String): Either<InfraErrors, Unit> =
+            either {
+                try {
+                    supabaseClient.postgrest.from("chats").update(
+                        {
+                            ChatModel::status setTo ChatStatus.FINISHED
+                        },
+                    ) {
+                        filter {
+                            ChatModel::id eq chatId
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(tag, "Failed to finish chat", e)
+                    raise(InfraErrors.DatabaseError("Failed to finish chat"))
+                }
+            }
 
         suspend fun sendMessage(
             chatId: String,

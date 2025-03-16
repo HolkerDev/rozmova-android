@@ -256,7 +256,7 @@ fun ScenariosGrid(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "No scenarios available for this category yet",
+                    text = stringResource(R.string.no_scenarios),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

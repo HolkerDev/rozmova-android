@@ -13,6 +13,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.ChatAnalysis
+import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ChatWithMessagesDto
 import eu.rozmova.app.repositories.ChatsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -191,17 +192,29 @@ class ChatDetailsViewModel
             }
         }
 
-        fun finishChat() {
+        fun finishChat(chatId: String) =
             viewModelScope.launch {
                 _state.update { it.copy(isLoading = true) }
-                try {
-                    val analysis = chatsRepository.finishChat(_state.value.chat!!.id)
-                    _state.update { it.copy(isLoading = false, chatAnalysis = analysis) }
-                } catch (e: Exception) {
-                    Log.e(tag, "Error finishing chat: ${e.message}")
-                }
+                chatsRepository.finishChat(chatId).map {
+                    _state.update {
+                        it.copy(chat = it.chat?.copy(chatModel = it.chat.chatModel.copy(status = ChatStatus.FINISHED)))
+                    } // TODO: Refactor this bullshit, I just hate this part of the code, like wtf
+                    _state.update { it.copy(isLoading = false) }
+                } // TODO: Handle error
             }
-        }
+
+        fun prepareAnalytics(chatId: String) =
+            viewModelScope.launch {
+                _state.update { it.copy(isLoading = true) }
+                chatsRepository
+                    .getAnalytics(chatId)
+                    .map { chatAnalysis ->
+                        _state.update { it.copy(isLoading = false, chatAnalysis = chatAnalysis) }
+                    }.mapLeft {
+                        // TODO: Handle error
+                        Log.e(tag, "Error preparing chat analytics: ${it.message}")
+                    }
+            }
 
         override fun onCleared() {
             super.onCleared()

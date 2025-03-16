@@ -80,7 +80,7 @@ class LearnScreenViewModel
                             ?.last()
                             ?.let {
                                 _latestChat.value = ViewState.Success(it)
-                            } ?: { _latestChat.value = ViewState.Empty }
+                            } ?: run { _latestChat.value = ViewState.Empty }
                     }.mapLeft { _latestChat.value = ViewState.Error(it) }
             }
 
@@ -92,7 +92,7 @@ class LearnScreenViewModel
             }
         }
 
-        fun fetchScenarios() =
+        private fun fetchScenarios() =
             viewModelScope.launch {
                 userPreferencesRepository
                     .fetchUserPreferences()
