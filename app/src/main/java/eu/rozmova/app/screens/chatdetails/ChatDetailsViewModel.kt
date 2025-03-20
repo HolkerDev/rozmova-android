@@ -27,7 +27,7 @@ data class ChatDetailState(
     val isLoading: Boolean = true,
     val error: String? = null,
     val chat: ChatWithMessagesDto? = null,
-    val messages: List<ChatMessage>? = null,
+    val messages: List<AudioChatMessage>? = null,
     val audioPlayback: AudioState = AudioState(false, null, null),
     val isRecording: Boolean = false,
     val isChatAnalysisSubmitLoading: Boolean = false,
@@ -40,7 +40,7 @@ data class AudioState(
     val currentMessageIdPlaying: String?,
 )
 
-data class ChatMessage(
+data class AudioChatMessage(
     val id: String,
     val isPlaying: Boolean,
     val duration: Int = 0,
@@ -129,7 +129,7 @@ class ChatDetailsViewModel
                             _shouldProposeToFinishChat.update { true }
                         }
                         response.messages.map { message ->
-                            ChatMessage(
+                            AudioChatMessage(
                                 id = message.id,
                                 isPlaying = false,
                                 body = message.transcription,
@@ -242,7 +242,7 @@ class ChatDetailsViewModel
                             isLoading = false,
                             messages =
                                 chat.messages.map { message ->
-                                    ChatMessage(
+                                    AudioChatMessage(
                                         id = message.id,
                                         isPlaying = false,
                                         body = message.transcription,

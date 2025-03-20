@@ -1,4 +1,4 @@
-package eu.rozmova.app.screens.chatdetails
+package eu.rozmova.app.screens.messagechat
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,7 +48,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.rozmova.app.R
 import eu.rozmova.app.components.AudioMessageItem
 import eu.rozmova.app.components.ChatAnalysisDialog
@@ -56,49 +55,54 @@ import eu.rozmova.app.components.ShouldFinishChatDialog
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.components.WordItem
+import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.ChatModel
-import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.WordModel
+import eu.rozmova.app.screens.chatdetails.AudioChatMessage
+import eu.rozmova.app.screens.createchat.ChatId
+import eu.rozmova.app.utils.ViewState
+
+data class ChatMessage(
+    val id: String,
+    val body: String,
+    val author: Author,
+)
 
 @Composable
-fun ChatDetailScreen(
-    onBackClick: () -> Unit,
+fun MessageChatScreen(
+    chatId: ChatId,
     onChatArchive: () -> Unit,
-    chatId: String,
+    onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ChatDetailsViewModel = hiltViewModel(),
+    viewModel: MessageChatViewModel = hiltViewModel(),
 ) {
+    val messageListState = rememberLazyListState()
+    val onChatArchiveState = rememberUpdatedState(onChatArchive)
+    val state by viewModel.state.collectAsState()
+    var showModal by remember { mutableStateOf(false) }
+
     LaunchedEffect(chatId) {
         viewModel.loadChat(chatId)
     }
 
-    val onChatArchiveState = rememberUpdatedState(onChatArchive)
-    val state by viewModel.state.collectAsState()
-    val chatState by viewModel.state.collectAsState()
-    val isRecording by viewModel.isRecording.collectAsState()
-    val shouldScrollToBottom by viewModel.shouldScrollToBottom.collectAsStateWithLifecycle()
-    val shouldProposeToFinishChat by viewModel.shouldProposeToFinishChat.collectAsState()
-    val chatArchived by viewModel.navigateToChatList.collectAsStateWithLifecycle()
-    val messageListState = rememberLazyListState()
-    var showModal by remember { mutableStateOf(false) }
+    LaunchedEffect(key1 = viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is MessageChatEvent.ScrollToBottom -> {
+                    (state.chat as? ViewState.Success)?.let { successState ->
+                        messageListState.animateScrollToItem(successState.data.messages.size - 1)
+                    }
+                }
 
-    LaunchedEffect(shouldScrollToBottom) {
-        if (shouldScrollToBottom && chatState.messages != null) {
-            messageListState.animateScrollToItem(chatState.messages!!.size - 1)
-            viewModel.onScrollToBottom()
-        }
-    }
-
-    LaunchedEffect(shouldProposeToFinishChat) {
-        if (shouldProposeToFinishChat) {
-            showModal = true
-        }
-    }
-
-    LaunchedEffect(chatArchived) {
-        if (chatArchived) {
-            onChatArchiveState.value()
+                MessageChatEvent.Close -> {
+                    onChatArchiveState.value()
+                }
+                MessageChatEvent.ProposeFinish -> {
+                    showModal = true
+                }
+                null -> {}
+            }
         }
     }
 
@@ -107,50 +111,50 @@ fun ChatDetailScreen(
             showDialog = showModal,
             onYesClick = {
                 showModal = false
-                viewModel.finishChat(chatState.chat!!.id)
-                viewModel.resetProposal()
+                (state.chat as? ViewState.Success)?.let { chatState ->
+                    viewModel.finishChat(chatState.data.id)
+                }
             },
             onNoClick = {
                 showModal = false
-                viewModel.resetProposal()
             },
             onDismiss = {
                 showModal = false
-                viewModel.resetProposal()
             },
         )
 
         state.chatAnalysis?.let {
             ChatAnalysisDialog(
                 chatAnalysis = it,
-                onConfirm = { viewModel.onChatAnalysisSubmit() },
-                isLoading = chatState.isChatAnalysisSubmitLoading,
+                onConfirm = { viewModel.archiveChat(chatId) },
+                isLoading = state.isAnalysisLoading,
             )
         }
 
-        if (state.isLoading && state.chat == null) {
-            LoadingComponent(onBackClick)
-        } else if (!state.error.isNullOrBlank()) {
-            ErrorComponent(onBackClick)
-        } else {
-            chatState.chat?.let { chat ->
+        when (val chatState = state.chat) {
+            is ViewState.Loading -> LoadingComponent(onBackClick)
+            ViewState.Empty -> ErrorComponent(onBackClick)
+            is ViewState.Error -> ErrorComponent(onBackClick)
+            is ViewState.Success -> {
                 ScenarioInfoCard(
+                    scenario = chatState.data.scenario,
+                    messages =
+                        chatState.data.messages.map { message ->
+                            ChatMessage(
+                                id = message.id,
+                                author = message.author,
+                                body = message.transcription,
+                            )
+                        },
+                    words = chatState.data.words,
+                    chatModel = chatState.data.chatModel,
                     onBackClick = onBackClick,
-                    onRecordStart = { viewModel.startRecording() },
-                    onRecordStop = { viewModel.stopRecording() },
-                    onPlayMessage = { messageId -> viewModel.playAudio(messageId) },
-                    onStopMessage = { viewModel.stopAudio() },
-                    isRecording = isRecording,
-                    scenario = chat.scenario,
-                    messages = chatState.messages ?: emptyList(),
-                    chatModel = chat.chatModel,
-                    words = chat.words,
-                    isMessageLoading = state.isLoading,
+                    onChatFinish = { },
+                    onChatArchive = { },
+                    isMessageLoading = state.isLoadingMessage,
                     messageListState = messageListState,
-                    onChatFinish = { viewModel.finishChat(chat.id) },
-                    onChatArchive = { viewModel.prepareAnalytics(chat.id) },
                 )
-            } ?: LoadingComponent(onBackClick)
+            }
         }
     }
 }
@@ -158,18 +162,13 @@ fun ChatDetailScreen(
 @Composable
 fun ScenarioInfoCard(
     scenario: ScenarioModel,
-    messages: List<AudioChatMessage>,
+    messages: List<ChatMessage>,
     words: List<WordModel>,
     chatModel: ChatModel,
     onBackClick: () -> Unit,
-    onRecordStart: () -> Unit,
-    onRecordStop: () -> Unit,
-    onPlayMessage: (messageId: String) -> Unit,
-    onStopMessage: () -> Unit,
     onChatFinish: () -> Unit,
     onChatArchive: () -> Unit,
     isMessageLoading: Boolean,
-    isRecording: Boolean,
     messageListState: LazyListState,
     modifier: Modifier = Modifier,
 ) {
@@ -248,27 +247,9 @@ fun ScenarioInfoCard(
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
-                AudioMessageList(
-                    messages = messages,
-                    onPlayMessage,
-                    onStopMessage,
-                    onChatFinish,
-                    messageListState,
-                    isMessageLoading,
-                    chatModel.status == ChatStatus.IN_PROGRESS,
-                    Modifier.weight(1f),
-                )
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
-                AudioRecorderButton(
-                    onRecordStart = onRecordStart,
-                    onRecordStop = onRecordStop,
-                    isDisabled = isMessageLoading,
-                    shouldAnalyse = chatModel.status == ChatStatus.FINISHED,
-                    onChatAnalyticsRequest = onChatArchive,
-                    isRecording = isRecording,
-                )
             }
         }
     }
