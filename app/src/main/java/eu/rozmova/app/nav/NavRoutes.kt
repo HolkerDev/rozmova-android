@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import eu.rozmova.app.R
+import eu.rozmova.app.domain.ScenarioType
 
 sealed class NavRoutes(
     val route: String,
@@ -23,8 +24,11 @@ sealed class NavRoutes(
         labelResourceId = R.string.bottom_nav_chats,
     )
 
-    data object ChatDetails : NavRoutes(route = "chat_details/{chatId}") {
-        fun routeWith(chatId: String) = "chat_details/$chatId"
+    data object Chat : NavRoutes(route = "chat/{chatId}/{chatType}") {
+        fun routeWith(
+            chatId: String,
+            scenarioType: ScenarioType,
+        ) = "chat/$chatId/${scenarioType.name}"
     }
 
     data object Settings : NavRoutes(

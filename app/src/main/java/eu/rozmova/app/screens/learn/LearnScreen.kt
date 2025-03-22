@@ -16,27 +16,26 @@ import eu.rozmova.app.components.CategorySelection
 import eu.rozmova.app.components.QuickResumeCard
 import eu.rozmova.app.components.TodaysScenarioSelection
 import eu.rozmova.app.domain.ScenarioModel
-import eu.rozmova.app.utils.ViewState
+import eu.rozmova.app.domain.ScenarioType
 
 @Composable
 fun LearnScreen(
-    navigateToChat: (chatId: String) -> Unit,
+    navigateToChat: (chatId: String, scenarioType: ScenarioType) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LearnScreenViewModel = hiltViewModel(),
 ) {
     val todaySelectionState by viewModel.todaySelectionState.collectAsState()
-    val chatCreationState by viewModel.chatCreationState.collectAsState()
     val scenariosState by viewModel.scenariosState.collectAsState()
-    val navigate = rememberUpdatedState(navigateToChat)
+    val navigateToChatAction = rememberUpdatedState(navigateToChat)
     val latestChatState by viewModel.latestChat.collectAsState()
 
-    LaunchedEffect(chatCreationState) {
-        when (val state = chatCreationState) {
-            is ViewState.Success -> {
-                navigate.value(state.data)
-                viewModel.resetChatCreationState()
+    LaunchedEffect(key1 = viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is LearnEvent.ChatCreated -> {
+                    navigateToChatAction.value(event.chatId, event.scenarioType)
+                }
             }
-            else -> {}
         }
     }
 
@@ -60,7 +59,12 @@ fun LearnScreen(
         item {
             QuickResumeCard(
                 chat = latestChatState,
-                onContinueClick = { chatId -> navigateToChat(chatId) },
+                onContinueClick = { chatId, scenarioType ->
+                    navigateToChat(
+                        chatId,
+                        scenarioType,
+                    )
+                },
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             )
         }

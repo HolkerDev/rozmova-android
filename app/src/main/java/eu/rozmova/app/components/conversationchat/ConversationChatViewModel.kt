@@ -1,4 +1,4 @@
-package eu.rozmova.app.screens.chatdetails
+package eu.rozmova.app.components.conversationchat
 import android.app.Application
 import android.media.MediaRecorder
 import android.net.Uri

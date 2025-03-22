@@ -1,4 +1,4 @@
-package eu.rozmova.app.screens.chatdetails
+package eu.rozmova.app.components
 
 import android.Manifest
 import android.app.Application
@@ -29,7 +29,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.AndroidViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.R
-import eu.rozmova.app.components.RecordButton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.io.File

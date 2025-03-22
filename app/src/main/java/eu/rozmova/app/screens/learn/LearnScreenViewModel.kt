@@ -6,20 +6,30 @@ import arrow.core.getOrElse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ChatWithScenarioModel
+import eu.rozmova.app.domain.Language
 import eu.rozmova.app.domain.ScenarioModel
+import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.TodayScenarioSelectionModel
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
 import eu.rozmova.app.repositories.UserPreferencesRepository
 import eu.rozmova.app.utils.LocaleManager
 import eu.rozmova.app.utils.ViewState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import eu.rozmova.app.domain.Language
 
 private val DEFAULT_LEARNING_LANGUAGE = Language.GERMAN.code
+
+sealed class LearnEvent {
+    data class ChatCreated(
+        val chatId: String,
+        val scenarioType: ScenarioType,
+    ) : LearnEvent()
+}
 
 @HiltViewModel
 class LearnScreenViewModel
@@ -33,6 +43,9 @@ class LearnScreenViewModel
         private val _scenariosState =
             MutableStateFlow<ViewState<List<ScenarioModel>>>(ViewState.Loading)
         val scenariosState = _scenariosState.asStateFlow()
+
+        private val _events = MutableSharedFlow<LearnEvent>()
+        val events = _events.asSharedFlow()
 
         private val _chatCreationState = MutableStateFlow<ViewState<String>>(ViewState.Empty)
         val chatCreationState = _chatCreationState.asStateFlow()
@@ -89,6 +102,7 @@ class LearnScreenViewModel
             viewModelScope.launch {
                 chatsRepository.createChatFromScenario(scenario).let { chatId ->
                     _chatCreationState.value = ViewState.Success(chatId)
+                    _events.emit(LearnEvent.ChatCreated(chatId, scenario.scenarioType))
                 }
             }
         }

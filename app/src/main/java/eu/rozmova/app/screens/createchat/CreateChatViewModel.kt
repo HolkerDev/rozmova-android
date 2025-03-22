@@ -6,14 +6,19 @@ import androidx.lifecycle.viewModelScope
 import arrow.core.getOrElse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ScenarioModel
+import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.UserPreference
 import eu.rozmova.app.domain.getLanguageByCode
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
 import eu.rozmova.app.repositories.UserPreferencesRepository
 import eu.rozmova.app.utils.LocaleManager
+import eu.rozmova.app.utils.ViewState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -45,16 +50,16 @@ fun scenariosToLevelGroups(scenarios: List<ScenarioModel>): List<LevelGroup> =
             )
         }
 
-sealed class CreateChatState {
-    data object Loading : CreateChatState()
+data class CreateChatState(
+    val levelGroups: ViewState<List<LevelGroup>> = ViewState.Loading,
+    val isLoadingNewChat: Boolean = false,
+)
 
-    data class Success(
-        val levelGroups: List<LevelGroup>,
-    ) : CreateChatState()
-
-    data class ChatCreated(
+sealed class CreateChatEvent {
+    data class ChatReady(
         val chatId: String,
-    ) : CreateChatState()
+        val scenarioType: ScenarioType,
+    ) : CreateChatEvent()
 }
 
 @HiltViewModel
@@ -68,12 +73,14 @@ class CreateChatViewModel
     ) : ViewModel() {
         private val tag = this::class.simpleName
 
-        private val _state = MutableStateFlow<CreateChatState>(CreateChatState.Loading)
+        private val _state = MutableStateFlow(CreateChatState())
         val state = _state.asStateFlow()
+
+        private val _events = MutableSharedFlow<CreateChatEvent>()
+        val events = _events.asSharedFlow()
 
         private fun fetchLevelGroups() =
             viewModelScope.launch {
-                _state.value = CreateChatState.Loading
                 val userLearnLanguage =
                     userPreferencesRepository
                         .fetchUserPreferences()
@@ -92,17 +99,17 @@ class CreateChatViewModel
                 val levelGroups = scenariosToLevelGroups(scenarios)
                 if (levelGroups.isEmpty()) {
                     Log.e(tag, "No scenarios found")
-                    _state.value = CreateChatState.Loading
+                    _state.update { it.copy(levelGroups = ViewState.Success(emptyList())) }
                     return@launch
                 }
-                _state.value = CreateChatState.Success(levelGroups)
+                _state.update { it.copy(levelGroups = ViewState.Success(levelGroups)) }
             }
 
         fun createChatFromScenario(scenario: ScenarioModel) {
             viewModelScope.launch {
-                _state.value = CreateChatState.Loading
+                _state.update { it.copy(isLoadingNewChat = true) }
                 val chatId = chatsRepository.createChatFromScenario(scenario)
-                _state.value = CreateChatState.ChatCreated(chatId)
+                _events.emit(CreateChatEvent.ChatReady(chatId, scenario.scenarioType))
             }
         }
 

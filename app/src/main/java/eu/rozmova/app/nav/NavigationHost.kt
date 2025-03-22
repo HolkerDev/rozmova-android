@@ -9,7 +9,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import eu.rozmova.app.screens.chatdetails.ChatDetailScreen
+import eu.rozmova.app.domain.ScenarioType
+import eu.rozmova.app.screens.chat.ChatScreen
 import eu.rozmova.app.screens.chats.ChatsListScreen
 import eu.rozmova.app.screens.createchat.CreateChatScreen
 import eu.rozmova.app.screens.learn.LearnScreen
@@ -30,15 +31,15 @@ fun NavigationHost(
     ) {
         // Main Screens
         composable(NavRoutes.Chats.route) {
-            ChatsListScreen(onChatSelect = { chatId ->
-                navController.navigate("chat_details/$chatId")
+            ChatsListScreen(onChatSelect = { chatId, scenarioType ->
+                navController.navigate("chat/$chatId/$scenarioType")
             }, onChatCreateClick = { navController.navigate(NavRoutes.CreateChat.route) })
         }
 
         composable(NavRoutes.Learn.route) {
             LearnScreen(
-                navigateToChat = { id ->
-                    navController.navigate(NavRoutes.ChatDetails.routeWith(id))
+                navigateToChat = { chatId, scenarioType ->
+                    navController.navigate(NavRoutes.Chat.routeWith(chatId, scenarioType))
                 },
             )
         }
@@ -55,8 +56,8 @@ fun NavigationHost(
         }
 
         composable(route = NavRoutes.CreateChat.route) {
-            CreateChatScreen(onChatReady = { chatId ->
-                navController.navigate(NavRoutes.ChatDetails.routeWith(chatId)) {
+            CreateChatScreen(onChatReady = { chatId, scenarioType ->
+                navController.navigate(NavRoutes.Chat.routeWith(chatId, scenarioType)) {
                     popUpTo(NavRoutes.Chats.route)
                 }
             }, onBack = { navController.navigateUp() })
@@ -64,18 +65,17 @@ fun NavigationHost(
 
         // Side Screens
         composable(
-            route = NavRoutes.ChatDetails.route,
-            arguments = listOf(navArgument("chatId") { type = NavType.StringType }),
+            route = NavRoutes.Chat.route,
+            arguments = listOf(navArgument("chatId") { type = NavType.StringType }, navArgument("chatType") { type = NavType.StringType }),
         ) { backStackEntry ->
             val chatId: String = backStackEntry.arguments?.getString("chatId") ?: ""
-            ChatDetailScreen(
-                onBackClick = { navController.navigateUp() },
-                onChatArchive = {
-                    navController.navigate(NavRoutes.Learn.route) {
-                        popUpTo(NavRoutes.Learn.route)
-                    }
-                },
-                chatId,
+            val chatType =
+                backStackEntry.arguments?.getString("scenarioType")?.let { ScenarioType.valueOf(it) } ?: ScenarioType.CONVERSATION
+            ChatScreen(
+                chatId = chatId,
+                scenarioType = chatType,
+                onBack = { navController.navigateUp() },
+                onMain = { navController.navigate(NavRoutes.Learn.route) },
             )
         }
     }

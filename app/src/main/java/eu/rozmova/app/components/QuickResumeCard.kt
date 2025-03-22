@@ -32,12 +32,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.R
 import eu.rozmova.app.domain.ChatWithScenarioModel
+import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.utils.ViewState
 
 @Composable
 fun QuickResumeCard(
     chat: ViewState<ChatWithScenarioModel>,
-    onContinueClick: (chatId: String) -> Unit,
+    onContinueClick: (chatId: String, scenarioType: ScenarioType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (chat is ViewState.Empty) return
@@ -114,7 +115,7 @@ fun QuickResumeCard(
                         )
                     }
                     OutlinedButton(
-                        onClick = { onContinueClick(chat.data.id) },
+                        onClick = { onContinueClick(chat.data.id, chat.data.scenario.scenarioType) },
                         modifier = Modifier.padding(start = 16.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     ) {

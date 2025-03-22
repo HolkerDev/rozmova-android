@@ -22,16 +22,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,17 +44,28 @@ import eu.rozmova.app.R
 import eu.rozmova.app.components.Chip
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.domain.ScenarioModel
+import eu.rozmova.app.domain.ScenarioType
+import eu.rozmova.app.utils.ViewState
 
 typealias ChatId = String
 
 @Composable
 fun CreateChatScreen(
-    onChatReady: (ChatId) -> Unit,
+    onChatReady: (ChatId, ScenarioType) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CreateChatViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val onChatReadyAction = rememberUpdatedState(onChatReady)
+
+    LaunchedEffect(key1 = viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is CreateChatEvent.ChatReady -> onChatReadyAction.value(event.chatId, event.scenarioType)
+            }
+        }
+    }
 
     val onScenarioSelect: (ScenarioModel) -> Unit = { selectedScenario ->
         viewModel.createChatFromScenario(selectedScenario)
@@ -65,17 +77,18 @@ fun CreateChatScreen(
             modifier = Modifier.padding(bottom = 20.dp),
             onBack = onBack,
         )
-        when (val uiState = state) {
-            CreateChatState.Loading -> CircularProgressIndicator()
-            is CreateChatState.Success -> {
-                // Keep track of expanded sections
-                var expandedSections by remember { mutableStateOf(setOf(uiState.levelGroups[0].groupName)) }
+        when (val levelGroupsState = state.levelGroups) {
+            ViewState.Empty -> TODO()
+            is ViewState.Error -> TODO()
+            ViewState.Loading -> {}
+            is ViewState.Success -> {
+                var expandedSections by remember { mutableStateOf(setOf(levelGroupsState.data[0].groupName)) }
 
                 Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        items(uiState.levelGroups) { group ->
+                        items(levelGroupsState.data) { group ->
                             ScenarioGroup(
                                 levelGroup = group,
                                 isExpanded = expandedSections.contains(group.groupName),
@@ -93,8 +106,6 @@ fun CreateChatScreen(
                     }
                 }
             }
-
-            is CreateChatState.ChatCreated -> onChatReady(uiState.chatId)
         }
     }
 }

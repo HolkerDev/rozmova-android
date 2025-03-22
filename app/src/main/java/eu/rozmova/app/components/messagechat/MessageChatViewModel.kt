@@ -1,4 +1,4 @@
-package eu.rozmova.app.screens.messagechat
+package eu.rozmova.app.components.messagechat
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -38,10 +38,9 @@ class MessageChatViewModel
     ) : ViewModel() {
         private val _state =
             MutableStateFlow(MessageChatState())
-
         val state = _state.asStateFlow()
 
-        private val _events = MutableSharedFlow<MessageChatEvent?>()
+        private val _events = MutableSharedFlow<MessageChatEvent>()
         val events = _events.asSharedFlow()
 
         fun loadChat(chatId: String) =

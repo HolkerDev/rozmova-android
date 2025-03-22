@@ -1,4 +1,4 @@
-package eu.rozmova.app.screens.messagechat
+package eu.rozmova.app.components.messagechat
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -55,11 +55,11 @@ import eu.rozmova.app.components.ShouldFinishChatDialog
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.components.WordItem
+import eu.rozmova.app.components.conversationchat.AudioChatMessage
 import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.ChatModel
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.WordModel
-import eu.rozmova.app.screens.chatdetails.AudioChatMessage
 import eu.rozmova.app.screens.createchat.ChatId
 import eu.rozmova.app.utils.ViewState
 
@@ -70,7 +70,7 @@ data class ChatMessage(
 )
 
 @Composable
-fun MessageChatScreen(
+fun MessageChat(
     chatId: ChatId,
     onChatArchive: () -> Unit,
     onBackClick: () -> Unit,

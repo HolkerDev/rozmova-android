@@ -35,8 +35,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import eu.rozmova.app.components.conversationchat.AudioChatMessage
 import eu.rozmova.app.domain.Author
-import eu.rozmova.app.screens.chatdetails.AudioChatMessage
 import eu.rozmova.app.utils.formatDuration
 
 @Composable

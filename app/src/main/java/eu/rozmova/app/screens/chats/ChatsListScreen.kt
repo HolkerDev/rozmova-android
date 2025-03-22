@@ -27,10 +27,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.components.ChatItem
 import eu.rozmova.app.components.SimpleToolBar
+import eu.rozmova.app.domain.ScenarioType
 
 @Composable
 fun ChatsListScreen(
-    onChatSelect: (String) -> Unit,
+    onChatSelect: (String, ScenarioType) -> Unit,
     onChatCreateClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ChatsListViewModel = hiltViewModel(),
@@ -58,7 +59,7 @@ fun ChatsListScreen(
                     is ChatListState.Success -> {
                         LazyColumn {
                             items(viewState.chats) { chat ->
-                                ChatItem(chat, onChatClick = { onChatSelect(chat.id) })
+                                ChatItem(chat, onChatClick = { onChatSelect(chat.id, chat.scenario.scenarioType) })
                             }
                         }
                     }

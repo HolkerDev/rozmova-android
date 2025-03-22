@@ -1,4 +1,4 @@
-package eu.rozmova.app.screens.chatdetails
+package eu.rozmova.app.components.conversationchat
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,6 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.rozmova.app.R
 import eu.rozmova.app.components.AudioMessageItem
+import eu.rozmova.app.components.AudioRecorderButton
 import eu.rozmova.app.components.ChatAnalysisDialog
 import eu.rozmova.app.components.ShouldFinishChatDialog
 import eu.rozmova.app.components.SimpleToolBar
@@ -62,7 +63,7 @@ import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.WordModel
 
 @Composable
-fun ChatDetailScreen(
+fun ConversationChat(
     onBackClick: () -> Unit,
     onChatArchive: () -> Unit,
     chatId: String,
