@@ -201,7 +201,7 @@ class ChatsRepository
                 }
             }
 
-        suspend fun sendMessage(
+        suspend fun sendAudioMessage(
             chatId: String,
             messageAudioFile: File,
         ): Either<InfraErrors, ChatResponse> =
@@ -219,6 +219,20 @@ class ChatsRepository
                             mapOf("chatId" to chatId, "audioPath" to filePath),
                         )
                     Log.i(tag, "Message sent: ${response.body<String>()}")
+                    response.body<ChatResponse>()
+                } catch (e: Exception) {
+                    Log.e(tag, "Failed to send message", e)
+                    raise(InfraErrors.DatabaseError("Failed to send message"))
+                }
+            }
+
+        suspend fun sendMessage(
+            chatId: String,
+            message: String,
+        ): Either<InfraErrors, ChatResponse> =
+            either {
+                try {
+                    val response = supabaseClient.functions.invoke("send-message", mapOf("chatId" to chatId, "message" to message))
                     response.body<ChatResponse>()
                 } catch (e: Exception) {
                     Log.e(tag, "Failed to send message", e)

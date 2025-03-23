@@ -48,26 +48,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
-import eu.rozmova.app.components.AudioMessageItem
 import eu.rozmova.app.components.ChatAnalysisDialog
 import eu.rozmova.app.components.MessageInput
+import eu.rozmova.app.components.MessageItem
 import eu.rozmova.app.components.ShouldFinishChatDialog
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.components.WordItem
-import eu.rozmova.app.components.conversationchat.AudioChatMessage
-import eu.rozmova.app.domain.Author
-import eu.rozmova.app.domain.ChatModel
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.WordModel
 import eu.rozmova.app.screens.createchat.ChatId
 import eu.rozmova.app.utils.ViewState
-
-data class ChatMessage(
-    val id: String,
-    val body: String,
-    val author: Author,
-)
 
 @Composable
 fun MessageChat(
@@ -90,8 +81,11 @@ fun MessageChat(
         viewModel.events.collect { event ->
             when (event) {
                 is MessageChatEvent.ScrollToBottom -> {
-                    (state.chat as? ViewState.Success)?.let { successState ->
-                        messageListState.animateScrollToItem(successState.data.messages.size - 1)
+                    (state.messages as? ViewState.Success)?.let { messages ->
+                        if (messages.data.isEmpty()) {
+                            return@let
+                        }
+                        messageListState.animateScrollToItem(messages.data.size - 1)
                     }
                 }
 
@@ -138,16 +132,8 @@ fun MessageChat(
                 Column(modifier = Modifier.fillMaxSize()) {
                     ScenarioInfoCard(
                         scenario = chatState.data.scenario,
-                        messages =
-                            chatState.data.messages.map { message ->
-                                ChatMessage(
-                                    id = message.id,
-                                    author = message.author,
-                                    body = message.transcription,
-                                )
-                            },
+                        messages = state.messages,
                         words = chatState.data.words,
-                        chatModel = chatState.data.chatModel,
                         onBackClick = onBackClick,
                         onChatFinish = { },
                         onChatArchive = { },
@@ -170,9 +156,8 @@ fun MessageChat(
 @Composable
 fun ScenarioInfoCard(
     scenario: ScenarioModel,
-    messages: List<ChatMessage>,
+    messages: ViewState<List<ChatMessage>>,
     words: List<WordModel>,
-    chatModel: ChatModel,
     onBackClick: () -> Unit,
     onChatFinish: () -> Unit,
     onChatArchive: () -> Unit,
@@ -254,6 +239,12 @@ fun ScenarioInfoCard(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
+                MessageList(
+                    messages = messages,
+                    onChatFinish = onChatFinish,
+                    messageListState = messageListState,
+                    isLoadingMessage = isMessageLoading,
+                )
             }
         }
     }
@@ -267,47 +258,52 @@ fun ScenarioInfoCard(
 }
 
 @Composable
-fun AudioMessageList(
-    messages: List<AudioChatMessage>,
-    onPlayMessage: (messageId: String) -> Unit,
-    onStopMessage: () -> Unit,
+fun MessageList(
+    messages: ViewState<List<ChatMessage>>,
     onChatFinish: () -> Unit,
     messageListState: LazyListState,
     isLoadingMessage: Boolean,
-    showFinishButton: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    LazyColumn(
-        modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(16.dp),
-        state = messageListState,
-    ) {
-        items(messages) { message ->
-            AudioMessageItem(
-                message = message,
-                onPlayMessage = onPlayMessage,
-                onStopMessage = onStopMessage,
-                modifier = Modifier.fillMaxWidth(),
-            )
+    val showFinishButton = messages is ViewState.Success && messages.data.size > 1
+    when (messages) {
+        ViewState.Empty -> {}
+        is ViewState.Error -> {}
+        ViewState.Loading -> {
+            CircularProgressIndicator()
         }
-        if (isLoadingMessage) {
-            item {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
+        is ViewState.Success -> {
+            LazyColumn(
+                modifier = modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(16.dp),
+                state = messageListState,
+            ) {
+                items(messages.data) { message ->
+                    MessageItem(
+                        message = message,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
-            }
-        } else if (messages.size > 1 && showFinishButton) {
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                StopChatButton(
-                    onClick = onChatFinish,
-                )
+                if (isLoadingMessage) {
+                    item {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                } else if (messages.data.size > 1 && showFinishButton) {
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        StopChatButton(
+                            onClick = onChatFinish,
+                        )
+                    }
+                }
             }
         }
     }

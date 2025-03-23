@@ -121,7 +121,7 @@ class ChatDetailsViewModel
                 _state.update { it.copy(isLoading = true) }
                 scrollToBottom()
                 chatsRepository
-                    .sendMessage(
+                    .sendAudioMessage(
                         chatId = _state.value.chat!!.id,
                         audioFile!!,
                     ).map { response ->

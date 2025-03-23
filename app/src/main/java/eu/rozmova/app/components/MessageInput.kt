@@ -31,7 +31,6 @@ fun MessageInput(
     modifier: Modifier = Modifier,
 ) {
     var message by remember { mutableStateOf("") }
-
     Row(
         modifier =
             modifier
