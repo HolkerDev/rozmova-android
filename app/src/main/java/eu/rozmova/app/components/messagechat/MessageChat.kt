@@ -129,7 +129,12 @@ fun MessageChat(
             ViewState.Empty -> ErrorComponent(onBackClick)
             is ViewState.Error -> ErrorComponent(onBackClick)
             is ViewState.Success -> {
-                Column(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(bottom = 16.dp),
+                ) {
                     ScenarioInfoCard(
                         scenario = chatState.data.scenario,
                         messages = state.messages,
