@@ -13,6 +13,7 @@ fun ChatScreen(
     onBack: () -> Unit,
     onMain: () -> Unit,
 ) {
+    Log.i("ChatScreen", "ChatScreen: $chatId, $scenarioType")
     when (scenarioType) {
         ScenarioType.MESSAGES -> {
             MessageChat(

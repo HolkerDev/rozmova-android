@@ -24,7 +24,7 @@ sealed class NavRoutes(
         labelResourceId = R.string.bottom_nav_chats,
     )
 
-    data object Chat : NavRoutes(route = "chat/{chatId}/{chatType}") {
+    data object Chat : NavRoutes(route = "chat/{chatId}/{scenarioType}") {
         fun routeWith(
             chatId: String,
             scenarioType: ScenarioType,

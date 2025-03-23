@@ -66,14 +66,18 @@ fun NavigationHost(
         // Side Screens
         composable(
             route = NavRoutes.Chat.route,
-            arguments = listOf(navArgument("chatId") { type = NavType.StringType }, navArgument("chatType") { type = NavType.StringType }),
+            arguments =
+                listOf(
+                    navArgument("chatId") { type = NavType.StringType },
+                    navArgument("scenarioType") { type = NavType.StringType },
+                ),
         ) { backStackEntry ->
             val chatId: String = backStackEntry.arguments?.getString("chatId") ?: ""
-            val chatType =
+            val scenarioType =
                 backStackEntry.arguments?.getString("scenarioType")?.let { ScenarioType.valueOf(it) } ?: ScenarioType.CONVERSATION
             ChatScreen(
                 chatId = chatId,
-                scenarioType = chatType,
+                scenarioType = scenarioType,
                 onBack = { navController.navigateUp() },
                 onMain = { navController.navigate(NavRoutes.Learn.route) },
             )
