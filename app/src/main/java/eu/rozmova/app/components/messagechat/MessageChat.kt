@@ -101,7 +101,6 @@ fun MessageChat(
                 MessageChatEvent.ProposeFinish -> {
                     showModal = true
                 }
-                null -> {}
             }
         }
     }
