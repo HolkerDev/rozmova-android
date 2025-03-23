@@ -66,4 +66,12 @@ class MessageChatViewModel
                 }
                 _state.value = _state.value.copy(isAnalysisLoading = false)
             }
+
+        fun sendMessage(
+            chatId: String,
+            message: String,
+        ) = viewModelScope.launch {
+            _state.value = _state.value.copy(isLoadingMessage = true)
+            _state.value = _state.value.copy(isLoadingMessage = false)
+        }
     }

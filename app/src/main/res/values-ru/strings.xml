@@ -59,4 +59,6 @@
     <string name="should_finish_chat_title">Завершить чат?</string>
     <string name="should_finish_chat_confirm">Завершить</string>
     <string name="should_finish_chat_dismiss">Продолжить</string>
+    <string name="type_message">Введите сообщение...</string>
+    <string name="send_message">Выслать сообщение</string>
 </resources>

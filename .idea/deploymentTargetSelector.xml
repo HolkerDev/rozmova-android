@@ -22,18 +22,10 @@
       <SelectionState runConfigName="HelperWordsBottomSheetPreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="AudioRecorderButtonPreview">
-        <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-03-16T19:25:50.776462Z">
-          <Target type="DEFAULT_BOOT">
-            <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/mykolapenkovskyi/.android/avd/Medium_Phone.avd" />
-            </handle>
-          </Target>
-        </DropdownSelection>
-        <DialogSelection />
-      </SelectionState>
       <SelectionState runConfigName="YesNoDialogPreview">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="MessageInputPreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

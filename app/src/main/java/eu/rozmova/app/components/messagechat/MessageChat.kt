@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -51,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.components.AudioMessageItem
 import eu.rozmova.app.components.ChatAnalysisDialog
+import eu.rozmova.app.components.MessageInput
 import eu.rozmova.app.components.ShouldFinishChatDialog
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.components.StopChatButton
@@ -135,24 +135,33 @@ fun MessageChat(
             ViewState.Empty -> ErrorComponent(onBackClick)
             is ViewState.Error -> ErrorComponent(onBackClick)
             is ViewState.Success -> {
-                ScenarioInfoCard(
-                    scenario = chatState.data.scenario,
-                    messages =
-                        chatState.data.messages.map { message ->
-                            ChatMessage(
-                                id = message.id,
-                                author = message.author,
-                                body = message.transcription,
-                            )
+                Column(modifier = Modifier.fillMaxSize()) {
+                    ScenarioInfoCard(
+                        scenario = chatState.data.scenario,
+                        messages =
+                            chatState.data.messages.map { message ->
+                                ChatMessage(
+                                    id = message.id,
+                                    author = message.author,
+                                    body = message.transcription,
+                                )
+                            },
+                        words = chatState.data.words,
+                        chatModel = chatState.data.chatModel,
+                        onBackClick = onBackClick,
+                        onChatFinish = { },
+                        onChatArchive = { },
+                        isMessageLoading = state.isLoadingMessage,
+                        messageListState = messageListState,
+                        modifier = Modifier.weight(1f),
+                    )
+                    MessageInput(
+                        onSendMessage = { message ->
+                            viewModel.sendMessage(chatState.data.id, message)
                         },
-                    words = chatState.data.words,
-                    chatModel = chatState.data.chatModel,
-                    onBackClick = onBackClick,
-                    onChatFinish = { },
-                    onChatArchive = { },
-                    isMessageLoading = state.isLoadingMessage,
-                    messageListState = messageListState,
-                )
+                        isDisabled = state.isLoadingMessage,
+                    )
+                }
             }
         }
     }
@@ -173,14 +182,14 @@ fun ScenarioInfoCard(
 ) {
     var showWordsBottomSheet by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(modifier = modifier) {
         SimpleToolBar(title = stringResource(R.string.chat_details_title), onBack = onBackClick)
         Card(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight()
-                    .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 50.dp),
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                    .weight(1f),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         ) {
             Column(
@@ -245,10 +254,6 @@ fun ScenarioInfoCard(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
-                Spacer(modifier = Modifier.height(16.dp))
-                Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider()
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
