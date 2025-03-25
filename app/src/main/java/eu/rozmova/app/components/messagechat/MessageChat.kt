@@ -24,6 +24,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CollectionsBookmark
 import androidx.compose.material.icons.rounded.Task
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ButtonDefaults
@@ -228,21 +230,28 @@ fun ScenarioInfoCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Situation text with show more button
-                Column {
-                    Text(
-                        text = scenario.situation,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    if (scenario.situation.length > 150) {
-                        TextButton(
-                            onClick = { showSituationDialog = true },
-                            modifier = Modifier.padding(top = 4.dp),
-                        ) {
-                            Text("Show more")
-                        }
+                Surface(
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.clickable { showSituationDialog = true },
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Description,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = scenario.situation,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
                 }
 
@@ -313,7 +322,7 @@ fun ScenarioInfoCard(
                     Text("Close")
                 }
             },
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
             modifier = Modifier.fillMaxWidth(0.9f).fillMaxHeight(0.8f),
         )
     }
@@ -341,7 +350,7 @@ fun ScenarioInfoCard(
                     Text("Close")
                 }
             },
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
             modifier = Modifier.fillMaxWidth(0.9f).fillMaxHeight(0.85f),
         )
     }
