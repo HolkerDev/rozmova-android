@@ -1,5 +1,6 @@
 package eu.rozmova.app.components.messagechat
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,10 +17,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CollectionsBookmark
 import androidx.compose.material.icons.rounded.Task
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -33,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -171,6 +176,8 @@ fun ScenarioInfoCard(
     modifier: Modifier = Modifier,
 ) {
     var showWordsBottomSheet by remember { mutableStateOf(false) }
+    var showSituationDialog by remember { mutableStateOf(false) }
+    var showInstructionsDialog by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
         SimpleToolBar(title = stringResource(R.string.chat_details_title), onBack = onBackClick)
@@ -201,29 +208,47 @@ fun ScenarioInfoCard(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f),
                     )
-                    if (words.isNotEmpty()) {
-                        FilledTonalButton(
-                            onClick = { showWordsBottomSheet = true },
-                            colors = ButtonDefaults.filledTonalButtonColors(),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.CollectionsBookmark,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                            )
+                    Row {
+                        if (words.isNotEmpty()) {
+                            FilledTonalButton(
+                                onClick = { showWordsBottomSheet = true },
+                                colors = ButtonDefaults.filledTonalButtonColors(),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.CollectionsBookmark,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                            }
                         }
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = scenario.situation,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+
+                // Situation text with show more button
+                Column {
+                    Text(
+                        text = scenario.situation,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    if (scenario.situation.length > 150) {
+                        TextButton(
+                            onClick = { showSituationDialog = true },
+                            modifier = Modifier.padding(top = 4.dp),
+                        ) {
+                            Text("Show more")
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
                 Surface(
                     color = MaterialTheme.colorScheme.secondaryContainer,
                     shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.clickable { showInstructionsDialog = true },
                 ) {
                     Row(
                         modifier = Modifier.padding(12.dp),
@@ -239,6 +264,8 @@ fun ScenarioInfoCard(
                             text = scenario.userInstruction,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
@@ -258,6 +285,56 @@ fun ScenarioInfoCard(
         HelperWordsBottomSheet(
             words = words,
             onDismiss = { showWordsBottomSheet = false },
+        )
+    }
+
+    if (showSituationDialog) {
+        AlertDialog(
+            onDismissRequest = { showSituationDialog = false },
+            title = { Text("Situation") },
+            text = {
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState()),
+                ) {
+                    Text(
+                        text = scenario.situation,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showSituationDialog = false }) {
+                    Text("Close")
+                }
+            },
+        )
+    }
+
+    if (showInstructionsDialog) {
+        AlertDialog(
+            onDismissRequest = { showInstructionsDialog = false },
+            title = { Text("Instructions") },
+            text = {
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState()),
+                ) {
+                    Text(
+                        text = scenario.userInstruction,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showInstructionsDialog = false }) {
+                    Text("Close")
+                }
+            },
         )
     }
 }
