@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.components.conversationchat.AudioChatMessage
 import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.ChatAnalysis
+import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ChatWithMessagesDto
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.utils.ViewState
@@ -122,11 +123,11 @@ class MessageChatViewModel
                             it.copy(
                                 messages =
                                     ViewState.Success(
-                                        chatMessages.map {
+                                        chatMessages.map { msg ->
                                             ChatMessage(
-                                                id = it.id,
-                                                body = it.body,
-                                                author = it.author,
+                                                id = msg.id,
+                                                body = msg.body,
+                                                author = msg.author,
                                             )
                                         },
                                     ),
@@ -138,4 +139,29 @@ class MessageChatViewModel
             _events.emit(MessageChatEvent.ScrollToBottom)
             _state.update { _state.value.copy(isLoadingMessage = false) }
         }
+
+        fun finisChat(chatId: String) =
+            viewModelScope.launch {
+                _state.update { it.copy(isLoadingMessage = true) }
+                chatsRepository
+                    .finishChat(chatId)
+                    .mapLeft {
+                        Log.e("MessageChatViewModel", "Error finishing chat", it)
+                    }.map {
+                        val chatState = _state.value.chat
+                        if (chatState is ViewState.Success) {
+                            _state.value =
+                                _state.value.copy(
+                                    isLoadingMessage = false,
+                                    chat =
+                                        chatState.copy(
+                                            data =
+                                                chatState.data.copy(
+                                                    chatModel = chatState.data.chatModel.copy(status = ChatStatus.FINISHED),
+                                                ),
+                                        ),
+                                )
+                        }
+                    } // TODO: I hate this part of the code even more. FUCK IT
+            }
     }

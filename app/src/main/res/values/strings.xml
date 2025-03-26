@@ -60,4 +60,5 @@
     <string name="should_finish_chat_dismiss">Continue</string>
     <string name="type_message">Type a message...</string>
     <string name="send_message">Send message</string>
+    <string name="message_chat_title">Writing practice</string>
 </resources>

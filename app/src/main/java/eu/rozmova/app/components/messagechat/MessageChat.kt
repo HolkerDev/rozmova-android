@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Task
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -51,6 +52,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -64,11 +66,11 @@ import eu.rozmova.app.components.ShouldFinishChatDialog
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.components.WordItem
+import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.WordModel
 import eu.rozmova.app.screens.createchat.ChatId
 import eu.rozmova.app.utils.ViewState
-import androidx.compose.ui.platform.LocalConfiguration
 
 @Composable
 fun MessageChat(
@@ -147,10 +149,11 @@ fun MessageChat(
                 ) {
                     ScenarioInfoCard(
                         scenario = chatState.data.scenario,
+                        chatStatus = chatState.data.chatModel.status,
                         messages = state.messages,
                         words = chatState.data.words,
                         onBackClick = onBackClick,
-                        onChatFinish = { },
+                        onChatFinish = { viewModel.finisChat(chatState.data.chatModel.id) },
                         onChatArchive = { },
                         isMessageLoading = state.isLoadingMessage,
                         messageListState = messageListState,
@@ -171,6 +174,7 @@ fun MessageChat(
 @Composable
 fun ScenarioInfoCard(
     scenario: ScenarioModel,
+    chatStatus: ChatStatus,
     messages: ViewState<List<ChatMessage>>,
     words: List<WordModel>,
     onBackClick: () -> Unit,
@@ -185,7 +189,7 @@ fun ScenarioInfoCard(
     var showInstructionsDialog by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
-        SimpleToolBar(title = stringResource(R.string.chat_details_title), onBack = onBackClick)
+        SimpleToolBar(title = stringResource(R.string.message_chat_title), onBack = onBackClick)
         Card(
             modifier =
                 Modifier
@@ -283,12 +287,24 @@ fun ScenarioInfoCard(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
-                MessageList(
-                    messages = messages,
-                    onChatFinish = onChatFinish,
-                    messageListState = messageListState,
-                    isLoadingMessage = isMessageLoading,
-                )
+                if (chatStatus == ChatStatus.FINISHED) {
+                    Button(onClick = {
+                        if (!isMessageLoading) onChatArchive()
+                    }, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth()) {
+                        if (isMessageLoading) {
+                            Text("Analyzing...")
+                        } else {
+                            Text("Get analytics")
+                        }
+                    }
+                } else {
+                    MessageList(
+                        messages = messages,
+                        onChatFinish = onChatFinish,
+                        messageListState = messageListState,
+                        isLoadingMessage = isMessageLoading,
+                    )
+                }
             }
         }
     }

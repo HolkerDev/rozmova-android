@@ -61,4 +61,5 @@
     <string name="should_finish_chat_dismiss">Продовжити</string>
     <string name="type_message">Впищіть повідомлення</string>
     <string name="send_message">Вислати повідомлення</string>
+    <string name="message_chat_title">Практика</string>
 </resources>
