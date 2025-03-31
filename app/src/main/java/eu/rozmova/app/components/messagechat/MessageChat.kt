@@ -154,7 +154,7 @@ fun MessageChat(
                         words = chatState.data.words,
                         onBackClick = onBackClick,
                         onChatFinish = { viewModel.finisChat(chatState.data.chatModel.id) },
-                        onChatArchive = { },
+                        onChatArchive = { viewModel.prepareAnalytics(chatState.data.id) },
                         isMessageLoading = state.isLoadingMessage,
                         messageListState = messageListState,
                         modifier = Modifier.weight(1f),
@@ -163,7 +163,7 @@ fun MessageChat(
                         onSendMessage = { message ->
                             viewModel.sendMessage(chatState.data.id, message)
                         },
-                        isDisabled = state.isLoadingMessage,
+                        isDisabled = state.isLoadingMessage || chatState.data.chatModel.status != ChatStatus.IN_PROGRESS,
                     )
                 }
             }
@@ -297,14 +297,14 @@ fun ScenarioInfoCard(
                             Text("Get analytics")
                         }
                     }
-                } else {
-                    MessageList(
-                        messages = messages,
-                        onChatFinish = onChatFinish,
-                        messageListState = messageListState,
-                        isLoadingMessage = isMessageLoading,
-                    )
                 }
+                MessageList(
+                    messages = messages,
+                    onChatFinish = onChatFinish,
+                    messageListState = messageListState,
+                    showFinishButton = messages is ViewState.Success && messages.data.isNotEmpty() && chatStatus == ChatStatus.IN_PROGRESS,
+                    isLoadingMessage = isMessageLoading,
+                )
             }
         }
     }
@@ -389,9 +389,9 @@ fun MessageList(
     onChatFinish: () -> Unit,
     messageListState: LazyListState,
     isLoadingMessage: Boolean,
+    showFinishButton: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val showFinishButton = messages is ViewState.Success && messages.data.size > 1
     when (messages) {
         ViewState.Empty -> {}
         is ViewState.Error -> {}
@@ -422,7 +422,7 @@ fun MessageList(
                             CircularProgressIndicator()
                         }
                     }
-                } else if (messages.data.size > 1 && showFinishButton) {
+                } else if (showFinishButton) {
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                         StopChatButton(

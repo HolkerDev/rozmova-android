@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.components.ChatItem
-import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.domain.ScenarioType
 
 @Composable
@@ -44,7 +43,6 @@ fun ChatsListScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            SimpleToolBar(title = stringResource(R.string.chats_screen_title))
             Card(
                 modifier =
                     Modifier

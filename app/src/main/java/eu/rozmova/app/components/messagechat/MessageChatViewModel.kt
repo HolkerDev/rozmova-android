@@ -89,6 +89,19 @@ class MessageChatViewModel
                     Log.e("MessageChatViewModel", "Error archiving chat", it)
                 }
                 _state.value = _state.value.copy(isAnalysisLoading = false)
+                _events.emit(MessageChatEvent.Close)
+            }
+
+        fun prepareAnalytics(chatId: String) =
+            viewModelScope.launch {
+                _state.update { it.copy(isLoadingMessage = true) }
+                chatsRepository
+                    .getAnalytics(chatId)
+                    .map { chatAnalysis ->
+                        _state.update { it.copy(isLoadingMessage = false, chatAnalysis = chatAnalysis) }
+                    }.mapLeft {
+                        Log.e("MessageChatViewModel", "Error preparing chat analytics: ${it.message}")
+                    }
             }
 
         fun sendMessage(
