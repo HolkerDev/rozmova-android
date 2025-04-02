@@ -298,13 +298,22 @@ fun ScenarioInfoCard(
                         }
                     }
                 }
-                MessageList(
-                    messages = messages,
-                    onChatFinish = onChatFinish,
-                    messageListState = messageListState,
-                    showFinishButton = messages is ViewState.Success && messages.data.isNotEmpty() && chatStatus == ChatStatus.IN_PROGRESS,
-                    isLoadingMessage = isMessageLoading,
-                )
+                when (messages) {
+                    ViewState.Empty -> {}
+                    is ViewState.Error -> {}
+                    ViewState.Loading -> {
+                        CircularProgressIndicator()
+                    }
+                    is ViewState.Success -> {
+                        MessageList(
+                            messages = messages.data,
+                            onChatFinish = onChatFinish,
+                            messageListState = messageListState,
+                            showFinishButton = messages.data.isNotEmpty() && chatStatus == ChatStatus.IN_PROGRESS,
+                            isLoadingMessage = isMessageLoading,
+                        )
+                    }
+                }
             }
         }
     }
@@ -385,51 +394,43 @@ fun ScenarioInfoCard(
 
 @Composable
 fun MessageList(
-    messages: ViewState<List<ChatMessage>>,
+    messages: List<ChatMessage>,
     onChatFinish: () -> Unit,
     messageListState: LazyListState,
     isLoadingMessage: Boolean,
     showFinishButton: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    when (messages) {
-        ViewState.Empty -> {}
-        is ViewState.Error -> {}
-        ViewState.Loading -> {
-            CircularProgressIndicator()
+    println(messages)
+    LazyColumn(
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(16.dp),
+        state = messageListState,
+    ) {
+        items(messages) { message ->
+            MessageItem(
+                message = message,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
-        is ViewState.Success -> {
-            LazyColumn(
-                modifier = modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(16.dp),
-                state = messageListState,
-            ) {
-                items(messages.data) { message ->
-                    MessageItem(
-                        message = message,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+        if (isLoadingMessage) {
+            item {
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
                 }
-                if (isLoadingMessage) {
-                    item {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                } else if (showFinishButton) {
-                    item {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        StopChatButton(
-                            onClick = onChatFinish,
-                        )
-                    }
-                }
+            }
+        } else if (showFinishButton) {
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                StopChatButton(
+                    onClick = onChatFinish,
+                )
             }
         }
     }

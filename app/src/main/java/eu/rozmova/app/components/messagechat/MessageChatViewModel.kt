@@ -62,7 +62,7 @@ class MessageChatViewModel
                             chat = ViewState.Success(chat),
                             messages =
                                 ViewState.Success(
-                                    chat.messages.map { message ->
+                                    chat.messages.sortedBy { it.createdAt }.map { message ->
                                         ChatMessage(
                                             id = message.id,
                                             body = message.transcription,
