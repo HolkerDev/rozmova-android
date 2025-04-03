@@ -153,7 +153,7 @@ fun MessageChat(
                         messages = state.messages,
                         words = chatState.data.words,
                         onBackClick = onBackClick,
-                        onChatFinish = { viewModel.finisChat(chatState.data.chatModel.id) },
+                        onChatFinish = { viewModel.finishChat(chatState.data.chatModel.id) },
                         onChatArchive = { viewModel.prepareAnalytics(chatState.data.id) },
                         isMessageLoading = state.isLoadingMessage,
                         messageListState = messageListState,

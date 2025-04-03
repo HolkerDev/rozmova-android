@@ -13,3 +13,11 @@ sealed class ViewState<out T> {
 
     data object Empty : ViewState<Nothing>()
 }
+
+fun <T, R> ViewState<T>.mapSuccess(transform: (T) -> R): ViewState<R> =
+    when (this) {
+        is ViewState.Success -> ViewState.Success(transform(data))
+        is ViewState.Loading -> ViewState.Loading
+        is ViewState.Error -> ViewState.Error(error)
+        is ViewState.Empty -> ViewState.Empty
+    }

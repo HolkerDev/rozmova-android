@@ -11,6 +11,7 @@ import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ChatWithMessagesDto
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.utils.ViewState
+import eu.rozmova.app.utils.mapSuccess
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -72,13 +73,6 @@ class MessageChatViewModel
                                 ),
                         )
                     _events.emit(MessageChatEvent.ScrollToBottom)
-                }
-            }
-
-        fun finishChat(chatId: String) =
-            viewModelScope.launch {
-                chatsRepository.finishChat(chatId).mapLeft {
-                    Log.e("MessageChatViewModel", "Error finishing chat", it)
                 }
             }
 
@@ -153,7 +147,7 @@ class MessageChatViewModel
             _state.update { _state.value.copy(isLoadingMessage = false) }
         }
 
-        fun finisChat(chatId: String) =
+        fun finishChat(chatId: String) =
             viewModelScope.launch {
                 _state.update { it.copy(isLoadingMessage = true) }
                 chatsRepository
@@ -161,20 +155,11 @@ class MessageChatViewModel
                     .mapLeft {
                         Log.e("MessageChatViewModel", "Error finishing chat", it)
                     }.map {
-                        val chatState = _state.value.chat
-                        if (chatState is ViewState.Success) {
-                            _state.value =
-                                _state.value.copy(
-                                    isLoadingMessage = false,
-                                    chat =
-                                        chatState.copy(
-                                            data =
-                                                chatState.data.copy(
-                                                    chatModel = chatState.data.chatModel.copy(status = ChatStatus.FINISHED),
-                                                ),
-                                        ),
-                                )
+                        _state.update {
+                            it.copy(
+                                chat = it.chat.mapSuccess { it.copy(chatModel = it.chatModel.copy(status = ChatStatus.FINISHED)) },
+                            )
                         }
-                    } // TODO: I hate this part of the code even more. FUCK IT
+                    }
             }
     }
