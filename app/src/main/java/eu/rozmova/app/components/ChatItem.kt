@@ -2,8 +2,10 @@ package eu.rozmova.app.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -34,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -66,6 +69,10 @@ fun ChatItem(
                         onChatDelete(chat.id)
                         showDeleteDialog = false
                     },
+                    colors =
+                        androidx.compose.material3.ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error,
+                        ),
                 ) {
                     Text("Delete")
                 }
@@ -84,6 +91,7 @@ fun ChatItem(
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 6.dp)
                 .scale(scale)
+                .clip(MaterialTheme.shapes.medium)
                 .combinedClickable(
                     onClick = { onChatClick(chat.id) },
                     onLongClick = {
@@ -93,11 +101,17 @@ fun ChatItem(
                     },
                     onLongClickLabel = "Delete chat",
                 ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = if (isPressed) 0.dp else 2.dp,
+                pressedElevation = 0.dp,
+            ),
         colors =
             CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             ),
+        shape = MaterialTheme.shapes.medium,
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -112,11 +126,12 @@ fun ChatItem(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.weight(1f),
                 ) {
-                    ChatTypeIcon(scenarioType = chat.scenario.scenarioType)
+                    ChatTypeIconWithBackground(scenarioType = chat.scenario.scenarioType)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = chat.scenario.title,
                         style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -153,7 +168,21 @@ fun ChatItem(
 }
 
 @Composable
-private fun ChatTypeIcon(scenarioType: ScenarioType) {
+private fun ChatTypeIconWithBackground(scenarioType: ScenarioType) {
+    val backgroundColor =
+        when (scenarioType) {
+            ScenarioType.CONVERSATION -> MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+            ScenarioType.MESSAGES -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f)
+            else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+        }
+
+    val iconTint =
+        when (scenarioType) {
+            ScenarioType.CONVERSATION -> MaterialTheme.colorScheme.primary
+            ScenarioType.MESSAGES -> MaterialTheme.colorScheme.tertiary
+            else -> MaterialTheme.colorScheme.primary
+        }
+
     val icon =
         when (scenarioType) {
             ScenarioType.CONVERSATION -> Icons.Default.RecordVoiceOver
@@ -161,19 +190,21 @@ private fun ChatTypeIcon(scenarioType: ScenarioType) {
             else -> Icons.AutoMirrored.Filled.Chat
         }
 
-    val tint =
-        when (scenarioType) {
-            ScenarioType.CONVERSATION -> MaterialTheme.colorScheme.primary
-            ScenarioType.MESSAGES -> MaterialTheme.colorScheme.tertiary
-            else -> MaterialTheme.colorScheme.primary
-        }
-
-    Icon(
-        imageVector = icon,
-        contentDescription = "Chat status: $scenarioType",
-        tint = tint,
-        modifier = Modifier.size(24.dp),
-    )
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier =
+            Modifier
+                .size(36.dp)
+                .clip(MaterialTheme.shapes.small)
+                .background(backgroundColor),
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = "Chat status: $scenarioType",
+            tint = iconTint,
+            modifier = Modifier.size(20.dp),
+        )
+    }
 }
 
 @Composable
@@ -184,7 +215,8 @@ fun Chip(
     Surface(
         modifier = modifier.padding(end = 8.dp, bottom = 4.dp),
         shape = MaterialTheme.shapes.small,
-        color = MaterialTheme.colorScheme.secondaryContainer,
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
+        shadowElevation = 0.dp,
     ) {
         Text(
             text = text,

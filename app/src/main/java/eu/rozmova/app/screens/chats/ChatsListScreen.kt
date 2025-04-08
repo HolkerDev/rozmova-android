@@ -1,5 +1,6 @@
 package eu.rozmova.app.screens.chats
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
@@ -41,21 +43,54 @@ fun ChatsListScreen(
         viewModel.loadChats()
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f)),
+    ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Card(
                 modifier =
                     Modifier
                         .fillMaxSize()
                         .padding(bottom = 8.dp, start = 8.dp, end = 8.dp, top = 16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
+                colors =
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                    ),
+                shape = MaterialTheme.shapes.medium,
             ) {
                 when (val viewState = state) {
-                    ChatListState.Empty -> Text(text = stringResource(R.string.chats_screen_no_chats))
-                    is ChatListState.Error -> Text(text = stringResource(R.string.error_message))
-                    ChatListState.Loading -> CircularProgressIndicator()
+                    ChatListState.Empty ->
+                        Text(
+                            text = stringResource(R.string.chats_screen_no_chats),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(24.dp),
+                        )
+                    is ChatListState.Error ->
+                        Text(
+                            text = stringResource(R.string.error_message),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(24.dp),
+                        )
+                    ChatListState.Loading ->
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize().padding(24.dp),
+                        ) {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        }
                     is ChatListState.Success -> {
-                        LazyColumn {
+                        LazyColumn(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                        ) {
                             items(viewState.chats) { chat ->
                                 ChatItem(chat, onChatClick = { onChatSelect(chat.id, chat.scenario.scenarioType) }, onChatDelete = {
                                     viewModel.deleteChat(chat.id)
@@ -73,7 +108,8 @@ fun ChatsListScreen(
                 Modifier
                     .padding(16.dp)
                     .align(Alignment.BottomEnd),
-            containerColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.tertiary,
+            contentColor = MaterialTheme.colorScheme.onTertiary,
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
