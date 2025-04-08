@@ -1,5 +1,6 @@
 package eu.rozmova.app.screens.chats
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -57,7 +58,9 @@ fun ChatsListScreen(
                     is ChatListState.Success -> {
                         LazyColumn {
                             items(viewState.chats) { chat ->
-                                ChatItem(chat, onChatClick = { onChatSelect(chat.id, chat.scenario.scenarioType) })
+                                ChatItem(chat, onChatClick = { onChatSelect(chat.id, chat.scenario.scenarioType) }, onChatDelete = {
+                                    Log.i("ChatItem", "Delete chat with id: $it")
+                                })
                             }
                         }
                     }
