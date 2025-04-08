@@ -194,9 +194,13 @@ fun ScenarioInfoCard(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
                     .weight(1f),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            )
         ) {
             Column(
                 modifier =
@@ -205,54 +209,66 @@ fun ScenarioInfoCard(
                         .fillMaxWidth(),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = scenario.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f),
                     )
-                    Row {
-                        if (words.isNotEmpty()) {
-                            FilledTonalButton(
-                                onClick = { showWordsBottomSheet = true },
-                                colors = ButtonDefaults.filledTonalButtonColors(),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.CollectionsBookmark,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
-                                )
-                            }
+                    if (words.isNotEmpty()) {
+                        FilledTonalButton(
+                            onClick = { showWordsBottomSheet = true },
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            modifier = Modifier.padding(start = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.CollectionsBookmark,
+                                contentDescription = stringResource(R.string.helper_words),
+                                modifier = Modifier.size(20.dp),
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = stringResource(R.string.helper_words),
+                                style = MaterialTheme.typography.labelMedium
+                            )
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
 
-                // Situation text with show more button
+                // Situation card
                 Surface(
                     color = MaterialTheme.colorScheme.tertiaryContainer,
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.clickable { showSituationDialog = true },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .clickable { showSituationDialog = true },
                 ) {
                     Row(
-                        modifier = Modifier.padding(12.dp),
+                        modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Description,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                            modifier = Modifier.size(24.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = scenario.situation,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onTertiaryContainer,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
@@ -260,49 +276,85 @@ fun ScenarioInfoCard(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                // Instructions card
                 Surface(
                     color = MaterialTheme.colorScheme.secondaryContainer,
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.clickable { showInstructionsDialog = true },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .clickable { showInstructionsDialog = true },
                 ) {
                     Row(
-                        modifier = Modifier.padding(12.dp),
+                        modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Task,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(24.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = scenario.userInstruction,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSecondaryContainer,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
+                
                 Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider()
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                
                 if (chatStatus == ChatStatus.FINISHED) {
-                    Button(onClick = {
-                        if (!isMessageLoading) onChatArchive()
-                    }, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = {
+                            if (!isMessageLoading) onChatArchive()
+                        }, 
+                        shape = MaterialTheme.shapes.medium, 
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
                         if (isMessageLoading) {
-                            Text("Analyzing...")
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Analyzing...", style = MaterialTheme.typography.labelLarge)
                         } else {
-                            Text("Get analytics")
+                            Text("Get analytics", style = MaterialTheme.typography.labelLarge)
                         }
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
+                
                 when (messages) {
                     ViewState.Empty -> {}
                     is ViewState.Error -> {}
                     ViewState.Loading -> {
-                        CircularProgressIndicator()
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(48.dp)
+                            )
+                        }
                     }
                     is ViewState.Success -> {
                         MessageList(
@@ -330,7 +382,13 @@ fun ScenarioInfoCard(
         AlertDialog(
             properties = DialogProperties(dismissOnClickOutside = true, dismissOnBackPress = true, usePlatformDefaultWidth = false),
             onDismissRequest = { showSituationDialog = false },
-            title = { Text("Situation") },
+            title = { 
+                Text(
+                    "Situation", 
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                ) 
+            },
             text = {
                 Box(
                     modifier =
@@ -341,20 +399,27 @@ fun ScenarioInfoCard(
                     Text(
                         text = scenario.situation,
                         style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showSituationDialog = false }) {
-                    Text("Close")
+                TextButton(
+                    onClick = { showSituationDialog = false },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text("Close", style = MaterialTheme.typography.labelLarge)
                 }
             },
             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
             modifier =
                 Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.95f)
                     .wrapContentHeight()
                     .heightIn(max = screenHeight * 0.8f),
+            shape = RoundedCornerShape(20.dp)
         )
     }
 
@@ -363,7 +428,13 @@ fun ScenarioInfoCard(
         AlertDialog(
             properties = DialogProperties(dismissOnClickOutside = true, dismissOnBackPress = true, usePlatformDefaultWidth = false),
             onDismissRequest = { showInstructionsDialog = false },
-            title = { Text("Instructions") },
+            title = { 
+                Text(
+                    "Instructions", 
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                ) 
+            },
             text = {
                 Box(
                     modifier =
@@ -374,20 +445,27 @@ fun ScenarioInfoCard(
                     Text(
                         text = scenario.userInstruction,
                         style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showInstructionsDialog = false }) {
-                    Text("Close")
+                TextButton(
+                    onClick = { showInstructionsDialog = false },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text("Close", style = MaterialTheme.typography.labelLarge)
                 }
             },
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             modifier =
                 Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.95f)
                     .wrapContentHeight()
                     .heightIn(max = screenHeight * 0.8f),
+            shape = RoundedCornerShape(20.dp)
         )
     }
 }
@@ -401,11 +479,11 @@ fun MessageList(
     showFinishButton: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    println(messages)
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(vertical = 8.dp),
         state = messageListState,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(messages) { message ->
             MessageItem(
@@ -422,7 +500,22 @@ fun MessageList(
                             .padding(16.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    CircularProgressIndicator()
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Typing...",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         } else if (showFinishButton) {
@@ -445,6 +538,8 @@ fun HelperWordsBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         dragHandle = { BottomSheetDefaults.DragHandle() },
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
         Column(
             modifier =
@@ -455,16 +550,17 @@ fun HelperWordsBottomSheet(
             Text(
                 text = stringResource(R.string.helper_words),
                 style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
             )
 
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(words) { word ->
                     WordItem(word = word)
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
@@ -476,15 +572,55 @@ private fun LoadingComponent(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier.fillMaxSize(), 
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
         SimpleToolBar(title = stringResource(R.string.loading_progress), onBack = onBackClick)
+        Spacer(modifier = Modifier.height(24.dp))
+        CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(48.dp)
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        CircularProgressIndicator()
+        Text(
+            text = "Loading conversation...",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
 @Composable
 private fun ErrorComponent(onBackClick: () -> Unit) {
-    SimpleToolBar(title = stringResource(R.string.error), onBack = onBackClick)
-    Text(text = stringResource(R.string.error_message))
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        SimpleToolBar(title = stringResource(R.string.error), onBack = onBackClick)
+        Spacer(modifier = Modifier.height(24.dp))
+        Icon(
+            imageVector = Icons.Rounded.Description,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(48.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.error_message),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.error
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        TextButton(
+            onClick = onBackClick,
+            colors = ButtonDefaults.textButtonColors(
+                contentColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Text("Go Back", style = MaterialTheme.typography.labelLarge)
+        }
+    }
 }

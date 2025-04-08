@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import eu.rozmova.app.components.conversationchat.AudioChatMessage
 import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.ChatStatus
@@ -58,8 +57,9 @@ class MessageChatViewModel
         fun loadChat(chatId: String) =
             viewModelScope.launch {
                 chatsRepository.fetchChatById(chatId = chatId).let { chat ->
-                    _state.update {
-                        it.copy(
+                    println(chat.messages)
+                    _state.update { state ->
+                        state.copy(
                             chat = ViewState.Success(chat),
                             messages =
                                 ViewState.Success(
@@ -80,8 +80,8 @@ class MessageChatViewModel
         fun archiveChat(chatId: String) =
             viewModelScope.launch {
                 _state.value = _state.value.copy(isAnalysisLoading = true)
-                chatsRepository.archiveChat(chatId).mapLeft {
-                    Log.e("MessageChatViewModel", "Error archiving chat", it)
+                chatsRepository.archiveChat(chatId).mapLeft { err ->
+                    Log.e("MessageChatViewModel", "Error archiving chat", err)
                 }
                 _state.value = _state.value.copy(isAnalysisLoading = false)
                 _events.emit(MessageChatEvent.Close)
@@ -93,7 +93,7 @@ class MessageChatViewModel
                 chatsRepository
                     .getAnalytics(chatId)
                     .map { chatAnalysis ->
-                        _state.update { it.copy(isLoadingMessage = false, chatAnalysis = chatAnalysis) }
+                        _state.update { state -> state.copy(isLoadingMessage = false, chatAnalysis = chatAnalysis) }
                     }.mapLeft {
                         Log.e("MessageChatViewModel", "Error preparing chat analytics: ${it.message}")
                     }
@@ -113,37 +113,22 @@ class MessageChatViewModel
                     if (response.shouldFinishChat) {
                         _events.emit(MessageChatEvent.ProposeFinish)
                     }
-                    response.messages.map { message ->
-                        AudioChatMessage(
-                            id = message.id,
-                            isPlaying = false,
-                            body = message.transcription,
-                            link = message.audioReference,
-                            author = message.author,
-                            duration = message.audioDuration,
+
+                    _state.update { state ->
+                        state.copy(
+                            messages =
+                                ViewState.Success(
+                                    response.messages.sortedBy { msg -> msg.createdAt }.map { msg ->
+                                        ChatMessage(
+                                            id = msg.id,
+                                            body = msg.transcription,
+                                            author = msg.author,
+                                        )
+                                    },
+                                ),
                         )
                     }
-                }.fold(
-                    { error ->
-                    },
-                    { chatMessages ->
-                        _state.update {
-                            it.copy(
-                                messages =
-                                    ViewState.Success(
-                                        chatMessages.map { msg ->
-                                            ChatMessage(
-                                                id = msg.id,
-                                                body = msg.body,
-                                                author = msg.author,
-                                            )
-                                        },
-                                    ),
-                            )
-                        }
-                    },
-                )
-
+                }
             _events.emit(MessageChatEvent.ScrollToBottom)
             _state.update { _state.value.copy(isLoadingMessage = false) }
         }
