@@ -59,7 +59,7 @@ fun ChatItem(
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
             title = { Text("Delete Chat") },
-            text = { Text("Are you sure you want to delete this chat with ${chat.scenario.title}?") },
+            text = { Text("Are you sure you want to delete this chat?") },
             confirmButton = {
                 TextButton(
                     onClick = {
