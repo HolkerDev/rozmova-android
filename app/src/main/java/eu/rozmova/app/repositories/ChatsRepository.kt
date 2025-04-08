@@ -73,6 +73,20 @@ class ChatsRepository
                 }
             }
 
+        suspend fun deleteChat(chatId: String): Either<InfraErrors, Unit> =
+            either {
+                try {
+                    supabaseClient.postgrest.from(Tables.CHATS).delete {
+                        filter {
+                            ChatModel::id eq chatId
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(tag, "Failed to delete chat", e)
+                    raise(InfraErrors.DatabaseError("Failed to delete chat"))
+                }
+            }
+
         suspend fun archiveChat(chatId: String): Either<InfraErrors, Unit> =
             either {
                 try {

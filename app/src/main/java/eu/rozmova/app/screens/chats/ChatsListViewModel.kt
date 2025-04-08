@@ -59,4 +59,16 @@ class ChatsListViewModel
                         },
                     )
             }
+
+        fun deleteChat(chatId: String) =
+            viewModelScope.launch {
+                _state.update { ChatListState.Loading }
+                chatsRepository
+                    .deleteChat(chatId)
+                    .map {
+                        loadChats()
+                    }.mapLeft {
+                        Log.e(tag, "Error while deleting chat", it)
+                    }
+            }
     }
