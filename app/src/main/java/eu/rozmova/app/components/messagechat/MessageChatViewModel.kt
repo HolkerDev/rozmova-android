@@ -58,12 +58,12 @@ class MessageChatViewModel
         fun loadChat(chatId: String) =
             viewModelScope.launch {
                 chatsRepository.fetchChatById(chatId = chatId).let { chat ->
-                    _state.value =
-                        _state.value.copy(
+                    _state.update {
+                        it.copy(
                             chat = ViewState.Success(chat),
                             messages =
                                 ViewState.Success(
-                                    chat.messages.sortedBy { it.createdAt }.map { message ->
+                                    chat.messages.sortedBy { msg -> msg.createdAt }.map { message ->
                                         ChatMessage(
                                             id = message.id,
                                             body = message.transcription,
@@ -72,6 +72,7 @@ class MessageChatViewModel
                                     },
                                 ),
                         )
+                    }
                     _events.emit(MessageChatEvent.ScrollToBottom)
                 }
             }

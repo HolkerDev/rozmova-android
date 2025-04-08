@@ -1,6 +1,5 @@
 package eu.rozmova.app.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -30,10 +29,12 @@ fun ChatItem(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp)
-                .clickable(onClick = { onChatClick(chat.id) }),
+                .padding(horizontal = 8.dp, vertical = 4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        onClick = {
+            onChatClick(chat.id)
+        },
     ) {
         Column {
             Text(
