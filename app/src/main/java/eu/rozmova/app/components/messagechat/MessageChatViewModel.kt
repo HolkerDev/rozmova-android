@@ -89,11 +89,11 @@ class MessageChatViewModel
 
         fun prepareAnalytics(chatId: String) =
             viewModelScope.launch {
-                _state.update { it.copy(isLoadingMessage = true) }
+                _state.update { it.copy(isAnalysisLoading = true) }
                 chatsRepository
                     .getAnalytics(chatId)
                     .map { chatAnalysis ->
-                        _state.update { state -> state.copy(isLoadingMessage = false, chatAnalysis = chatAnalysis) }
+                        _state.update { state -> state.copy(isAnalysisLoading = false, chatAnalysis = chatAnalysis) }
                     }.mapLeft {
                         Log.e("MessageChatViewModel", "Error preparing chat analytics: ${it.message}")
                     }
@@ -135,7 +135,6 @@ class MessageChatViewModel
 
         fun finishChat(chatId: String) =
             viewModelScope.launch {
-                _state.update { it.copy(isLoadingMessage = true) }
                 chatsRepository
                     .finishChat(chatId)
                     .mapLeft {

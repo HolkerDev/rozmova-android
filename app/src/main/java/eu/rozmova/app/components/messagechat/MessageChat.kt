@@ -156,6 +156,7 @@ fun MessageChat(
                         onChatFinish = { viewModel.finishChat(chatState.data.chatModel.id) },
                         onChatArchive = { viewModel.prepareAnalytics(chatState.data.id) },
                         isMessageLoading = state.isLoadingMessage,
+                        isAnalysisLoading = state.isAnalysisLoading,
                         messageListState = messageListState,
                         modifier = Modifier.weight(1f),
                     )
@@ -181,6 +182,7 @@ fun ScenarioInfoCard(
     onChatFinish: () -> Unit,
     onChatArchive: () -> Unit,
     isMessageLoading: Boolean,
+    isAnalysisLoading: Boolean,
     messageListState: LazyListState,
     modifier: Modifier = Modifier,
 ) {
@@ -198,9 +200,10 @@ fun ScenarioInfoCard(
                     .weight(1f),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            )
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
         ) {
             Column(
                 modifier =
@@ -209,9 +212,10 @@ fun ScenarioInfoCard(
                         .fillMaxWidth(),
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -228,7 +232,8 @@ fun ScenarioInfoCard(
                             onClick = { showWordsBottomSheet = true },
                             colors = ButtonDefaults.filledTonalButtonColors(),
                             modifier = Modifier.padding(start = 8.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                            shape = MaterialTheme.shapes.medium,
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.CollectionsBookmark,
@@ -238,7 +243,7 @@ fun ScenarioInfoCard(
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = stringResource(R.string.helper_words),
-                                style = MaterialTheme.typography.labelSmall
+                                style = MaterialTheme.typography.labelSmall,
                             )
                         }
                     }
@@ -246,18 +251,20 @@ fun ScenarioInfoCard(
 
                 // Compact information cards in a Row
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     // Situation card
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { showSituationDialog = true },
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .clickable { showSituationDialog = true },
                     ) {
                         Row(
                             modifier = Modifier.padding(8.dp),
@@ -267,7 +274,7 @@ fun ScenarioInfoCard(
                                 imageVector = Icons.Rounded.Description,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(16.dp),
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
@@ -283,9 +290,10 @@ fun ScenarioInfoCard(
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { showInstructionsDialog = true },
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .clickable { showInstructionsDialog = true },
                     ) {
                         Row(
                             modifier = Modifier.padding(8.dp),
@@ -295,7 +303,7 @@ fun ScenarioInfoCard(
                                 imageVector = Icons.Rounded.Task,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(16.dp),
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
@@ -307,27 +315,27 @@ fun ScenarioInfoCard(
                         }
                     }
                 }
-                
+
                 HorizontalDivider(
                     thickness = 1.dp,
                     color = MaterialTheme.colorScheme.outlineVariant,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    modifier = Modifier.padding(vertical = 8.dp),
                 )
-                
+
+                // Always show the analytics button for finished chats, with proper loading state
                 if (chatStatus == ChatStatus.FINISHED) {
                     Button(
-                        onClick = {
-                            if (!isMessageLoading) onChatArchive()
-                        }, 
-                        shape = MaterialTheme.shapes.small, 
+                        onClick = { onChatArchive() },
+                        shape = MaterialTheme.shapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         contentPadding = PaddingValues(vertical = 8.dp),
+                        enabled = !isAnalysisLoading,
                     ) {
-                        if (isMessageLoading) {
+                        if (isAnalysisLoading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(16.dp),
                                 color = MaterialTheme.colorScheme.onPrimary,
-                                strokeWidth = 2.dp
+                                strokeWidth = 2.dp,
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Analyzing...", style = MaterialTheme.typography.labelMedium)
@@ -337,20 +345,25 @@ fun ScenarioInfoCard(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
-                
+
                 when (messages) {
-                    ViewState.Empty -> {}
-                    is ViewState.Error -> {}
+                    ViewState.Empty -> {
+                        EmptyMessageDisplay()
+                    }
+                    is ViewState.Error -> {
+                        ErrorMessageDisplay()
+                    }
                     ViewState.Loading -> {
                         Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 32.dp),
-                            contentAlignment = Alignment.Center
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 32.dp),
+                            contentAlignment = Alignment.Center,
                         ) {
                             CircularProgressIndicator(
                                 color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(36.dp)
+                                modifier = Modifier.size(36.dp),
                             )
                         }
                     }
@@ -380,12 +393,12 @@ fun ScenarioInfoCard(
         AlertDialog(
             properties = DialogProperties(dismissOnClickOutside = true, dismissOnBackPress = true, usePlatformDefaultWidth = false),
             onDismissRequest = { showSituationDialog = false },
-            title = { 
+            title = {
                 Text(
-                    "Situation", 
+                    "Situation",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                ) 
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
             },
             text = {
                 Box(
@@ -397,13 +410,13 @@ fun ScenarioInfoCard(
                     Text(
                         text = scenario.situation,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             },
             confirmButton = {
                 TextButton(
-                    onClick = { showSituationDialog = false }
+                    onClick = { showSituationDialog = false },
                 ) {
                     Text("Close")
                 }
@@ -414,7 +427,7 @@ fun ScenarioInfoCard(
                     .fillMaxWidth(0.95f)
                     .wrapContentHeight()
                     .heightIn(max = screenHeight * 0.8f),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
         )
     }
 
@@ -423,12 +436,12 @@ fun ScenarioInfoCard(
         AlertDialog(
             properties = DialogProperties(dismissOnClickOutside = true, dismissOnBackPress = true, usePlatformDefaultWidth = false),
             onDismissRequest = { showInstructionsDialog = false },
-            title = { 
+            title = {
                 Text(
-                    "Instructions", 
+                    "Instructions",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                ) 
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
             },
             text = {
                 Box(
@@ -440,13 +453,13 @@ fun ScenarioInfoCard(
                     Text(
                         text = scenario.userInstruction,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             },
             confirmButton = {
                 TextButton(
-                    onClick = { showInstructionsDialog = false }
+                    onClick = { showInstructionsDialog = false },
                 ) {
                     Text("Close")
                 }
@@ -457,7 +470,7 @@ fun ScenarioInfoCard(
                     .fillMaxWidth(0.95f)
                     .wrapContentHeight()
                     .heightIn(max = screenHeight * 0.8f),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
         )
     }
 }
@@ -475,7 +488,7 @@ fun MessageList(
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(vertical = 4.dp),
         state = messageListState,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         items(messages) { message ->
             MessageItem(
@@ -494,18 +507,18 @@ fun MessageList(
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = Arrangement.Center,
                     ) {
                         CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp
+                            strokeWidth = 2.dp,
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "Typing...",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -531,7 +544,7 @@ fun HelperWordsBottomSheet(
         onDismissRequest = onDismiss,
         dragHandle = { BottomSheetDefaults.DragHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
     ) {
         Column(
             modifier =
@@ -549,7 +562,7 @@ fun HelperWordsBottomSheet(
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 items(words) { word ->
                     WordItem(word = word)
@@ -565,21 +578,21 @@ private fun LoadingComponent(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxSize(), 
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         SimpleToolBar(title = stringResource(R.string.loading_progress), onBack = onBackClick)
         Spacer(modifier = Modifier.height(24.dp))
         CircularProgressIndicator(
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(48.dp),
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "Loading conversation...",
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -589,7 +602,7 @@ private fun ErrorComponent(onBackClick: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         SimpleToolBar(title = stringResource(R.string.error), onBack = onBackClick)
         Spacer(modifier = Modifier.height(24.dp))
@@ -597,22 +610,57 @@ private fun ErrorComponent(onBackClick: () -> Unit) {
             imageVector = Icons.Rounded.Description,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.size(48.dp),
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(R.string.error_message),
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.error
+            color = MaterialTheme.colorScheme.error,
         )
         Spacer(modifier = Modifier.height(16.dp))
         TextButton(
             onClick = onBackClick,
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = MaterialTheme.colorScheme.primary
-            )
+            colors =
+                ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary,
+                ),
         ) {
             Text("Go Back", style = MaterialTheme.typography.labelLarge)
         }
+    }
+}
+
+@Composable
+private fun EmptyMessageDisplay() {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "No messages yet",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun ErrorMessageDisplay() {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "Error loading messages",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error,
+        )
     }
 }
