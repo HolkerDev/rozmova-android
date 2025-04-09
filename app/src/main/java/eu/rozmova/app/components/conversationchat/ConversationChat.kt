@@ -159,6 +159,7 @@ fun ConversationChat(
                     isMessageLoading = state.isLoading,
                     messageListState = messageListState,
                     onChatFinish = { viewModel.finishChat(chat.id) },
+                    isAnalysisLoading = chatState.isAnalysisLoading,
                     onChatArchive = { viewModel.prepareAnalytics(chat.id) },
                 )
             } ?: LoadingComponent(onBackClick)
@@ -181,6 +182,7 @@ fun ScenarioInfoCard(
     onChatArchive: () -> Unit,
     isMessageLoading: Boolean,
     isRecording: Boolean,
+    isAnalysisLoading: Boolean,
     messageListState: LazyListState,
     modifier: Modifier = Modifier,
 ) {
@@ -327,8 +329,19 @@ fun ScenarioInfoCard(
                         shape = MaterialTheme.shapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         contentPadding = PaddingValues(vertical = 8.dp),
+                        enabled = !isAnalysisLoading,
                     ) {
-                        Text("Get analytics", style = MaterialTheme.typography.labelMedium)
+                        if (isAnalysisLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = 2.dp,
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Analyzing...", style = MaterialTheme.typography.labelMedium)
+                        } else {
+                            Text("Get analytics", style = MaterialTheme.typography.labelMedium)
+                        }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }

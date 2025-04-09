@@ -32,6 +32,7 @@ data class ChatDetailState(
     val isRecording: Boolean = false,
     val isChatAnalysisSubmitLoading: Boolean = false,
     val chatAnalysis: ChatAnalysis? = null,
+    val isAnalysisLoading: Boolean = false,
 )
 
 data class AudioState(
@@ -128,7 +129,7 @@ class ChatDetailsViewModel
                         if (response.shouldFinishChat) {
                             _shouldProposeToFinishChat.update { true }
                         }
-                        response.messages.map { message ->
+                        response.messages.sortedBy { it.createdAt }.map { message ->
                             AudioChatMessage(
                                 id = message.id,
                                 isPlaying = false,
@@ -214,13 +215,12 @@ class ChatDetailsViewModel
 
         fun prepareAnalytics(chatId: String) =
             viewModelScope.launch {
-                _state.update { it.copy(isLoading = true) }
+                _state.update { it.copy(isAnalysisLoading = true) }
                 chatsRepository
                     .getAnalytics(chatId)
                     .map { chatAnalysis ->
-                        _state.update { it.copy(isLoading = false, chatAnalysis = chatAnalysis) }
+                        _state.update { it.copy(isAnalysisLoading = false, chatAnalysis = chatAnalysis) }
                     }.mapLeft {
-                        // TODO: Handle error
                         Log.e(tag, "Error preparing chat analytics: ${it.message}")
                     }
             }
@@ -233,22 +233,22 @@ class ChatDetailsViewModel
 
         fun loadChat(chatId: String) =
             viewModelScope.launch {
-                _state.update { it.copy(isLoading = true) }
+                _state.update { state -> state.copy(isLoading = true) }
                 try {
                     val chat = chatsRepository.fetchChatById(chatId)
-                    _state.update {
-                        it.copy(
+                    _state.update { state ->
+                        state.copy(
                             chat = chat,
                             isLoading = false,
                             messages =
-                                chat.messages.map { message ->
+                                chat.messages.sortedBy { msg -> msg.createdAt }.map { msg ->
                                     AudioChatMessage(
-                                        id = message.id,
+                                        id = msg.id,
                                         isPlaying = false,
-                                        body = message.transcription,
-                                        link = message.audioReference,
-                                        author = message.author,
-                                        duration = message.audioDuration,
+                                        body = msg.transcription,
+                                        link = msg.audioReference,
+                                        author = msg.author,
+                                        duration = msg.audioDuration,
                                     )
                                 },
                         )
