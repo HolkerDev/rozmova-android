@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Task
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -193,118 +194,161 @@ fun ScenarioInfoCard(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
                     .weight(1f),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors =
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
         ) {
             Column(
                 modifier =
                     Modifier
-                        .padding(16.dp)
+                        .padding(12.dp)
                         .fillMaxWidth(),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = scenario.title,
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 2,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f),
                     )
-                    Row {
-                        if (words.isNotEmpty()) {
-                            FilledTonalButton(
-                                onClick = { showWordsBottomSheet = true },
-                                colors = ButtonDefaults.filledTonalButtonColors(),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.CollectionsBookmark,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp),
-                                )
-                            }
+                    if (words.isNotEmpty()) {
+                        FilledTonalButton(
+                            onClick = { showWordsBottomSheet = true },
+                            colors = ButtonDefaults.filledTonalButtonColors(),
+                            modifier = Modifier.padding(start = 8.dp),
+                            shape = MaterialTheme.shapes.medium,
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.CollectionsBookmark,
+                                contentDescription = stringResource(R.string.helper_words),
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = stringResource(R.string.helper_words),
+                                style = MaterialTheme.typography.labelSmall,
+                            )
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
 
-                // Situation text with show more button
-                Surface(
-                    color = MaterialTheme.colorScheme.tertiaryContainer,
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.clickable { showSituationDialog = true },
+                // Compact information cards in a Row
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                    // Situation card
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp),
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .clickable { showSituationDialog = true },
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Description,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = scenario.situation,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                        Row(
+                            modifier = Modifier.padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Description,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Situation",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                            )
+                        }
+                    }
+
+                    // Instructions card
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp),
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .clickable { showInstructionsDialog = true },
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Task,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Instructions",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                            )
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-                Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.clickable { showInstructionsDialog = true },
-                ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    modifier = Modifier.padding(vertical = 8.dp),
+                )
+
+                // Always show the analytics button for finished chats
+                if (chatModel.status == ChatStatus.FINISHED) {
+                    Button(
+                        onClick = { onChatArchive() },
+                        shape = MaterialTheme.shapes.small,
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(vertical = 8.dp),
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Task,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = scenario.userInstruction,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                        Text("Get analytics", style = MaterialTheme.typography.labelMedium)
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider()
-                Spacer(modifier = Modifier.height(16.dp))
+
                 AudioMessageList(
                     messages = messages,
-                    onPlayMessage,
-                    onStopMessage,
-                    onChatFinish,
-                    messageListState,
-                    isMessageLoading,
-                    chatModel.status == ChatStatus.IN_PROGRESS,
-                    Modifier.weight(1f),
+                    onPlayMessage = onPlayMessage,
+                    onStopMessage = onStopMessage,
+                    onChatFinish = onChatFinish,
+                    messageListState = messageListState,
+                    isLoadingMessage = isMessageLoading,
+                    showFinishButton = messages.isNotEmpty() && chatModel.status == ChatStatus.IN_PROGRESS,
+                    modifier = Modifier.weight(1f),
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider()
+
                 Spacer(modifier = Modifier.height(16.dp))
                 AudioRecorderButton(
                     onRecordStart = onRecordStart,
                     onRecordStop = onRecordStop,
-                    isDisabled = isMessageLoading,
-                    shouldAnalyse = chatModel.status == ChatStatus.FINISHED,
+                    isDisabled = isMessageLoading || chatModel.status == ChatStatus.FINISHED,
                     onChatAnalyticsRequest = onChatArchive,
                     isRecording = isRecording,
                 )
@@ -324,7 +368,13 @@ fun ScenarioInfoCard(
         AlertDialog(
             properties = DialogProperties(dismissOnClickOutside = true, dismissOnBackPress = true, usePlatformDefaultWidth = false),
             onDismissRequest = { showSituationDialog = false },
-            title = { Text("Situation") },
+            title = {
+                Text(
+                    "Situation",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            },
             text = {
                 Box(
                     modifier =
@@ -334,21 +384,25 @@ fun ScenarioInfoCard(
                 ) {
                     Text(
                         text = scenario.situation,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showSituationDialog = false }) {
+                TextButton(
+                    onClick = { showSituationDialog = false },
+                ) {
                     Text("Close")
                 }
             },
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            containerColor = MaterialTheme.colorScheme.surface,
             modifier =
                 Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.95f)
                     .wrapContentHeight()
                     .heightIn(max = screenHeight * 0.8f),
+            shape = RoundedCornerShape(16.dp),
         )
     }
 
@@ -357,7 +411,13 @@ fun ScenarioInfoCard(
         AlertDialog(
             properties = DialogProperties(dismissOnClickOutside = true, dismissOnBackPress = true, usePlatformDefaultWidth = false),
             onDismissRequest = { showInstructionsDialog = false },
-            title = { Text("Instructions") },
+            title = {
+                Text(
+                    "Instructions",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            },
             text = {
                 Box(
                     modifier =
@@ -367,21 +427,25 @@ fun ScenarioInfoCard(
                 ) {
                     Text(
                         text = scenario.userInstruction,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showInstructionsDialog = false }) {
+                TextButton(
+                    onClick = { showInstructionsDialog = false },
+                ) {
                     Text("Close")
                 }
             },
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            containerColor = MaterialTheme.colorScheme.surface,
             modifier =
                 Modifier
-                    .fillMaxWidth(0.9f)
+                    .fillMaxWidth(0.95f)
                     .wrapContentHeight()
                     .heightIn(max = screenHeight * 0.8f),
+            shape = RoundedCornerShape(16.dp),
         )
     }
 }
@@ -399,8 +463,9 @@ fun AudioMessageList(
 ) {
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(vertical = 4.dp),
         state = messageListState,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         items(messages) { message ->
             AudioMessageItem(
@@ -416,15 +481,30 @@ fun AudioMessageList(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(8.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    CircularProgressIndicator()
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Processing...",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
             }
-        } else if (messages.size > 1 && showFinishButton) {
+        } else if (showFinishButton) {
             item {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 StopChatButton(
                     onClick = onChatFinish,
                 )
@@ -442,6 +522,8 @@ fun HelperWordsBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         dragHandle = { BottomSheetDefaults.DragHandle() },
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
     ) {
         Column(
             modifier =
@@ -452,16 +534,17 @@ fun HelperWordsBottomSheet(
             Text(
                 text = stringResource(R.string.helper_words),
                 style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
             )
 
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 items(words) { word ->
                     WordItem(word = word)
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
@@ -473,15 +556,56 @@ private fun LoadingComponent(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
         SimpleToolBar(title = stringResource(R.string.loading_progress), onBack = onBackClick)
+        Spacer(modifier = Modifier.height(24.dp))
+        CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(48.dp),
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        CircularProgressIndicator()
+        Text(
+            text = "Loading conversation...",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
 @Composable
 private fun ErrorComponent(onBackClick: () -> Unit) {
-    SimpleToolBar(title = stringResource(R.string.error), onBack = onBackClick)
-    Text(text = stringResource(R.string.error_message))
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        SimpleToolBar(title = stringResource(R.string.error), onBack = onBackClick)
+        Spacer(modifier = Modifier.height(24.dp))
+        Icon(
+            imageVector = Icons.Rounded.Description,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(48.dp),
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.error_message),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.error,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        TextButton(
+            onClick = onBackClick,
+            colors =
+                ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary,
+                ),
+        ) {
+            Text("Go Back", style = MaterialTheme.typography.labelLarge)
+        }
+    }
 }

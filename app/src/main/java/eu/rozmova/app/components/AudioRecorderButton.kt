@@ -13,9 +13,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -111,7 +108,6 @@ fun AudioRecorderButton(
     onRecordStop: () -> Unit,
     isRecording: Boolean,
     isDisabled: Boolean,
-    shouldAnalyse: Boolean,
     onChatAnalyticsRequest: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AudioRecorderViewModel = hiltViewModel(),
@@ -148,30 +144,18 @@ fun AudioRecorderButton(
         )
 
     Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxWidth()) {
-        if (shouldAnalyse) {
-            Button(onClick = {
-                if (!isDisabled) onChatAnalyticsRequest()
-            }, shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth()) {
-                if (isDisabled) {
-                    Text("Analyzing...")
-                } else {
-                    Text("Get analytics")
+        RecordButton(
+            onRecord = {
+                when {
+                    ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
+                        == PackageManager.PERMISSION_GRANTED -> onRecordStart()
+                    else -> permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                 }
-            }
-        } else {
-            RecordButton(
-                onRecord = {
-                    when {
-                        ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
-                            == PackageManager.PERMISSION_GRANTED -> onRecordStart()
-                        else -> permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                    }
-                },
-                onStop = onRecordStop,
-                isRecording = isRecording,
-                isDisabled = isDisabled,
-            )
-        }
+            },
+            onStop = onRecordStop,
+            isRecording = isRecording,
+            isDisabled = isDisabled,
+        )
     }
 }
 
@@ -183,7 +167,6 @@ private fun AudioRecorderButtonPreview() {
         onRecordStop = {},
         isRecording = false,
         isDisabled = false,
-        shouldAnalyse = true,
         onChatAnalyticsRequest = {},
     )
 }
