@@ -17,73 +17,80 @@ import javax.inject.Singleton
 
 sealed class AuthState {
     data object Loading : AuthState()
-    data class Authenticated(val userSession: UserSession) : AuthState()
+
+    data class Authenticated(
+        val userSession: UserSession,
+    ) : AuthState()
+
     data object Unauthenticated : AuthState()
 }
 
 @Singleton
-class AuthRepository @Inject constructor(
-    private val supabaseClient: SupabaseClient,
-    private val googleAuthProvider: GoogleAuthProvider
-) {
-    private val tag = this::class.java.simpleName
+class AuthRepository
+    @Inject
+    constructor(
+        private val supabaseClient: SupabaseClient,
+        private val googleAuthProvider: GoogleAuthProvider,
+    ) {
+        private val tag = this::class.java.simpleName
 
-    private val _authState = MutableStateFlow<AuthState>(AuthState.Loading)
-    val authState = _authState.asStateFlow()
+        private val _authState = MutableStateFlow<AuthState>(AuthState.Loading)
+        val authState = _authState.asStateFlow()
 
-    suspend fun observeAuthState() {
-        try {
-            val session = supabaseClient.auth.currentSessionOrNull()
-            _authState.value = session?.let { AuthState.Authenticated(it) }
-                ?: AuthState.Unauthenticated
+        suspend fun observeAuthState() {
+            try {
+                val session = supabaseClient.auth.currentSessionOrNull()
+                _authState.value = session?.let { AuthState.Authenticated(it) }
+                    ?: AuthState.Unauthenticated
 
-            supabaseClient.auth.sessionStatus
-                .collect { sessionStatus ->
-                    Log.i(tag, "Session status: $sessionStatus")
-                    _authState.value = when (sessionStatus) {
-                        is SessionStatus.Authenticated ->
-                            AuthState.Authenticated(sessionStatus.session)
+                supabaseClient.auth.sessionStatus
+                    .collect { sessionStatus ->
+                        Log.i(tag, "Session status: $sessionStatus")
+                        _authState.value =
+                            when (sessionStatus) {
+                                is SessionStatus.Authenticated ->
+                                    AuthState.Authenticated(sessionStatus.session)
 
-                        SessionStatus.Initializing ->
-                            AuthState.Loading
+                                SessionStatus.Initializing ->
+                                    AuthState.Loading
 
-                        is SessionStatus.NotAuthenticated,
-                        is SessionStatus.RefreshFailure ->
-                            AuthState.Unauthenticated
+                                is SessionStatus.NotAuthenticated,
+                                is SessionStatus.RefreshFailure,
+                                ->
+                                    AuthState.Unauthenticated
+                            }
                     }
-                }
-        } catch (e: Exception) {
-            Log.e(tag, "Failed to observe auth state", e)
-            _authState.value = AuthState.Unauthenticated
-        }
-    }
-
-    suspend fun signOut() {
-        try {
-            supabaseClient.auth.signOut()
-        } catch (e: Exception) {
-            Log.e(tag, "Sign out failed", e)
-            throw e
-        }
-    }
-
-    suspend fun signInWithGoogle() {
-        return try {
-            val rawNonce = UUID.randomUUID().toString()
-            val hashedNonce = createNonce(rawNonce)
-            val googleCredential = googleAuthProvider.getGoogleCredential(hashedNonce).getOrThrow()
-
-            supabaseClient.auth.signInWith(IDToken) {
-                idToken = googleCredential
-                provider = Google
-                nonce = rawNonce
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to observe auth state", e)
+                _authState.value = AuthState.Unauthenticated
             }
-        } catch (e: Exception) {
-            Log.e(tag, "Sign in with Google failed", e)
-            _authState.value = AuthState.Unauthenticated
         }
+
+        suspend fun signOut() {
+            try {
+                supabaseClient.auth.signOut()
+            } catch (e: Exception) {
+                Log.e(tag, "Sign out failed", e)
+                throw e
+            }
+        }
+
+        suspend fun signInWithGoogle() =
+            try {
+                val rawNonce = UUID.randomUUID().toString()
+                val hashedNonce = createNonce(rawNonce)
+                val googleCredential = googleAuthProvider.getGoogleCredential(hashedNonce).getOrThrow()
+
+                supabaseClient.auth.signInWith(IDToken) {
+                    idToken = googleCredential
+                    provider = Google
+                    nonce = rawNonce
+                }
+            } catch (e: Exception) {
+                Log.e(tag, "Sign in with Google failed", e)
+                _authState.value = AuthState.Unauthenticated
+            }
     }
-}
 
 fun createNonce(rawNonce: String): String {
     val bytes = rawNonce.toByteArray()
