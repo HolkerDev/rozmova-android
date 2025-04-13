@@ -86,6 +86,7 @@ class AppViewModel
                             initializeFeatureService(authState.userSession)
                             AppState.Authenticated
                         }
+
                         is AuthState.Unauthenticated -> AppState.Unauthenticated
                     }
                 }.stateIn(
@@ -100,13 +101,14 @@ private fun App(viewModel: AppViewModel = hiltViewModel()) {
     val navController = rememberNavController()
     val bottomNavScreens = listOf(NavRoutes.Learn, NavRoutes.Chats, NavRoutes.Settings)
     val appState by viewModel.appState.collectAsState()
+    val currentRoute = getCurrentRoute(navController)
 
     RozmovaTheme {
         Scaffold(
             bottomBar = {
-                val currentRoute = getCurrentRoute(navController) ?: ""
-                if (currentRoute in bottomNavScreens.map { it.route }) {
-                    BottomNavBar(currentRoute, navController)
+                val route = getCurrentRoute(navController) ?: ""
+                if (route in bottomNavScreens.map { it.route }) {
+                    BottomNavBar(route, navController)
                 }
             },
             contentWindowInsets = WindowInsets.statusBars,
@@ -120,9 +122,16 @@ private fun App(viewModel: AppViewModel = hiltViewModel()) {
                     }
 
                     AppState.Authenticated -> {
-                        navController.navigate(NavRoutes.Learn.route) {
-                            popUpTo(0) { inclusive = true }
-                            launchSingleTop = true
+                        val currentDestination = navController.currentDestination?.route
+                        // Only navigate to Learn if we're not on a valid screen or we're on the Main screen
+                        if (currentDestination == null ||
+                            currentDestination == NavRoutes.Main.route ||
+                            currentDestination == NavRoutes.Login.route
+                        ) {
+                            navController.navigate(NavRoutes.Learn.route) {
+                                popUpTo(0) { inclusive = true }
+                                launchSingleTop = true
+                            }
                         }
                     }
 
