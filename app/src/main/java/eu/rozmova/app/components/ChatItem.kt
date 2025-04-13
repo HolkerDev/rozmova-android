@@ -1,6 +1,7 @@
 package eu.rozmova.app.components
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -87,7 +88,7 @@ fun ChatItem(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 6.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
                 .scale(scale)
                 .clip(MaterialTheme.shapes.medium)
                 .combinedClickable(
@@ -101,14 +102,13 @@ fun ChatItem(
                 ),
         elevation =
             CardDefaults.cardElevation(
-                defaultElevation = if (isPressed) 0.dp else 2.dp,
-                pressedElevation = 0.dp,
+                defaultElevation = 4.dp,
             ),
         colors =
             CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             ),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
         shape = MaterialTheme.shapes.medium,
     ) {
         Column(
@@ -145,7 +145,6 @@ fun ChatItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(vertical = 4.dp),
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -169,9 +168,9 @@ fun ChatItem(
 private fun ChatTypeIconWithBackground(scenarioType: ScenarioType) {
     val backgroundColor =
         when (scenarioType) {
-            ScenarioType.CONVERSATION -> MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-            ScenarioType.MESSAGES -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f)
-            else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+            ScenarioType.CONVERSATION -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+            ScenarioType.MESSAGES -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
+            else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
         }
 
     val iconTint =
@@ -213,7 +212,7 @@ fun Chip(
     Surface(
         modifier = modifier.padding(end = 8.dp, bottom = 4.dp),
         shape = MaterialTheme.shapes.small,
-        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
         shadowElevation = 0.dp,
     ) {
         Text(

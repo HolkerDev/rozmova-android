@@ -101,7 +101,6 @@ private fun App(viewModel: AppViewModel = hiltViewModel()) {
     val navController = rememberNavController()
     val bottomNavScreens = listOf(NavRoutes.Learn, NavRoutes.Chats, NavRoutes.Settings)
     val appState by viewModel.appState.collectAsState()
-    val currentRoute = getCurrentRoute(navController)
 
     RozmovaTheme {
         Scaffold(
