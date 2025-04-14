@@ -1,4 +1,4 @@
-package eu.rozmova.app.services.network
+package eu.rozmova.app.clients
 
 import eu.rozmova.app.domain.ScenarioDto
 import retrofit2.Response

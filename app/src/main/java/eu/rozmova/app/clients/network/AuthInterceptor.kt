@@ -1,4 +1,4 @@
-package eu.rozmova.app.services.network
+package eu.rozmova.app.clients.network
 
 import android.util.Log
 import io.github.jan.supabase.SupabaseClient
@@ -19,11 +19,13 @@ class AuthInterceptor
 
         override fun intercept(chain: Interceptor.Chain): Response {
             val originalRequest = chain.request()
-            
+
             // Add Content-Type header to all requests
-            val requestWithContentType = originalRequest.newBuilder()
-                .header("Content-Type", "application/json")
-                .build()
+            val requestWithContentType =
+                originalRequest
+                    .newBuilder()
+                    .header("Content-Type", "application/json")
+                    .build()
 
             // If the user is not authenticated, proceed with content type header only
             if (supabaseClient.auth.currentSessionOrNull() == null) {

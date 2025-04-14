@@ -16,8 +16,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.components.CategorySelection
 import eu.rozmova.app.components.QuickResumeCard
 import eu.rozmova.app.components.TodaysScenarioSelection
+import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.ScenarioType
+import eu.rozmova.app.domain.toScenarioType
 import eu.rozmova.app.utils.ViewState
 
 @Composable
@@ -27,7 +29,6 @@ fun LearnScreen(
     viewModel: LearnScreenViewModel = hiltViewModel(),
 ) {
     val todaySelectionState by viewModel.todaySelectionState.collectAsState()
-    val scenariosState by viewModel.scenariosState.collectAsState()
     val weeklyScenariosState by viewModel.weeklyScenarios.collectAsState()
     val navigateToChatAction = rememberUpdatedState(navigateToChat)
     val latestChatState by viewModel.latestChat.collectAsState()
@@ -36,14 +37,18 @@ fun LearnScreen(
         viewModel.events.collect { event ->
             when (event) {
                 is LearnEvent.ChatCreated -> {
-                    navigateToChatAction.value(event.chatId, event.scenarioType)
+                    navigateToChatAction.value(event.chatId, event.scenarioType.toScenarioType())
                 }
             }
         }
     }
 
     val onScenarioSelect = { scenarioModel: ScenarioModel ->
-        viewModel.createChatFromScenario(scenarioModel)
+        viewModel.createChatFromScenario(scenarioModel.id)
+    }
+
+    val onScenarioDtoSelect = { scenarioDto: ScenarioDto ->
+        viewModel.createChatFromScenario(scenarioId = scenarioDto.id)
     }
 
     // Wrap the content in a scrollable Column
@@ -75,7 +80,7 @@ fun LearnScreen(
         item {
             when (val weeklyScenarios = weeklyScenariosState) {
                 is ViewState.Success -> {
-                    CategorySelection(scenarios = weeklyScenarios.data, onScenarioSelect = {})
+                    CategorySelection(scenarios = weeklyScenarios.data, onScenarioSelect = onScenarioDtoSelect)
                 }
                 ViewState.Empty -> CircularProgressIndicator()
                 is ViewState.Error -> TODO("Handle error of weekly scenarios loading")

@@ -5,8 +5,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import eu.rozmova.app.BuildConfig
-import eu.rozmova.app.services.network.AuthInterceptor
-import eu.rozmova.app.services.network.ScenarioClient
+import eu.rozmova.app.clients.ChatClient
+import eu.rozmova.app.clients.ScenarioClient
+import eu.rozmova.app.clients.network.AuthInterceptor
 import io.github.jan.supabase.SupabaseClient
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -61,5 +62,9 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideApiService(retrofit: Retrofit): ScenarioClient = retrofit.create(ScenarioClient::class.java)
-} 
+    fun provideServiceClient(retrofit: Retrofit): ScenarioClient = retrofit.create(ScenarioClient::class.java)
+
+    @Provides
+    @Singleton
+    fun provideChatClient(retrofit: Retrofit): ChatClient = retrofit.create(ChatClient::class.java)
+}

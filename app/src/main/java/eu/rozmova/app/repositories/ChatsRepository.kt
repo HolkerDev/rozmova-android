@@ -3,13 +3,15 @@ package eu.rozmova.app.repositories
 import android.util.Log
 import arrow.core.Either
 import arrow.core.raise.either
+import eu.rozmova.app.clients.ChatClient
+import eu.rozmova.app.clients.ChatCreateReq
 import eu.rozmova.app.domain.ChatAnalysis
+import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatModel
 import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ChatWithMessagesDto
 import eu.rozmova.app.domain.ChatWithScenarioModel
 import eu.rozmova.app.domain.MessageModel
-import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.WordModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -21,7 +23,6 @@ import io.github.jan.supabase.storage.storage
 import io.ktor.client.call.body
 import kotlinx.serialization.Serializable
 import java.io.File
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
@@ -53,6 +54,7 @@ class ChatsRepository
     @Inject
     constructor(
         private val supabaseClient: SupabaseClient,
+        private val chatClient: ChatClient,
     ) {
         private val tag = this::class.simpleName
 
@@ -162,24 +164,24 @@ class ChatsRepository
             )
         }
 
-        suspend fun createChatFromScenario(scenario: ScenarioModel): String {
-            try {
-                val chatId = UUID.randomUUID().toString()
-                supabaseClient.postgrest.from(Tables.CHATS).insert(
-                    ChatModel(
-                        id = chatId,
-                        scenarioId = scenario.id,
-                        status = ChatStatus.IN_PROGRESS,
-                        userId = supabaseClient.auth.currentUserOrNull()!!.id,
-                    ),
-                )
-
-                return chatId
-            } catch (e: Exception) {
-                Log.e(tag, "Failed to create chat", e)
-                throw e
-            }
-        }
+        suspend fun createChatFromScenario(scenarioId: String): Either<InfraErrors, ChatDto> =
+            Either
+                .catch {
+                    chatClient.createChat(ChatCreateReq(scenarioId = scenarioId)).let { res ->
+                        if (res.isSuccessful) {
+                            val chat =
+                                res.body()?.chat
+                                    ?: throw IllegalStateException("Chat creation failed")
+                            Log.i(tag, "Chat created: $chat")
+                            chat
+                        } else {
+                            throw IllegalStateException("Chat creation failed")
+                        }
+                    }
+                }.mapLeft { e ->
+                    Log.e(tag, "Failed to create chat", e)
+                    InfraErrors.NetworkError("Failed to create chat")
+                }
 
         suspend fun getPublicAudioLink(audioPath: String): String {
             val userId =

@@ -2,11 +2,11 @@ package eu.rozmova.app.repositories
 
 import android.util.Log
 import arrow.core.Either
+import eu.rozmova.app.clients.ScenarioClient
+import eu.rozmova.app.clients.WeeklyScenariosBody
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.TodayScenarioSelectionModel
-import eu.rozmova.app.services.network.ScenarioClient
-import eu.rozmova.app.services.network.WeeklyScenariosBody
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns

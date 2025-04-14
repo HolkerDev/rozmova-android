@@ -33,6 +33,12 @@ enum class ScenarioTypeDto {
     MESSAGES,
 }
 
+fun ScenarioTypeDto.toScenarioType(): ScenarioType =
+    when (this) {
+        ScenarioTypeDto.CONVERSATION -> ScenarioType.CONVERSATION
+        ScenarioTypeDto.MESSAGES -> ScenarioType.MESSAGES
+    }
+
 enum class LangDto {
     EN,
     DE,

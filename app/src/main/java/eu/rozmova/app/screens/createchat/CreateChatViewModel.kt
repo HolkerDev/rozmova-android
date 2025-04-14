@@ -108,8 +108,17 @@ class CreateChatViewModel
         fun createChatFromScenario(scenario: ScenarioModel) {
             viewModelScope.launch {
                 _state.update { it.copy(isLoadingNewChat = true) }
-                val chatId = chatsRepository.createChatFromScenario(scenario)
-                _events.emit(CreateChatEvent.ChatReady(chatId, scenario.scenarioType))
+                val chat =
+                    chatsRepository
+                        .createChatFromScenario(scenario.id)
+                        .map {
+                            it
+                        }.getOrElse {
+                            Log.e(tag, "Error creating chat from scenario", it)
+                            _state.update { it.copy(isLoadingNewChat = false) }
+                            return@launch
+                        }
+                _events.emit(CreateChatEvent.ChatReady(chat.id, scenario.scenarioType))
             }
         }
 
