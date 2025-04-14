@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -17,6 +18,7 @@ import eu.rozmova.app.components.QuickResumeCard
 import eu.rozmova.app.components.TodaysScenarioSelection
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.ScenarioType
+import eu.rozmova.app.utils.ViewState
 
 @Composable
 fun LearnScreen(
@@ -26,6 +28,7 @@ fun LearnScreen(
 ) {
     val todaySelectionState by viewModel.todaySelectionState.collectAsState()
     val scenariosState by viewModel.scenariosState.collectAsState()
+    val weeklyScenariosState by viewModel.weeklyScenarios.collectAsState()
     val navigateToChatAction = rememberUpdatedState(navigateToChat)
     val latestChatState by viewModel.latestChat.collectAsState()
 
@@ -70,7 +73,14 @@ fun LearnScreen(
         }
 
         item {
-            CategorySelection(scenariosState = scenariosState, onScenarioSelect = onScenarioSelect)
+            when (val weeklyScenarios = weeklyScenariosState) {
+                is ViewState.Success -> {
+                    CategorySelection(scenarios = weeklyScenarios.data, onScenarioSelect = {})
+                }
+                ViewState.Empty -> CircularProgressIndicator()
+                is ViewState.Error -> TODO("Handle error of weekly scenarios loading")
+                ViewState.Loading -> CircularProgressIndicator()
+            }
         }
     }
 }

@@ -36,6 +36,10 @@ sealed class InfraErrors(
     data class AuthError(
         val msg: String,
     ) : InfraErrors(msg)
+
+    data class NetworkError(
+        val msg: String,
+    ) : InfraErrors(msg)
 }
 
 @Serializable

@@ -1,5 +1,6 @@
 package eu.rozmova.app.screens.learn
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.getOrElse
@@ -7,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ChatWithScenarioModel
 import eu.rozmova.app.domain.Language
+import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.TodayScenarioSelectionModel
@@ -44,6 +46,9 @@ class LearnScreenViewModel
             MutableStateFlow<ViewState<List<ScenarioModel>>>(ViewState.Loading)
         val scenariosState = _scenariosState.asStateFlow()
 
+        private val _weeklyScenarios = MutableStateFlow<ViewState<List<ScenarioDto>>>(ViewState.Loading)
+        val weeklyScenarios = _weeklyScenarios.asStateFlow()
+
         private val _events = MutableSharedFlow<LearnEvent>()
         val events = _events.asSharedFlow()
 
@@ -61,6 +66,7 @@ class LearnScreenViewModel
             fetchTodayScenarios()
             fetchLatestChat()
             fetchScenarios()
+            fetchWeeklyScenarios()
         }
 
         fun resetChatCreationState() {
@@ -106,6 +112,23 @@ class LearnScreenViewModel
                 }
             }
         }
+
+        private fun fetchWeeklyScenarios() =
+            viewModelScope.launch {
+                val userLang = localeManager.getCurrentLocale().language
+                userPreferencesRepository
+                    .fetchUserPreferences()
+                    .map { it.learningLanguage }
+                    .getOrElse { DEFAULT_LEARNING_LANGUAGE }
+                    .let { learnLang ->
+                        scenariosRepository.weeklyScenarios(userLang = userLang, scenarioLang = learnLang)
+                    }.map {
+                        _weeklyScenarios.value = ViewState.Success(it)
+                    }.mapLeft {
+                        Log.e("LearnScreenViewModel", "Error trying to fetch weekly scenarios", it)
+                        _weeklyScenarios.value = ViewState.Error(it)
+                    }
+            }
 
         private fun fetchScenarios() =
             viewModelScope.launch {

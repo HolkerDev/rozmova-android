@@ -20,11 +20,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -45,19 +43,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.R
-import eu.rozmova.app.domain.ScenarioDifficulty
-import eu.rozmova.app.domain.ScenarioModel
-import eu.rozmova.app.domain.ScenarioType
+import eu.rozmova.app.domain.ScenarioDto
+import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.domain.toDifficulty
-import eu.rozmova.app.utils.ViewState
-import kotlinx.datetime.Clock
 
 // Data models
 data class CategoryItem(
-    val type: ScenarioType,
+    val type: ScenarioTypeDto,
     val titleResId: Int,
     val icon: ImageVector,
 )
@@ -65,96 +59,82 @@ data class CategoryItem(
 val categories =
     listOf(
         CategoryItem(
-            type = ScenarioType.CONVERSATION,
-            titleResId = R.string.category_conversation,
-            icon = Icons.Default.RecordVoiceOver,
-        ),
-        CategoryItem(
-            type = ScenarioType.MESSAGES,
+            type = ScenarioTypeDto.MESSAGES,
             titleResId = R.string.category_message,
             icon = Icons.Default.Chat,
         ),
-//        CategoryItem(
-//            type = ScenarioType.EMAIL,
-//            titleResId = R.string.category_email,
-//            icon = Icons.Default.Email,
-//        ),
+        CategoryItem(
+            type = ScenarioTypeDto.CONVERSATION,
+            titleResId = R.string.category_conversation,
+            icon = Icons.Default.RecordVoiceOver,
+        ),
     )
 
 @Composable
 fun CategorySelection(
-    scenariosState: ViewState<List<ScenarioModel>>,
-    onScenarioSelect: (ScenarioModel) -> Unit,
+    scenarios: List<ScenarioDto>,
+    onScenarioSelect: (ScenarioDto) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // State for selected category - shared between components
-    var selectedCategory by remember { mutableStateOf(ScenarioType.CONVERSATION) }
+    var selectedCategory by remember { mutableStateOf(ScenarioTypeDto.MESSAGES) }
 
-    when (scenariosState) {
-        ViewState.Loading -> {
-            CircularProgressIndicator()
-        }
-        is ViewState.Success -> {
-            val scenarios = scenariosState.data
-            Card(
-                modifier =
-                    modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                colors =
-                    CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    ),
+    Card(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
             ) {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Category,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.categories),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-
-                    // Categories section
-                    CategorySection(
-                        selectedCategoryType = selectedCategory,
-                        onCategorySelect = { selectedCategory = it },
-                    )
-
-                    // Scenarios grid
-                    ScenariosGrid(
-                        selectedCategoryType = selectedCategory,
-                        allScenarios = scenarios,
-                        onScenarioSelect = onScenarioSelect,
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.Category,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.categories),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
+
+            // Categories section
+            CategorySection(
+                selectedCategoryType = selectedCategory,
+                onCategorySelect = { selectedCategory = it },
+            )
+
+            // Scenarios grid
+            ScenariosGrid(
+                selectedCategoryType = selectedCategory,
+                allScenarios = scenarios,
+                onScenarioSelect = onScenarioSelect,
+            )
         }
-        else -> {}
     }
 }
 
 @Composable
 fun CategorySection(
-    selectedCategoryType: ScenarioType,
-    onCategorySelect: (ScenarioType) -> Unit,
+    selectedCategoryType: ScenarioTypeDto,
+    onCategorySelect: (ScenarioTypeDto) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -235,9 +215,9 @@ fun CategorySection(
 
 @Composable
 fun ScenariosGrid(
-    allScenarios: List<ScenarioModel>,
-    onScenarioSelect: (ScenarioModel) -> Unit,
-    selectedCategoryType: ScenarioType,
+    allScenarios: List<ScenarioDto>,
+    onScenarioSelect: (ScenarioDto) -> Unit,
+    selectedCategoryType: ScenarioTypeDto,
     modifier: Modifier = Modifier,
 ) {
     // Filter scenarios based on selected category
@@ -289,8 +269,8 @@ fun ScenariosGrid(
 
 @Composable
 fun ScenarioCard(
-    scenario: ScenarioModel,
-    onScenarioSelect: (ScenarioModel) -> Unit,
+    scenario: ScenarioDto,
+    onScenarioSelect: (ScenarioDto) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ElevatedCard(
@@ -332,9 +312,8 @@ fun ScenarioCard(
                 ) {
                     val icon =
                         when (scenario.scenarioType) {
-                            ScenarioType.CONVERSATION -> Icons.Default.RecordVoiceOver
-                            ScenarioType.MESSAGES -> Icons.Default.Chat
-                            ScenarioType.EMAIL -> Icons.Default.Email
+                            ScenarioTypeDto.CONVERSATION -> Icons.Default.RecordVoiceOver
+                            ScenarioTypeDto.MESSAGES -> Icons.Default.Chat
                         }
 
                     Icon(
@@ -383,35 +362,5 @@ fun ScenarioCard(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun CategorySelectionPreview() {
-    MaterialTheme {
-        CategorySelection(
-            scenariosState =
-                ViewState.Success(
-                    listOf(
-                        ScenarioModel(
-                            id = "1",
-                            createdAt = Clock.System.now(),
-                            title = "Scenario 1",
-                            labels = emptyList(),
-                            languageLevel = "A1",
-                            botInstruction = "Bot instruction",
-                            situation = "Situation",
-                            userInstruction = "User instruction",
-                            targetLanguage = "English",
-                            userLanguage = "Spanish",
-                            scenarioType = ScenarioType.CONVERSATION,
-                            difficulty = ScenarioDifficulty.EASY,
-                            wordIds = emptyList(),
-                        ),
-                    ),
-                ),
-            onScenarioSelect = {},
-        )
     }
 }
