@@ -4,6 +4,7 @@ import android.util.Log
 import arrow.core.Either
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.TodayScenarioSelectionModel
+import eu.rozmova.app.services.network.ApiService
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
@@ -17,6 +18,7 @@ class ScenariosRepository
     @Inject
     constructor(
         private val supabaseClient: SupabaseClient,
+        private val apiService: ApiService,
     ) {
         suspend fun getAll(
             learningLanguage: String,
@@ -43,6 +45,20 @@ class ScenariosRepository
                         "ScenariosRepository",
                         "Fetching today selection for $learningLanguage and $interfaceLanguage",
                     )
+                    apiService.fetchWeeklyScenarios().let { response ->
+                        if (response.isSuccessful) {
+                            Log.i(
+                                "ScenariosRepository",
+                                "Successfully fetched weekly scenarios",
+                            )
+                        } else {
+                            Log.e("ScenarioRepository", response.raw().toString())
+                            Log.e(
+                                "ScenariosRepository",
+                                "Failed to fetch weekly scenarios: ${response.errorBody()}",
+                            )
+                        }
+                    }
                     supabaseClient.postgrest
                         .from(Tables.TODAY_SCENARIO_SELECTION)
                         .select(

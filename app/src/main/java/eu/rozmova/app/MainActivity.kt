@@ -1,7 +1,6 @@
 package eu.rozmova.app
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.WindowInsets
@@ -69,7 +68,6 @@ class AppViewModel
                 val userId = userSession.user?.id ?: throw IllegalStateException("User not found")
                 userRepository
                     .fetchUserGroups(userId)
-                    .also { Log.i("AppViewModel", "userGroups: $it") }
                     .getOrElse { emptyList() }
                     .let { userGroups ->
                         featureService.initialize(userGroups)
@@ -79,7 +77,6 @@ class AppViewModel
         val appState =
             authRepository.authState
                 .map { authState ->
-                    Log.i("AppViewModel", "authState: $authState")
                     when (authState) {
                         is AuthState.Loading -> AppState.Loading
                         is AuthState.Authenticated -> {
@@ -122,7 +119,6 @@ private fun App(viewModel: AppViewModel = hiltViewModel()) {
 
                     AppState.Authenticated -> {
                         val currentDestination = navController.currentDestination?.route
-                        // Only navigate to Learn if we're not on a valid screen or we're on the Main screen
                         if (currentDestination == null ||
                             currentDestination == NavRoutes.Main.route ||
                             currentDestination == NavRoutes.Login.route
