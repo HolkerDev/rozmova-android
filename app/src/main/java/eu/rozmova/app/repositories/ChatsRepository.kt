@@ -96,19 +96,23 @@ class ChatsRepository
                     InfraErrors.DatabaseError("Failed to fetch all chats")
                 }
 
-        suspend fun deleteChat(chatId: String): Either<InfraErrors, Unit> =
-            either {
-                try {
-                    supabaseClient.postgrest.from(Tables.CHATS).delete {
-                        filter {
-                            ChatModel::id eq chatId
-                        }
+        suspend fun deleteChat(chatId: String): Either<InfraErrors, List<ChatDto>> =
+            Either
+                .catch {
+                    val response = chatClient.deleteById(chatId)
+                    if (response.isSuccessful) {
+                        val chats =
+                            response.body()
+                                ?: throw IllegalStateException("Chat deletion failed: ${response.message()}")
+                        Log.i(tag, "Chat deleted: $chats")
+                        chats
+                    } else {
+                        throw IllegalStateException("Chat deletion failed: ${response.message()}")
                     }
-                } catch (e: Exception) {
-                    Log.e(tag, "Failed to delete chat", e)
-                    raise(InfraErrors.DatabaseError("Failed to delete chat"))
+                }.mapLeft { error ->
+                    Log.e(tag, "Error deleting chat", error)
+                    InfraErrors.NetworkError("Failed to delete chat")
                 }
-            }
 
         suspend fun archiveChat(chatId: String): Either<InfraErrors, Unit> =
             either {
