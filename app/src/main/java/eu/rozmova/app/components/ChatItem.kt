@@ -41,13 +41,13 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import eu.rozmova.app.domain.ChatWithScenarioModel
-import eu.rozmova.app.domain.ScenarioType
+import eu.rozmova.app.domain.ChatDto
+import eu.rozmova.app.domain.ScenarioTypeDto
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun ChatItem(
-    chat: ChatWithScenarioModel,
+    chat: ChatDto,
     onChatClick: (String) -> Unit,
     onChatDelete: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -165,26 +165,23 @@ fun ChatItem(
 }
 
 @Composable
-private fun ChatTypeIconWithBackground(scenarioType: ScenarioType) {
+private fun ChatTypeIconWithBackground(scenarioType: ScenarioTypeDto) {
     val backgroundColor =
         when (scenarioType) {
-            ScenarioType.CONVERSATION -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-            ScenarioType.MESSAGES -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
-            else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+            ScenarioTypeDto.CONVERSATION -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+            ScenarioTypeDto.MESSAGES -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
         }
 
     val iconTint =
         when (scenarioType) {
-            ScenarioType.CONVERSATION -> MaterialTheme.colorScheme.primary
-            ScenarioType.MESSAGES -> MaterialTheme.colorScheme.tertiary
-            else -> MaterialTheme.colorScheme.primary
+            ScenarioTypeDto.CONVERSATION -> MaterialTheme.colorScheme.primary
+            ScenarioTypeDto.MESSAGES -> MaterialTheme.colorScheme.tertiary
         }
 
     val icon =
         when (scenarioType) {
-            ScenarioType.CONVERSATION -> Icons.Default.RecordVoiceOver
-            ScenarioType.MESSAGES -> Icons.AutoMirrored.Filled.Chat
-            else -> Icons.AutoMirrored.Filled.Chat
+            ScenarioTypeDto.CONVERSATION -> Icons.Default.RecordVoiceOver
+            ScenarioTypeDto.MESSAGES -> Icons.AutoMirrored.Filled.Chat
         }
 
     Box(

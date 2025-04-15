@@ -4,8 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import eu.rozmova.app.domain.ChatStatus
-import eu.rozmova.app.domain.ChatWithScenarioModel
+import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.repositories.ChatsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +18,7 @@ sealed interface ChatListState {
     data object Loading : ChatListState
 
     data class Success(
-        val chats: List<ChatWithScenarioModel>,
+        val chats: List<ChatDto>,
     ) : ChatListState
 
     data object Error : ChatListState
@@ -44,20 +43,13 @@ class ChatsListViewModel
             viewModelScope.launch {
                 _state.update { ChatListState.Loading }
                 chatsRepository
-                    .fetchChats()
+                    .fetchAll()
                     .map { chats ->
-                        chats.filter { chat ->
-                            chat.status in listOf(ChatStatus.IN_PROGRESS, ChatStatus.FINISHED)
-                        }
-                    }.fold(
-                        { error ->
-                            Log.e(tag, "Error loading chats", error)
-                            _state.update { ChatListState.Error }
-                        },
-                        { chats ->
-                            _state.update { ChatListState.Success(chats) }
-                        },
-                    )
+                        _state.update { ChatListState.Success(chats) }
+                    }.mapLeft { error ->
+                        Log.e(tag, "Error loading chats", error)
+                        _state.update { ChatListState.Error }
+                    }
             }
 
         fun deleteChat(chatId: String) =

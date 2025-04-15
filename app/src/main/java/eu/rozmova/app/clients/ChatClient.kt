@@ -17,6 +17,9 @@ interface ChatClient {
     suspend fun fetchChatById(
         @Path("chatId")chatId: String,
     ): Response<ChatDto>
+
+    @GET("chats")
+    suspend fun fetchAll(): Response<List<ChatDto>>
 }
 
 data class ChatCreateReq(

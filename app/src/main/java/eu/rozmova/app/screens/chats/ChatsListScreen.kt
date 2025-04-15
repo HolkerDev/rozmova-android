@@ -29,6 +29,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.components.ChatItem
 import eu.rozmova.app.domain.ScenarioType
+import eu.rozmova.app.domain.toScenarioType
 
 @Composable
 fun ChatsListScreen(
@@ -92,7 +93,12 @@ fun ChatsListScreen(
                             modifier = Modifier.padding(vertical = 8.dp),
                         ) {
                             items(viewState.chats) { chat ->
-                                ChatItem(chat, onChatClick = { onChatSelect(chat.id, chat.scenario.scenarioType) }, onChatDelete = {
+                                ChatItem(chat, onChatClick = {
+                                    onChatSelect(
+                                        chat.id,
+                                        chat.scenario.scenarioType.toScenarioType(),
+                                    )
+                                }, onChatDelete = {
                                     viewModel.deleteChat(chat.id)
                                 })
                             }

@@ -11,6 +11,7 @@ data class ScenarioDto(
     val scenarioType: ScenarioTypeDto,
     val title: String,
     val situation: String,
+    val labels: List<String>,
     val helperWords: List<WordDto>,
     val userInstructions: List<UserInstruction>,
 )

@@ -77,6 +77,25 @@ class ChatsRepository
                 }
             }
 
+        suspend fun fetchAll(): Either<InfraErrors, List<ChatDto>> =
+            Either
+                .catch {
+                    chatClient.fetchAll().let { res ->
+                        if (res.isSuccessful) {
+                            val chats =
+                                res.body()
+                                    ?: throw IllegalStateException("Chats list fetch failed due to empty body: ${res.message()}")
+                            Log.i(tag, "Chat fetched: $chats")
+                            chats
+                        } else {
+                            throw IllegalStateException("Chats list fetch failed: ${res.message()}")
+                        }
+                    }
+                }.mapLeft { e ->
+                    Log.e(tag, "Failed to fetch all chats", e)
+                    InfraErrors.DatabaseError("Failed to fetch all chats")
+                }
+
         suspend fun deleteChat(chatId: String): Either<InfraErrors, Unit> =
             either {
                 try {
