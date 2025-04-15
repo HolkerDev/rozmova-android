@@ -1,9 +1,7 @@
 package eu.rozmova.app.domain
 
 import eu.rozmova.app.components.Difficulty
-import kotlinx.serialization.Serializable
 
-@Serializable
 data class ScenarioDto(
     val id: String,
     val createdAt: String,
@@ -13,6 +11,18 @@ data class ScenarioDto(
     val scenarioType: ScenarioTypeDto,
     val title: String,
     val situation: String,
+    val helperWords: List<WordDto>,
+    val userInstructions: List<UserInstruction>,
+)
+
+data class UserInstruction(
+    val assessment: String,
+    val task: String,
+)
+
+data class WordDto(
+    val word: String,
+    val translation: String,
 )
 
 enum class DifficultyDto {

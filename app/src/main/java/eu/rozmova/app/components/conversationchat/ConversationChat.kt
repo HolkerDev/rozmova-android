@@ -67,10 +67,10 @@ import eu.rozmova.app.components.ShouldFinishChatDialog
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.components.WordItem
-import eu.rozmova.app.domain.ChatModel
+import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatStatus
-import eu.rozmova.app.domain.ScenarioModel
-import eu.rozmova.app.domain.WordModel
+import eu.rozmova.app.domain.ScenarioDto
+import eu.rozmova.app.domain.WordDto
 
 @Composable
 fun ConversationChat(
@@ -154,8 +154,8 @@ fun ConversationChat(
                     isRecording = isRecording,
                     scenario = chat.scenario,
                     messages = chatState.messages ?: emptyList(),
-                    chatModel = chat.chatModel,
-                    words = chat.words,
+                    chatModel = chat,
+                    words = chat.scenario.helperWords,
                     isMessageLoading = state.isLoading,
                     messageListState = messageListState,
                     onChatFinish = { viewModel.finishChat(chat.id) },
@@ -169,10 +169,10 @@ fun ConversationChat(
 
 @Composable
 fun ScenarioInfoCard(
-    scenario: ScenarioModel,
+    scenario: ScenarioDto,
     messages: List<AudioChatMessage>,
-    words: List<WordModel>,
-    chatModel: ChatModel,
+    words: List<WordDto>,
+    chatModel: ChatDto,
     onBackClick: () -> Unit,
     onRecordStart: () -> Unit,
     onRecordStop: () -> Unit,
@@ -438,11 +438,11 @@ fun ScenarioInfoCard(
                             .fillMaxWidth()
                             .verticalScroll(rememberScrollState()),
                 ) {
-                    Text(
-                        text = scenario.userInstruction,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+//                    Text(
+//                        text = scenario.userInstruction,
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+//                    )
                 }
             },
             confirmButton = {
@@ -529,7 +529,7 @@ fun AudioMessageList(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HelperWordsBottomSheet(
-    words: List<WordModel>,
+    words: List<WordDto>,
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(

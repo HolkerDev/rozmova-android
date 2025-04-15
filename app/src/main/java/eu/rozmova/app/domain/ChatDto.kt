@@ -5,4 +5,5 @@ data class ChatDto(
     val scenario: ScenarioDto,
     val status: ChatStatus,
     val userId: String,
+    val messages: List<MessageDto>,
 )

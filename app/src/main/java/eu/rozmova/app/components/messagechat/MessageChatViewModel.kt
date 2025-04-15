@@ -6,11 +6,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.ChatAnalysis
-import eu.rozmova.app.domain.ChatStatus
-import eu.rozmova.app.domain.ChatWithMessagesDto
+import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.utils.ViewState
-import eu.rozmova.app.utils.mapSuccess
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -26,7 +24,7 @@ data class ChatMessage(
 )
 
 data class MessageChatState(
-    val chat: ViewState<ChatWithMessagesDto> = ViewState.Loading,
+    val chat: ViewState<ChatDto> = ViewState.Loading,
     val messages: ViewState<List<ChatMessage>> = ViewState.Loading,
     val isLoadingMessage: Boolean = false,
     val chatAnalysis: ChatAnalysis? = null,
@@ -56,8 +54,7 @@ class MessageChatViewModel
 
         fun loadChat(chatId: String) =
             viewModelScope.launch {
-                chatsRepository.fetchChatById(chatId = chatId).let { chat ->
-                    println(chat.messages)
+                chatsRepository.fetchChatById(chatId = chatId).map { chat ->
                     _state.update { state ->
                         state.copy(
                             chat = ViewState.Success(chat),
@@ -66,7 +63,7 @@ class MessageChatViewModel
                                     chat.messages.sortedBy { msg -> msg.createdAt }.map { message ->
                                         ChatMessage(
                                             id = message.id,
-                                            body = message.transcription,
+                                            body = message.content,
                                             author = message.author,
                                         )
                                     },
@@ -121,7 +118,7 @@ class MessageChatViewModel
                                     response.messages.sortedBy { msg -> msg.createdAt }.map { msg ->
                                         ChatMessage(
                                             id = msg.id,
-                                            body = msg.transcription,
+                                            body = msg.content,
                                             author = msg.author,
                                         )
                                     },
@@ -135,16 +132,16 @@ class MessageChatViewModel
 
         fun finishChat(chatId: String) =
             viewModelScope.launch {
-                chatsRepository
-                    .finishChat(chatId)
-                    .mapLeft {
-                        Log.e("MessageChatViewModel", "Error finishing chat", it)
-                    }.map {
-                        _state.update {
-                            it.copy(
-                                chat = it.chat.mapSuccess { it.copy(chatModel = it.chatModel.copy(status = ChatStatus.FINISHED)) },
-                            )
-                        }
-                    }
+//                chatsRepository
+//                    .finishChat(chatId)
+//                    .mapLeft {
+//                        Log.e("MessageChatViewModel", "Error finishing chat", it)
+//                    }.map {
+//                        _state.update {
+//                            it.copy(
+//                                chat = it.chat.mapSuccess { it.copy(chatModel = it.chatModel.copy(status = ChatStatus.FINISHED)) },
+//                            )
+//                        }
+//                    }
             }
     }

@@ -66,9 +66,10 @@ import eu.rozmova.app.components.ShouldFinishChatDialog
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.components.WordItem
+import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatStatus
-import eu.rozmova.app.domain.ScenarioModel
-import eu.rozmova.app.domain.WordModel
+import eu.rozmova.app.domain.MessageDto
+import eu.rozmova.app.domain.WordDto
 import eu.rozmova.app.screens.createchat.ChatId
 import eu.rozmova.app.utils.ViewState
 
@@ -148,23 +149,22 @@ fun MessageChat(
                             .padding(bottom = 16.dp),
                 ) {
                     ScenarioInfoCard(
-                        scenario = chatState.data.scenario,
-                        chatStatus = chatState.data.chatModel.status,
-                        messages = state.messages,
-                        words = chatState.data.words,
+                        chat = chatState.data,
                         onBackClick = onBackClick,
-                        onChatFinish = { viewModel.finishChat(chatState.data.chatModel.id) },
-                        onChatArchive = { viewModel.prepareAnalytics(chatState.data.id) },
+//                        onChatFinish = { viewModel.finishChat(chatState.data.chatModel.id) },
+//                        onChatArchive = { viewModel.prepareAnalytics(chatState.data.id) },
                         isMessageLoading = state.isLoadingMessage,
                         isAnalysisLoading = state.isAnalysisLoading,
                         messageListState = messageListState,
                         modifier = Modifier.weight(1f),
+                        onChatFinish = {},
+                        onChatArchive = {},
                     )
                     MessageInput(
                         onSendMessage = { message ->
                             viewModel.sendMessage(chatState.data.id, message)
                         },
-                        isDisabled = state.isLoadingMessage || chatState.data.chatModel.status != ChatStatus.IN_PROGRESS,
+                        isDisabled = state.isLoadingMessage || chatState.data.status != ChatStatus.IN_PROGRESS,
                     )
                 }
             }
@@ -174,10 +174,7 @@ fun MessageChat(
 
 @Composable
 fun ScenarioInfoCard(
-    scenario: ScenarioModel,
-    chatStatus: ChatStatus,
-    messages: ViewState<List<ChatMessage>>,
-    words: List<WordModel>,
+    chat: ChatDto,
     onBackClick: () -> Unit,
     onChatFinish: () -> Unit,
     onChatArchive: () -> Unit,
@@ -220,14 +217,14 @@ fun ScenarioInfoCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = scenario.title,
+                        text = chat.scenario.title,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f),
                     )
-                    if (words.isNotEmpty()) {
+                    if (chat.scenario.helperWords.isNotEmpty()) {
                         FilledTonalButton(
                             onClick = { showWordsBottomSheet = true },
                             colors = ButtonDefaults.filledTonalButtonColors(),
@@ -323,7 +320,7 @@ fun ScenarioInfoCard(
                 )
 
                 // Always show the analytics button for finished chats, with proper loading state
-                if (chatStatus == ChatStatus.FINISHED) {
+                if (chat.status == ChatStatus.FINISHED) {
                     Button(
                         onClick = { onChatArchive() },
                         shape = MaterialTheme.shapes.small,
@@ -346,44 +343,20 @@ fun ScenarioInfoCard(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                when (messages) {
-                    ViewState.Empty -> {
-                        EmptyMessageDisplay()
-                    }
-                    is ViewState.Error -> {
-                        ErrorMessageDisplay()
-                    }
-                    ViewState.Loading -> {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 32.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            CircularProgressIndicator(
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(36.dp),
-                            )
-                        }
-                    }
-                    is ViewState.Success -> {
-                        MessageList(
-                            messages = messages.data,
-                            onChatFinish = onChatFinish,
-                            messageListState = messageListState,
-                            showFinishButton = messages.data.isNotEmpty() && chatStatus == ChatStatus.IN_PROGRESS,
-                            isLoadingMessage = isMessageLoading,
-                        )
-                    }
-                }
+                MessageList(
+                    messages = chat.messages,
+                    onChatFinish = onChatFinish,
+                    messageListState = messageListState,
+                    showFinishButton = chat.messages.isNotEmpty() && chat.status == ChatStatus.IN_PROGRESS,
+                    isLoadingMessage = isMessageLoading,
+                )
             }
         }
     }
 
     if (showWordsBottomSheet) {
         HelperWordsBottomSheet(
-            words = words,
+            words = chat.scenario.helperWords,
             onDismiss = { showWordsBottomSheet = false },
         )
     }
@@ -408,7 +381,7 @@ fun ScenarioInfoCard(
                             .verticalScroll(rememberScrollState()),
                 ) {
                     Text(
-                        text = scenario.situation,
+                        text = chat.scenario.situation,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -451,7 +424,8 @@ fun ScenarioInfoCard(
                             .verticalScroll(rememberScrollState()),
                 ) {
                     Text(
-                        text = scenario.userInstruction,
+                        text =
+                            chat.scenario.userInstructions.joinToString("\n") { it.task },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -477,7 +451,7 @@ fun ScenarioInfoCard(
 
 @Composable
 fun MessageList(
-    messages: List<ChatMessage>,
+    messages: List<MessageDto>,
     onChatFinish: () -> Unit,
     messageListState: LazyListState,
     isLoadingMessage: Boolean,
@@ -537,7 +511,7 @@ fun MessageList(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HelperWordsBottomSheet(
-    words: List<WordModel>,
+    words: List<WordDto>,
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(

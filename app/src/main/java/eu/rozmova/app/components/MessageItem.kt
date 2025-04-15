@@ -1,10 +1,5 @@
 package eu.rozmova.app.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,30 +8,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ExpandLess
-import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import eu.rozmova.app.components.conversationchat.AudioChatMessage
-import eu.rozmova.app.components.messagechat.ChatMessage
 import eu.rozmova.app.domain.Author
-import eu.rozmova.app.utils.formatDuration
+import eu.rozmova.app.domain.MessageDto
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant.Companion.now
 
 @Composable
 fun MessageItem(
-    message: ChatMessage,
+    message: MessageDto,
     modifier: Modifier = Modifier,
 ) {
     val isUserMessage = message.author == Author.USER
@@ -73,7 +61,7 @@ fun MessageItem(
                     Spacer(modifier = Modifier.width(8.dp))
                     // Transcription toggle button
                     Text(
-                        text = message.body,
+                        text = message.content,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(horizontal = 8.dp),
                     )
@@ -87,10 +75,14 @@ fun MessageItem(
 @Composable
 private fun MessageItemPreview() {
     MessageItem(
-        message = ChatMessage(
-            id = "1",
-            body = "Hello, world!",
-            author = Author.USER,
-        ),
+        message =
+            MessageDto(
+                id = "1",
+                content = "Hello, world!",
+                author = Author.USER,
+                audioId = null,
+                createdAt = Clock.System.now(),
+                audioDuration = 0,
+            ),
     )
 }

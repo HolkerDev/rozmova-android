@@ -13,8 +13,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.ChatAnalysis
-import eu.rozmova.app.domain.ChatStatus
-import eu.rozmova.app.domain.ChatWithMessagesDto
+import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.repositories.ChatsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +25,7 @@ import javax.inject.Inject
 data class ChatDetailState(
     val isLoading: Boolean = true,
     val error: String? = null,
-    val chat: ChatWithMessagesDto? = null,
+    val chat: ChatDto? = null,
     val messages: List<AudioChatMessage>? = null,
     val audioPlayback: AudioState = AudioState(false, null, null),
     val isRecording: Boolean = false,
@@ -130,26 +129,26 @@ class ChatDetailsViewModel
                             _shouldProposeToFinishChat.update { true }
                         }
                         response.messages.sortedBy { it.createdAt }.map { message ->
-                            AudioChatMessage(
-                                id = message.id,
-                                isPlaying = false,
-                                body = message.transcription,
-                                link = message.audioReference,
-                                author = message.author,
-                                duration = message.audioDuration,
-                            )
+//                            AudioChatMessage(
+//                                id = message.id,
+//                                isPlaying = false,
+//                                body = message.content,
+//                                link = message.audioId,
+//                                author = message.author,
+//                                duration = message.audioDuration,
+//                            )
                         }
                     }.fold(
                         { error ->
                             _state.update { it.copy(isLoading = false, error = error.message) }
                         },
                         { chatMessages ->
-                            _state.update {
-                                it.copy(
-                                    isLoading = false,
-                                    messages = chatMessages,
-                                )
-                            }
+//                            _state.update {
+//                                it.copy(
+//                                    isLoading = false,
+//                                    messages = chatMessages,
+//                                )
+//                            }
                         },
                     )
                 scrollToBottom()
@@ -205,12 +204,12 @@ class ChatDetailsViewModel
         fun finishChat(chatId: String) =
             viewModelScope.launch {
                 _state.update { it.copy(isLoading = true) }
-                chatsRepository.finishChat(chatId).map {
-                    _state.update {
-                        it.copy(chat = it.chat?.copy(chatModel = it.chat.chatModel.copy(status = ChatStatus.FINISHED)))
-                    } // TODO: Refactor this bullshit, I just hate this part of the code, like wtf
-                    _state.update { it.copy(isLoading = false) }
-                } // TODO: Handle error
+//                chatsRepository.finishChat(chatId).map {
+//                    _state.update {
+//                        it.copy(chat = it.chat?.copy(chatModel = it.chat.chatModel.copy(status = ChatStatus.FINISHED)))
+//                    } // TODO: Refactor this bullshit, I just hate this part of the code, like wtf
+//                    _state.update { it.copy(isLoading = false) }
+//                } // TODO: Handle error
             }
 
         fun prepareAnalytics(chatId: String) =
@@ -234,29 +233,29 @@ class ChatDetailsViewModel
         fun loadChat(chatId: String) =
             viewModelScope.launch {
                 _state.update { state -> state.copy(isLoading = true) }
-                try {
-                    val chat = chatsRepository.fetchChatById(chatId)
-                    _state.update { state ->
-                        state.copy(
-                            chat = chat,
-                            isLoading = false,
-                            messages =
-                                chat.messages.sortedBy { msg -> msg.createdAt }.map { msg ->
-                                    AudioChatMessage(
-                                        id = msg.id,
-                                        isPlaying = false,
-                                        body = msg.transcription,
-                                        link = msg.audioReference,
-                                        author = msg.author,
-                                        duration = msg.audioDuration,
-                                    )
-                                },
-                        )
-                    }
-                    scrollToBottom()
-                } catch (e: Exception) {
-                    Log.e("ChatDetailsViewModel", "Error loading chat", e)
-                }
+//                try {
+//                    val chat = chatsRepository.fetchChatById(chatId)
+//                    _state.update { state ->
+//                        state.copy(
+//                            chat = chat,
+//                            isLoading = false,
+//                            messages =
+//                                chat.messages.sortedBy { msg -> msg.createdAt }.map { msg ->
+//                                    AudioChatMessage(
+//                                        id = msg.id,
+//                                        isPlaying = false,
+//                                        body = msg.transcription,
+//                                        link = msg.audioReference,
+//                                        author = msg.author,
+//                                        duration = msg.audioDuration,
+//                                    )
+//                                },
+//                        )
+//                    }
+//                    scrollToBottom()
+//                } catch (e: Exception) {
+//                    Log.e("ChatDetailsViewModel", "Error loading chat", e)
+//                }
             }
 
         fun playAudio(messageId: String) =

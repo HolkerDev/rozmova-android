@@ -9,10 +9,8 @@ import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatModel
 import eu.rozmova.app.domain.ChatStatus
-import eu.rozmova.app.domain.ChatWithMessagesDto
 import eu.rozmova.app.domain.ChatWithScenarioModel
-import eu.rozmova.app.domain.MessageModel
-import eu.rozmova.app.domain.WordModel
+import eu.rozmova.app.domain.MessageDto
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.functions.functions
@@ -45,7 +43,7 @@ sealed class InfraErrors(
 
 @Serializable
 data class ChatResponse(
-    val messages: List<MessageModel>,
+    val messages: List<MessageDto>,
     val shouldFinishChat: Boolean,
 )
 
@@ -111,58 +109,24 @@ class ChatsRepository
                 }
             }
 
-        suspend fun fetchChatById(chatId: String): ChatWithMessagesDto {
-            val columns =
-                Columns.raw(
-                    """
-                *,
-                scenario:scenario_id(*)
-            """,
-                )
-            val chatModel =
-                supabaseClient
-                    .postgrest
-                    .from(Tables.CHATS)
-                    .select(columns) {
-                        filter {
-                            ChatWithScenarioModel::id eq chatId
+        suspend fun fetchChatById(chatId: String): Either<InfraErrors, ChatDto> =
+            Either
+                .catch {
+                    chatClient.fetchChatById(chatId).let { res ->
+                        if (res.isSuccessful) {
+                            val chat =
+                                res.body()
+                                    ?: throw IllegalStateException("Chat fetch failed: ${res.message()}")
+                            Log.i(tag, "Chat fetched: $chat")
+                            chat
+                        } else {
+                            throw IllegalStateException("Chat fetch failed: ${res.message()}")
                         }
-                    }.decodeSingle<ChatWithScenarioModel>()
-
-            val words =
-                chatModel.scenario.wordIds?.let { wordIds ->
-                    supabaseClient.postgrest
-                        .from(Tables.WORDS)
-                        .select(Columns.raw("*")) {
-                            filter {
-                                WordModel::id isIn wordIds
-                            }
-                        }.decodeList<WordModel>()
-                } ?: emptyList()
-
-            val messages =
-                supabaseClient.postgrest
-                    .from(Tables.MESSAGES)
-                    .select(Columns.raw("*")) {
-                        filter {
-                            MessageModel::chatId eq chatId
-                        }
-                    }.decodeList<MessageModel>()
-
-            return ChatWithMessagesDto(
-                chatModel.id,
-                chatModel.scenario,
-                chatModel =
-                    ChatModel(
-                        id = chatId,
-                        scenarioId = chatModel.scenario.id,
-                        status = chatModel.status,
-                        userId = chatModel.userId,
-                    ),
-                messages,
-                words,
-            )
-        }
+                    }
+                }.mapLeft { e ->
+                    Log.e(tag, "Failed to fetch chat by ID", e)
+                    InfraErrors.DatabaseError("Failed to fetch chat by ID")
+                }
 
         suspend fun createChatFromScenario(scenarioId: String): Either<InfraErrors, ChatDto> =
             Either

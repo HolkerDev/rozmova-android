@@ -32,12 +32,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import eu.rozmova.app.domain.WordModel
+import eu.rozmova.app.domain.WordDto
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HelperWordsBottomSheet(
-    words: List<WordModel>,
+    words: List<WordDto>,
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(
@@ -71,7 +71,7 @@ fun HelperWordsBottomSheet(
 
 @Composable
 fun WordItem(
-    word: WordModel,
+    word: WordDto,
     modifier: Modifier = Modifier,
 ) {
     var showTranslation by remember { mutableStateOf(false) }
@@ -133,9 +133,9 @@ fun WordItem(
 private fun HelperWordsBottomSheetPreview() {
     val words =
         listOf(
-            WordModel("1", "hello", "привет"),
-            WordModel("2", "world", "мир"),
-            WordModel("3", "goodbye", "пока"),
+            WordDto("hello", "привет"),
+            WordDto("world", "мир"),
+            WordDto("goodbye", "пока"),
         )
 
     HelperWordsBottomSheet(words = words, onDismiss = {})
