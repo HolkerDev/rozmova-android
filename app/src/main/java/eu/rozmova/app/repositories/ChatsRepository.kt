@@ -85,7 +85,6 @@ class ChatsRepository
                             val chats =
                                 res.body()
                                     ?: throw IllegalStateException("Chats list fetch failed due to empty body: ${res.message()}")
-                            Log.i(tag, "Chat fetched: $chats")
                             chats
                         } else {
                             throw IllegalStateException("Chats list fetch failed: ${res.message()}")
@@ -104,7 +103,6 @@ class ChatsRepository
                         val chats =
                             response.body()
                                 ?: throw IllegalStateException("Chat deletion failed: ${response.message()}")
-                        Log.i(tag, "Chat deleted: $chats")
                         chats
                     } else {
                         throw IllegalStateException("Chat deletion failed: ${response.message()}")
@@ -140,7 +138,6 @@ class ChatsRepository
                             val chat =
                                 res.body()
                                     ?: throw IllegalStateException("Chat fetch failed: ${res.message()}")
-                            Log.i(tag, "Chat fetched: $chat")
                             chat
                         } else {
                             throw IllegalStateException("Chat fetch failed: ${res.message()}")
@@ -159,7 +156,6 @@ class ChatsRepository
                             val chat =
                                 res.body()?.chat
                                     ?: throw IllegalStateException("Chat creation failed")
-                            Log.i(tag, "Chat created: $chat")
                             chat
                         } else {
                             throw IllegalStateException("Chat creation failed")

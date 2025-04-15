@@ -122,6 +122,9 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation(libs.firebase.config.ktx)
 
+    implementation("org.orbit-mvi:orbit-viewmodel:9.0.0")
+    implementation("org.orbit-mvi:orbit-compose:9.0.0")
+
     testImplementation("io.mockk:mockk:1.13.9")
     androidTestImplementation("io.mockk:mockk-android:1.13.9")
 

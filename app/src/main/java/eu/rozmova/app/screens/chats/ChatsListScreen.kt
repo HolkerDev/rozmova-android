@@ -17,8 +17,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,7 +28,7 @@ import eu.rozmova.app.R
 import eu.rozmova.app.components.ChatItem
 import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.toScenarioType
-import eu.rozmova.app.utils.ViewState
+import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
 fun ChatsListScreen(
@@ -39,11 +37,7 @@ fun ChatsListScreen(
     modifier: Modifier = Modifier,
     viewModel: ChatsListViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.loadChats()
-    }
+    val state = viewModel.collectAsState().value
 
     Box(
         modifier =
@@ -65,35 +59,20 @@ fun ChatsListScreen(
                     ),
                 shape = MaterialTheme.shapes.medium,
             ) {
-                when (val viewState = state) {
-                    ViewState.Empty ->
-                        Text(
-                            text = stringResource(R.string.chats_screen_no_chats),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(24.dp),
-                        )
-                    is ViewState.Error ->
-                        Text(
-                            text = stringResource(R.string.error_message),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(24.dp),
-                        )
-                    ViewState.Loading ->
+                when {
+                    state.isLoading -> {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier.fillMaxSize().padding(24.dp),
                         ) {
                             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         }
-                    is ViewState.Success -> {
+                    }
+                    state.chats.isNotEmpty() -> {
                         LazyColumn(
                             modifier = Modifier.padding(vertical = 8.dp),
                         ) {
-                            items(viewState.data) { chat ->
+                            items(state.chats) { chat ->
                                 ChatItem(chat, onChatClick = {
                                     onChatSelect(
                                         chat.id,
@@ -104,6 +83,15 @@ fun ChatsListScreen(
                                 })
                             }
                         }
+                    }
+                    else -> {
+                        Text(
+                            text = stringResource(R.string.chats_screen_no_chats),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(24.dp),
+                        )
                     }
                 }
             }

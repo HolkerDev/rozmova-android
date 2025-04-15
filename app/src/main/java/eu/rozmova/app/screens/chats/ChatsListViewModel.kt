@@ -2,56 +2,56 @@ package eu.rozmova.app.screens.chats
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.repositories.ChatsRepository
-import eu.rozmova.app.utils.ViewState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.ContainerHost
+import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
+
+data class ChatsListState(
+    val chats: List<ChatDto> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: Throwable? = null,
+)
 
 @HiltViewModel
 class ChatsListViewModel
     @Inject
     constructor(
         private val chatsRepository: ChatsRepository,
-    ) : ViewModel() {
+    ) : ViewModel(),
+        ContainerHost<ChatsListState, Nothing> {
+        override val container = container<ChatsListState, Nothing>(ChatsListState())
         private val tag = this::class.simpleName
-
-        private val _state = MutableStateFlow<ViewState<List<ChatDto>>>(ViewState.Loading)
-        val state = _state.asStateFlow()
 
         init {
             loadChats()
         }
 
         fun loadChats() =
-            viewModelScope.launch {
-                _state.update { ViewState.Loading }
+            intent {
+                reduce { state.copy(isLoading = true) }
                 chatsRepository
                     .fetchAll()
                     .map { chats ->
-                        _state.update { ViewState.Success(chats) }
+                        reduce { state.copy(isLoading = false, chats = chats) }
                     }.mapLeft { error ->
                         Log.e(tag, "Error loading chats", error)
-                        _state.update { ViewState.Error(error) }
+                        reduce { state.copy(isLoading = false, error = error) }
                     }
             }
 
         fun deleteChat(chatId: String) =
-            viewModelScope.launch {
-                _state.update { ViewState.Loading }
+            intent {
+                reduce { state.copy(isLoading = true) }
                 chatsRepository
                     .deleteChat(chatId)
                     .map { chats ->
-                        _state.update {
-                            ViewState.Success(chats)
-                        }
-                    }.mapLeft {
-                        Log.e(tag, "Error while deleting chat", it)
+                        reduce { state.copy(chats = chats, isLoading = false) }
+                    }.mapLeft { error ->
+                        Log.e(tag, "Error while deleting chat", error)
+                        reduce { state.copy(isLoading = false, error = error) }
                     }
             }
     }
