@@ -128,7 +128,7 @@ class ChatDetailsViewModel
                         if (response.shouldFinishChat) {
                             _shouldProposeToFinishChat.update { true }
                         }
-                        response.messages.sortedBy { it.createdAt }.map { message ->
+//                        response.messages.sortedBy { it.createdAt }.map { message ->
 //                            AudioChatMessage(
 //                                id = message.id,
 //                                isPlaying = false,
@@ -137,7 +137,7 @@ class ChatDetailsViewModel
 //                                author = message.author,
 //                                duration = message.audioDuration,
 //                            )
-                        }
+//                        }
                     }.fold(
                         { error ->
                             _state.update { it.copy(isLoading = false, error = error.message) }

@@ -5,6 +5,8 @@ import arrow.core.Either
 import arrow.core.raise.either
 import eu.rozmova.app.clients.ChatClient
 import eu.rozmova.app.clients.ChatCreateReq
+import eu.rozmova.app.clients.MessageClient
+import eu.rozmova.app.clients.SendMessageReq
 import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatModel
@@ -53,6 +55,7 @@ class ChatsRepository
     constructor(
         private val supabaseClient: SupabaseClient,
         private val chatClient: ChatClient,
+        private val messageClient: MessageClient,
     ) {
         private val tag = this::class.simpleName
 
@@ -232,14 +235,21 @@ class ChatsRepository
         suspend fun sendMessage(
             chatId: String,
             message: String,
-        ): Either<InfraErrors, ChatResponse> =
-            either {
-                try {
-                    val response = supabaseClient.functions.invoke("send-message", mapOf("chatId" to chatId, "message" to message))
-                    response.body<ChatResponse>()
-                } catch (e: Exception) {
-                    Log.e(tag, "Failed to send message", e)
-                    raise(InfraErrors.DatabaseError("Failed to send message"))
+        ): Either<InfraErrors, ChatDto> =
+            Either
+                .catch {
+                    messageClient.sendTextMessage(SendMessageReq(chatId = chatId, content = message)).let { res ->
+                        if (res.isSuccessful) {
+                            val chatDto =
+                                res.body()
+                                    ?: throw IllegalStateException("Text message send failed: ${res.message()}")
+                            chatDto
+                        } else {
+                            throw IllegalStateException("Text message send failed: ${res.message()}")
+                        }
+                    }
+                }.mapLeft { error ->
+                    Log.e(tag, "Error sending message", error)
+                    InfraErrors.NetworkError("Failed to send text message")
                 }
-            }
     }

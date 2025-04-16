@@ -19,8 +19,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.MessageDto
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant.Companion.now
 
 @Composable
 fun MessageItem(
@@ -81,7 +79,6 @@ private fun MessageItemPreview() {
                 content = "Hello, world!",
                 author = Author.USER,
                 audioId = null,
-                createdAt = Clock.System.now(),
                 audioDuration = 0,
             ),
     )

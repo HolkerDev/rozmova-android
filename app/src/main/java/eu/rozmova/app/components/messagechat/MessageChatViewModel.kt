@@ -60,7 +60,7 @@ class MessageChatViewModel
                             chat = ViewState.Success(chat),
                             messages =
                                 ViewState.Success(
-                                    chat.messages.sortedBy { msg -> msg.createdAt }.map { message ->
+                                    chat.messages.map { message ->
                                         ChatMessage(
                                             id = message.id,
                                             body = message.content,
@@ -107,22 +107,12 @@ class MessageChatViewModel
                     chatId = chatId,
                     message = message,
                 ).map { response ->
-                    if (response.shouldFinishChat) {
-                        _events.emit(MessageChatEvent.ProposeFinish)
-                    }
-
-                    _state.update { state ->
-                        state.copy(
-                            messages =
-                                ViewState.Success(
-                                    response.messages.sortedBy { msg -> msg.createdAt }.map { msg ->
-                                        ChatMessage(
-                                            id = msg.id,
-                                            body = msg.content,
-                                            author = msg.author,
-                                        )
-                                    },
-                                ),
+//                    if (response.shouldFinishChat) {
+//                        _events.emit(MessageChatEvent.ProposeFinish)
+//                    }
+                    _state.update {
+                        it.copy(
+                            chat = ViewState.Success(response),
                         )
                     }
                 }
