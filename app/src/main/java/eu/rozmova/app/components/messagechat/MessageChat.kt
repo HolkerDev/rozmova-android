@@ -256,7 +256,7 @@ fun ScenarioInfoCard(
                 ) {
                     // Situation card
                     Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         shape = RoundedCornerShape(8.dp),
                         modifier =
                             Modifier
@@ -285,7 +285,7 @@ fun ScenarioInfoCard(
 
                     // Instructions card
                     Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         shape = RoundedCornerShape(8.dp),
                         modifier =
                             Modifier
