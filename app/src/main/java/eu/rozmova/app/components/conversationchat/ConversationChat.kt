@@ -62,8 +62,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.rozmova.app.R
 import eu.rozmova.app.components.AudioMessageItem
 import eu.rozmova.app.components.AudioRecorderButton
-import eu.rozmova.app.components.ChatAnalysisDialog
-import eu.rozmova.app.components.ShouldFinishChatDialog
 import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.components.WordItem
@@ -131,13 +129,13 @@ fun ConversationChat(
 //            },
 //        )
 
-        state.chatAnalysis?.let {
-            ChatAnalysisDialog(
-                chatAnalysis = it,
-                onConfirm = { viewModel.onChatAnalysisSubmit() },
-                isLoading = chatState.isChatAnalysisSubmitLoading,
-            )
-        }
+//        state.chatAnalysis?.let {
+//            ChatAnalysisDialog(
+//                review = it,
+//                onConfirm = { viewModel.onChatAnalysisSubmit() },
+//                isLoading = chatState.isChatAnalysisSubmitLoading,
+//            )
+//        }
 
         if (state.isLoading && state.chat == null) {
             LoadingComponent(onBackClick)

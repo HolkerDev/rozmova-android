@@ -8,8 +8,8 @@ data class ReviewDto(
 
 data class TaskCompletionDto(
     val isCompleted: Boolean,
-    val metInstructions: String,
-    val missedInstructions: String,
+    val metInstructions: List<String>,
+    val missedInstructions: List<String>,
     val mistakes: List<MistakeDto>,
     val rating: Int,
 )

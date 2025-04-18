@@ -2,7 +2,6 @@ package eu.rozmova.app.components.messagechat
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.domain.ReviewDto
@@ -15,8 +14,7 @@ data class MessageChatState(
     val chat: ChatDto? = null,
     val isLoadingPage: Boolean = false,
     val isLoadingMessage: Boolean = false,
-    val chatAnalysis: ChatAnalysis? = null,
-    val isAnalysisLoading: Boolean = false,
+    val review: ReviewDto? = null,
 )
 
 sealed class MessageChatEvent {
@@ -28,11 +26,6 @@ sealed class MessageChatEvent {
     ) : MessageChatEvent()
 
     data object Close : MessageChatEvent()
-
-    data class ReviewReady(
-        val chat: ChatDto,
-        val review: ReviewDto,
-    ) : MessageChatEvent()
 }
 
 @HiltViewModel
@@ -58,13 +51,13 @@ class MessageChatViewModel
             intent {
                 reduce { state.copy(isLoadingPage = true) }
                 chatsRepository.finishChat(chatId = chatId).map { chatUpdate ->
-                    reduce { state.copy(chat = chatUpdate.chat, isLoadingPage = false) }
-                    postSideEffect(
-                        MessageChatEvent.ReviewReady(
+                    reduce {
+                        state.copy(
                             chat = chatUpdate.chat,
+                            isLoadingPage = false,
                             review = chatUpdate.review,
-                        ),
-                    )
+                        )
+                    }
                 }
             }
 

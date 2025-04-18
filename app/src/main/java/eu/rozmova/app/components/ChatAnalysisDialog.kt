@@ -29,6 +29,7 @@ import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -47,7 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -57,15 +57,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import eu.rozmova.app.R
-import eu.rozmova.app.domain.ChatAnalysis
-import eu.rozmova.app.domain.Requirements
-import eu.rozmova.app.domain.TaskCompletion
-import eu.rozmova.app.domain.TopicToReview
+import eu.rozmova.app.domain.MistakeDto
+import eu.rozmova.app.domain.ReviewDto
+import eu.rozmova.app.domain.TaskCompletionDto
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatAnalysisDialog(
-    chatAnalysis: ChatAnalysis,
+    review: ReviewDto,
     isLoading: Boolean,
     onConfirm: () -> Unit,
     modifier: Modifier = Modifier,
@@ -95,7 +94,10 @@ fun ChatAnalysisDialog(
                     title = { Text(text = stringResource(R.string.chat_analysis_title)) },
                     navigationIcon = {
                         IconButton(onClick = onConfirm) {
-                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close_content_description))
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = stringResource(R.string.close_content_description),
+                            )
                         }
                     },
                     colors =
@@ -136,33 +138,48 @@ fun ChatAnalysisDialog(
                                         text = stringResource(R.string.chat_analysis_task_completion),
                                         style = MaterialTheme.typography.titleMedium,
                                     )
-                                    CompletionStatusChip(chatAnalysis.taskCompletion.isCompleted)
+                                    CompletionStatusChip(review.taskCompletion.isCompleted)
                                 }
 
                                 Spacer(modifier = Modifier.height(16.dp))
-                                RatingBar(chatAnalysis.taskCompletion.rating)
+                                RatingBar(review.taskCompletion.rating)
                                 Spacer(modifier = Modifier.height(16.dp))
-                                RequirementsSection(chatAnalysis.taskCompletion.requirements)
+                                RequirementsSection(
+                                    review.taskCompletion.metInstructions,
+                                    review.taskCompletion.missedInstructions,
+                                )
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         // Topics to Review Section
-                        if (chatAnalysis.topicsToReview.isNotEmpty()) {
+                        if (review.topicsToReview.isNotEmpty()) {
                             Text(
                                 text = stringResource(R.string.chat_analysis_topics_to_refresh),
                                 style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.padding(bottom = 8.dp),
                             )
-                            TopicsToReviewList(chatAnalysis.topicsToReview)
+                            TopicsToReviewList(review.topicsToReview)
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Topics to Review Section
+                        if (review.wordsToLearn.isNotEmpty()) {
+                            Text(
+                                text = "Words to learn",
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.padding(bottom = 8.dp),
+                            )
+                            WordsToLearn(review.wordsToLearn)
                         }
                     }
                 }
                 Button(
                     onClick = onConfirm,
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = MaterialTheme.shapes.medium,
                 ) {
                     if (isLoading) {
                         Text(text = stringResource(R.string.loading_progress))
@@ -176,12 +193,23 @@ fun ChatAnalysisDialog(
 }
 
 @Composable
-private fun TopicsToReviewList(topics: List<TopicToReview>) {
+private fun TopicsToReviewList(topics: List<String>) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         topics.forEach { topic ->
             TopicItem(topic)
+        }
+    }
+}
+
+@Composable
+private fun WordsToLearn(words: List<String>) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        words.forEach { topic ->
+            WordItem(topic)
         }
     }
 }
@@ -238,7 +266,7 @@ private fun RatingBar(rating: Int) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        repeat(5) { index ->
+        repeat(3) { index ->
             Icon(
                 imageVector =
                     if (index < rating) {
@@ -260,16 +288,19 @@ private fun RatingBar(rating: Int) {
 }
 
 @Composable
-private fun RequirementsSection(requirements: Requirements) {
+private fun RequirementsSection(
+    metInstructions: List<String>,
+    missedInstructions: List<String>,
+) {
     Column {
-        if (requirements.met.isNotEmpty()) {
+        metInstructions.takeIf { it.isNotEmpty() }?.let { met ->
             Text(
                 text = stringResource(R.string.met_requirements),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
             Spacer(modifier = Modifier.height(8.dp))
-            requirements.met.forEach { requirement ->
+            met.forEach { requirement ->
                 RequirementItem(
                     requirement = requirement,
                     isMet = true,
@@ -277,7 +308,7 @@ private fun RequirementsSection(requirements: Requirements) {
             }
         }
 
-        if (requirements.missed.isNotEmpty()) {
+        missedInstructions.takeIf { it.isNotEmpty() }?.let { missed ->
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(R.string.missed_requirements),
@@ -285,7 +316,7 @@ private fun RequirementsSection(requirements: Requirements) {
                 color = MaterialTheme.colorScheme.error,
             )
             Spacer(modifier = Modifier.height(8.dp))
-            requirements.missed.forEach { requirement ->
+            missed.forEach { requirement ->
                 RequirementItem(
                     requirement = requirement,
                     isMet = false,
@@ -333,13 +364,72 @@ private fun RequirementItem(
 }
 
 @Composable
-private fun TopicItem(topic: TopicToReview) {
+private fun WordItem(word: String) {
     val context = LocalContext.current
-    val clipboardManager = remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+    val clipboardManager =
+        remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
     val copiedToClipboardMsg = stringResource(R.string.copied_to_clipboard)
 
     val onCopyClick = {
-        val clip = ClipData.newPlainText("topic", topic.topic)
+        val clip = ClipData.newPlainText("word", word)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            clipboardManager.setPrimaryClip(clip)
+        } else {
+            clipboardManager.setPrimaryClip(clip)
+            Toast.makeText(context, copiedToClipboardMsg, Toast.LENGTH_SHORT).show()
+        }
+    }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            ),
+    ) {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable { onCopyClick() }
+                    .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Translate,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(end = 8.dp),
+            )
+            Text(
+                text = word,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.weight(1f),
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+            )
+
+            Icon(
+                imageVector = Icons.Rounded.ContentCopy,
+                contentDescription = "Copy $word",
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(start = 8.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun TopicItem(topic: String) {
+    val context = LocalContext.current
+    val clipboardManager =
+        remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+    val copiedToClipboardMsg = stringResource(R.string.copied_to_clipboard)
+
+    val onCopyClick = {
+        val clip = ClipData.newPlainText("topic", topic)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             clipboardManager.setPrimaryClip(clip)
         } else {
@@ -370,7 +460,7 @@ private fun TopicItem(topic: TopicToReview) {
                 modifier = Modifier.padding(end = 8.dp),
             )
             Text(
-                text = topic.topic,
+                text = topic,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                 modifier = Modifier.weight(1f),
@@ -381,7 +471,7 @@ private fun TopicItem(topic: TopicToReview) {
 
             Icon(
                 imageVector = Icons.Rounded.ContentCopy,
-                contentDescription = "Copy ${topic.topic}",
+                contentDescription = "Copy $topic",
                 tint = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.padding(start = 8.dp),
             )
@@ -395,23 +485,30 @@ private fun ChatAnalysisDialogPreview() {
     var isLoading by remember { mutableStateOf(false) }
 
     ChatAnalysisDialog(
-        chatAnalysis =
-            ChatAnalysis(
+        review =
+            ReviewDto(
                 taskCompletion =
-                    TaskCompletion(
-                        isCompleted = false,
-                        rating = 4,
-                        requirements =
-                            Requirements(
-                                met = listOf("Requirement 1", "Requirement 2"),
-                                missed = listOf("Requirement 3"),
+                    TaskCompletionDto(
+                        isCompleted = true,
+                        metInstructions = listOf("you were good"),
+                        missedInstructions = listOf("you were bad"),
+//                        missedInstructions = emptyList(),
+                        mistakes =
+                            listOf(
+                                MistakeDto(
+                                    wrong = "I *has* a dog",
+                                    correct = "I *have* a dog",
+                                ),
                             ),
+                        rating = 2,
                     ),
                 topicsToReview =
                     listOf(
-                        TopicToReview("Very long topic name, that is longer and longer 1"),
-                        TopicToReview("Topic 2"),
-                        TopicToReview("Topic 3"),
+                        "Akkusativ",
+                    ),
+                wordsToLearn =
+                    listOf(
+                        "der Junge",
                     ),
             ),
         onConfirm = { isLoading = !isLoading },

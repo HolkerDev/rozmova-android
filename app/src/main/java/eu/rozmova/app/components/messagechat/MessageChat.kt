@@ -110,7 +110,6 @@ fun MessageChat(
                         lastUserMsg = event.lastUserMsg,
                     )
             MessageChatEvent.ScrollToBottom -> scrollToBottom()
-            is MessageChatEvent.ReviewReady -> {}
         }
     }
 
@@ -136,11 +135,11 @@ fun MessageChat(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        state.chatAnalysis?.let {
+        state.review?.let {
             ChatAnalysisDialog(
-                chatAnalysis = it,
+                review = it,
                 onConfirm = { viewModel.archiveChat(chatId) },
-                isLoading = state.isAnalysisLoading,
+                isLoading = false,
             )
         }
 
@@ -154,13 +153,12 @@ fun MessageChat(
                 ScenarioInfoCard(
                     chat = chat,
                     onBackClick = onBackClick,
-//                        onChatFinish = { viewModel.finishChat(chatState.data.chatModel.id) },
+                    onChatFinish = { viewModel.finishChat(chat.id) },
 //                        onChatArchive = { viewModel.prepareAnalytics(chatState.data.id) },
                     isMessageLoading = state.isLoadingMessage,
-                    isAnalysisLoading = state.isAnalysisLoading,
+                    isAnalysisLoading = false,
                     messageListState = messageListState,
                     modifier = Modifier.weight(1f),
-                    onChatFinish = {},
                     onChatArchive = {},
                 )
                 MessageInput(
