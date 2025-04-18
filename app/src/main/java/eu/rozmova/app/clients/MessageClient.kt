@@ -9,10 +9,15 @@ interface MessageClient {
     @POST("messages/text")
     suspend fun sendTextMessage(
         @Body body: SendMessageReq,
-    ): Response<ChatDto>
+    ): Response<SendMessageRes>
 }
 
 data class SendMessageReq(
     val chatId: String,
     val content: String,
+)
+
+data class SendMessageRes(
+    val chat: ChatDto,
+    val shouldFinish: Boolean,
 )

@@ -44,7 +44,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,7 +70,13 @@ import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.domain.WordDto
 import eu.rozmova.app.screens.createchat.ChatId
-import eu.rozmova.app.utils.ViewState
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
+
+data class FinishChat(
+    val lastBotMsg: MessageDto,
+    val lastUserMsg: MessageDto,
+)
 
 @Composable
 fun MessageChat(
@@ -81,54 +86,57 @@ fun MessageChat(
     modifier: Modifier = Modifier,
     viewModel: MessageChatViewModel = hiltViewModel(),
 ) {
+    val state by viewModel.collectAsState()
+
     val messageListState = rememberLazyListState()
     val onChatArchiveState = rememberUpdatedState(onChatArchive)
-    val state by viewModel.state.collectAsState()
-    var showModal by remember { mutableStateOf(false) }
+    var finishChat: FinishChat? by remember { mutableStateOf(null) }
 
     LaunchedEffect(chatId) {
         viewModel.loadChat(chatId)
     }
 
-    LaunchedEffect(key1 = viewModel) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is MessageChatEvent.ScrollToBottom -> {
-                    (state.messages as? ViewState.Success)?.let { messages ->
-                        if (messages.data.isEmpty()) {
-                            return@let
-                        }
-                        messageListState.animateScrollToItem(messages.data.size - 1)
-                    }
-                }
-
-                MessageChatEvent.Close -> {
-                    onChatArchiveState.value()
-                }
-                MessageChatEvent.ProposeFinish -> {
-                    showModal = true
-                }
-            }
+    suspend fun scrollToBottom() {
+        state.chat?.messages?.takeIf { it.isNotEmpty() }?.let { messages ->
+            messageListState.animateScrollToItem(messages.size - 1)
         }
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
+    viewModel.collectSideEffect { event ->
+        when (event) {
+            MessageChatEvent.Close -> {}
+            is MessageChatEvent.ProposeFinish ->
+                finishChat =
+                    FinishChat(
+                        lastBotMsg = event.lastBotMsg,
+                        lastUserMsg = event.lastUserMsg,
+                    )
+            MessageChatEvent.ScrollToBottom -> scrollToBottom()
+        }
+    }
+
+    fun onMessageSend(content: String) {
+        viewModel.sendMessage(chatId, content)
+    }
+
+    finishChat?.let { data ->
         ShouldFinishChatDialog(
-            showDialog = showModal,
+            lastBotMsg = data.lastBotMsg,
+            lastUserMsg = data.lastUserMsg,
             onYesClick = {
-                showModal = false
-                (state.chat as? ViewState.Success)?.let { chatState ->
-                    viewModel.finishChat(chatState.data.id)
-                }
+                finishChat = null
+                viewModel.finishChat(chatId)
             },
             onNoClick = {
-                showModal = false
+                finishChat = null
             },
             onDismiss = {
-                showModal = false
+                finishChat = null
             },
         )
+    }
 
+    Column(modifier = modifier.fillMaxSize()) {
         state.chatAnalysis?.let {
             ChatAnalysisDialog(
                 chatAnalysis = it,
@@ -137,43 +145,36 @@ fun MessageChat(
             )
         }
 
-        when (val chatState = state.chat) {
-            is ViewState.Loading -> LoadingComponent(onBackClick)
-            ViewState.Empty -> ErrorComponent(onBackClick)
-            is ViewState.Error -> ErrorComponent(onBackClick)
-            is ViewState.Success -> {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(bottom = 16.dp),
-                ) {
-                    ScenarioInfoCard(
-                        chat = chatState.data,
-                        onBackClick = onBackClick,
+        state.chat?.let { chat ->
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 16.dp),
+            ) {
+                ScenarioInfoCard(
+                    chat = chat,
+                    onBackClick = onBackClick,
 //                        onChatFinish = { viewModel.finishChat(chatState.data.chatModel.id) },
 //                        onChatArchive = { viewModel.prepareAnalytics(chatState.data.id) },
-                        isMessageLoading = state.isLoadingMessage,
-                        isAnalysisLoading = state.isAnalysisLoading,
-                        messageListState = messageListState,
-                        modifier = Modifier.weight(1f),
-                        onChatFinish = {},
-                        onChatArchive = {},
-                    )
-                    MessageInput(
-                        onSendMessage = { message ->
-                            viewModel.sendMessage(chatState.data.id, message)
-                        },
-                        isDisabled = state.isLoadingMessage || chatState.data.status != ChatStatus.IN_PROGRESS,
-                    )
-                }
+                    isMessageLoading = state.isLoadingMessage,
+                    isAnalysisLoading = state.isAnalysisLoading,
+                    messageListState = messageListState,
+                    modifier = Modifier.weight(1f),
+                    onChatFinish = {},
+                    onChatArchive = {},
+                )
+                MessageInput(
+                    onSendMessage = ::onMessageSend,
+                    isDisabled = state.isLoadingMessage || chat.status != ChatStatus.IN_PROGRESS,
+                )
             }
         }
     }
 }
 
 @Composable
-fun ScenarioInfoCard(
+private fun ScenarioInfoCard(
     chat: ChatDto,
     onBackClick: () -> Unit,
     onChatFinish: () -> Unit,
@@ -256,7 +257,7 @@ fun ScenarioInfoCard(
                 ) {
                     // Situation card
                     Surface(
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.primaryContainer,
                         shape = RoundedCornerShape(8.dp),
                         modifier =
                             Modifier
@@ -285,7 +286,7 @@ fun ScenarioInfoCard(
 
                     // Instructions card
                     Surface(
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.primaryContainer,
                         shape = RoundedCornerShape(8.dp),
                         modifier =
                             Modifier

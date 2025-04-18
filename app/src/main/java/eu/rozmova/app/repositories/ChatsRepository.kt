@@ -49,6 +49,11 @@ data class ChatResponse(
     val shouldFinishChat: Boolean,
 )
 
+data class ChatUpdate(
+    val chat: ChatDto,
+    val shouldFinish: Boolean,
+)
+
 @Singleton
 class ChatsRepository
     @Inject
@@ -235,15 +240,15 @@ class ChatsRepository
         suspend fun sendMessage(
             chatId: String,
             message: String,
-        ): Either<InfraErrors, ChatDto> =
+        ): Either<InfraErrors, ChatUpdate> =
             Either
                 .catch {
                     messageClient.sendTextMessage(SendMessageReq(chatId = chatId, content = message)).let { res ->
                         if (res.isSuccessful) {
-                            val chatDto =
+                            val responseBody =
                                 res.body()
                                     ?: throw IllegalStateException("Text message send failed: ${res.message()}")
-                            chatDto
+                            ChatUpdate(chat = responseBody.chat, shouldFinish = responseBody.shouldFinish)
                         } else {
                             throw IllegalStateException("Text message send failed: ${res.message()}")
                         }

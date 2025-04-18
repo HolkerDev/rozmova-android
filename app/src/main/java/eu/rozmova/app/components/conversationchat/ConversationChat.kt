@@ -114,22 +114,22 @@ fun ConversationChat(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        ShouldFinishChatDialog(
-            showDialog = showModal,
-            onYesClick = {
-                showModal = false
-                viewModel.finishChat(chatState.chat!!.id)
-                viewModel.resetProposal()
-            },
-            onNoClick = {
-                showModal = false
-                viewModel.resetProposal()
-            },
-            onDismiss = {
-                showModal = false
-                viewModel.resetProposal()
-            },
-        )
+//        ShouldFinishChatDialog(
+//            showDialog = showModal,
+//            onYesClick = {
+//                showModal = false
+//                viewModel.finishChat(chatState.chat!!.id)
+//                viewModel.resetProposal()
+//            },
+//            onNoClick = {
+//                showModal = false
+//                viewModel.resetProposal()
+//            },
+//            onDismiss = {
+//                showModal = false
+//                viewModel.resetProposal()
+//            },
+//        )
 
         state.chatAnalysis?.let {
             ChatAnalysisDialog(
