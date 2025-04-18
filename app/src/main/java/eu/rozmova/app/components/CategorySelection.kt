@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -43,8 +44,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.R
+import eu.rozmova.app.domain.DifficultyDto
+import eu.rozmova.app.domain.LangDto
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.domain.toDifficulty
@@ -75,6 +79,7 @@ fun CategorySelection(
     scenarios: List<ScenarioDto>,
     onScenarioSelect: (ScenarioDto) -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     // State for selected category - shared between components
     var selectedCategory by remember { mutableStateOf(ScenarioTypeDto.MESSAGES) }
@@ -121,12 +126,26 @@ fun CategorySelection(
                 onCategorySelect = { selectedCategory = it },
             )
 
-            // Scenarios grid
-            ScenariosGrid(
-                selectedCategoryType = selectedCategory,
-                allScenarios = scenarios,
-                onScenarioSelect = onScenarioSelect,
-            )
+            if (isLoading) {
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            } else {
+                // Scenarios grid
+                ScenariosGrid(
+                    selectedCategoryType = selectedCategory,
+                    allScenarios = scenarios,
+                    onScenarioSelect = onScenarioSelect,
+                )
+            }
         }
     }
 }
@@ -362,5 +381,57 @@ fun ScenarioCard(
                 overflow = TextOverflow.Ellipsis,
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun CategorySelectionLoadingPreview() {
+    MaterialTheme {
+        CategorySelection(
+            scenarios = emptyList(),
+            onScenarioSelect = {},
+            isLoading = true,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CategorySelectionContentPreview() {
+    MaterialTheme {
+        CategorySelection(
+            scenarios =
+                listOf(
+                    ScenarioDto(
+                        id = "1",
+                        title = "Sample Conversation",
+                        situation = "A casual conversation with a friend about weekend plans",
+                        difficulty = DifficultyDto.EASY,
+                        scenarioType = ScenarioTypeDto.CONVERSATION,
+                        createdAt = "",
+                        userLang = LangDto.EN,
+                        scenarioLang = LangDto.EN,
+                        labels = emptyList(),
+                        helperWords = emptyList(),
+                        userInstructions = emptyList(),
+                    ),
+                    ScenarioDto(
+                        id = "2",
+                        title = "Sample Messages",
+                        situation = "Texting with a colleague about a project",
+                        difficulty = DifficultyDto.MEDIUM,
+                        scenarioType = ScenarioTypeDto.MESSAGES,
+                        createdAt = "",
+                        userLang = LangDto.EN,
+                        scenarioLang = LangDto.EN,
+                        labels = emptyList(),
+                        helperWords = emptyList(),
+                        userInstructions = emptyList(),
+                    ),
+                ),
+            onScenarioSelect = {},
+            isLoading = false,
+        )
     }
 }

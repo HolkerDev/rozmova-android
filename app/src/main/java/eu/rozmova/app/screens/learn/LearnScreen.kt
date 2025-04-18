@@ -88,7 +88,8 @@ fun LearnScreen(
                     // TODO: Handle the error state
                     Text("Error loading scenarios: ${weeklyScenarios.error?.message}")
                 }
-                ViewState.Loading -> CircularProgressIndicator()
+                ViewState.Loading ->
+                    CategorySelection(scenarios = emptyList(), onScenarioSelect = onScenarioDtoSelect)
             }
         }
     }
