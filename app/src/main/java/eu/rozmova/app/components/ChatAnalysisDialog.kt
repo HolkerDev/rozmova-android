@@ -420,7 +420,7 @@ private fun WordItem(word: String) {
             )
             Text(
                 text = word,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                 modifier = Modifier.weight(1f),
                 maxLines = 3,
@@ -478,7 +478,7 @@ private fun TopicItem(topic: String) {
             )
             Text(
                 text = topic,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                 modifier = Modifier.weight(1f),
                 maxLines = 3,
@@ -497,8 +497,8 @@ private fun TopicItem(topic: String) {
 }
 
 @Composable
-private fun parseAsteriskText(text: String): AnnotatedString {
-    return buildAnnotatedString {
+private fun parseAsteriskText(text: String): AnnotatedString =
+    buildAnnotatedString {
         var currentIndex = 0
         while (currentIndex < text.length) {
             val asteriskIndex = text.indexOf('*', currentIndex)
@@ -506,26 +506,25 @@ private fun parseAsteriskText(text: String): AnnotatedString {
                 append(text.substring(currentIndex))
                 break
             }
-            
+
             // Add text before asterisk
             append(text.substring(currentIndex, asteriskIndex))
-            
+
             // Find closing asterisk
             val closingAsteriskIndex = text.indexOf('*', asteriskIndex + 1)
             if (closingAsteriskIndex == -1) {
                 append(text.substring(asteriskIndex))
                 break
             }
-            
+
             // Add bold text
             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                 append(text.substring(asteriskIndex + 1, closingAsteriskIndex))
             }
-            
+
             currentIndex = closingAsteriskIndex + 1
         }
     }
-}
 
 @Composable
 private fun MistakesSection(mistakes: List<MistakeDto>) {
@@ -535,9 +534,10 @@ private fun MistakesSection(mistakes: List<MistakeDto>) {
         mistakes.forEach { mistake ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                ),
+                colors =
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
             ) {
                 Column(
@@ -557,16 +557,17 @@ private fun MistakesSection(mistakes: List<MistakeDto>) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = parseAsteriskText(mistake.wrong),
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough
-                            ),
+                            style =
+                                MaterialTheme.typography.bodyLarge.copy(
+                                    textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough,
+                                ),
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.weight(1f),
                         )
                     }
-                    
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    
+
                     // Correct version with arrow
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -585,29 +586,6 @@ private fun MistakesSection(mistakes: List<MistakeDto>) {
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.weight(1f),
                         )
-                        
-                        // Copy button
-                        val context = LocalContext.current
-                        val clipboardManager = remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
-                        val copiedToClipboardMsg = stringResource(R.string.copied_to_clipboard)
-                        
-                        IconButton(
-                            onClick = {
-                                val clip = ClipData.newPlainText("correction", mistake.correct)
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                    clipboardManager.setPrimaryClip(clip)
-                                } else {
-                                    clipboardManager.setPrimaryClip(clip)
-                                    Toast.makeText(context, copiedToClipboardMsg, Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.ContentCopy,
-                                contentDescription = stringResource(R.string.copy_content_description),
-                                tint = MaterialTheme.colorScheme.primary,
-                            )
-                        }
                     }
                 }
             }
@@ -637,7 +615,7 @@ private fun ChatAnalysisDialogPreview() {
                                 MistakeDto(
                                     wrong = "I *has* a dog",
                                     correct = "I *have* a dog",
-                                )
+                                ),
                             ),
                         rating = 2,
                     ),

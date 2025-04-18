@@ -14,6 +14,7 @@ data class MessageChatState(
     val chat: ChatDto? = null,
     val isLoadingPage: Boolean = false,
     val isLoadingMessage: Boolean = false,
+    val isLoadingReview: Boolean = false,
     val review: ReviewDto? = null,
 )
 
@@ -49,12 +50,13 @@ class MessageChatViewModel
 
         fun finishChat(chatId: String) =
             intent {
-                reduce { state.copy(isLoadingPage = true) }
+                reduce { state.copy(isLoadingPage = true, isLoadingReview = true) }
                 chatsRepository.finishChat(chatId = chatId).map { chatUpdate ->
                     reduce {
                         state.copy(
                             chat = chatUpdate.chat,
                             isLoadingPage = false,
+                            isLoadingReview = false,
                             review = chatUpdate.review,
                         )
                     }

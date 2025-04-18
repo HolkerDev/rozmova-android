@@ -143,6 +143,41 @@ fun MessageChat(
             )
         }
 
+        if (state.isLoadingReview) {
+            AlertDialog(
+                onDismissRequest = { },
+                title = {
+                    Text(
+                        "Analyzing conversation",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                },
+                text = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 2.dp,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            "Please wait while we analyze your conversation...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                },
+                confirmButton = { },
+                containerColor = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(16.dp),
+            )
+        }
+
         state.chat?.let { chat ->
             Column(
                 modifier =
@@ -154,7 +189,6 @@ fun MessageChat(
                     chat = chat,
                     onBackClick = onBackClick,
                     onChatFinish = { viewModel.finishChat(chat.id) },
-//                        onChatArchive = { viewModel.prepareAnalytics(chatState.data.id) },
                     isMessageLoading = state.isLoadingMessage,
                     isAnalysisLoading = false,
                     messageListState = messageListState,
