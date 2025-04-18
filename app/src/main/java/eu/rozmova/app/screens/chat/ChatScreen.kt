@@ -18,7 +18,7 @@ fun ChatScreen(
         ScenarioType.MESSAGES -> {
             MessageChat(
                 chatId = chatId,
-                onChatArchive = onMain,
+                onReviewAccept = onMain,
                 onBackClick = onBack,
             )
         }

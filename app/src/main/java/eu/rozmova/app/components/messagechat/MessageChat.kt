@@ -28,7 +28,6 @@ import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Task
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -80,7 +79,7 @@ data class FinishChat(
 @Composable
 fun MessageChat(
     chatId: ChatId,
-    onChatArchive: () -> Unit,
+    onReviewAccept: () -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MessageChatViewModel = hiltViewModel(),
@@ -138,7 +137,7 @@ fun MessageChat(
         state.review?.let {
             ChatAnalysisDialog(
                 review = it,
-                onConfirm = { viewModel.archiveChat(chatId) },
+                onConfirm = { onReviewAccept() },
                 isLoading = false,
             )
         }
@@ -190,10 +189,8 @@ fun MessageChat(
                     onBackClick = onBackClick,
                     onChatFinish = { viewModel.finishChat(chat.id) },
                     isMessageLoading = state.isLoadingMessage,
-                    isAnalysisLoading = false,
                     messageListState = messageListState,
                     modifier = Modifier.weight(1f),
-                    onChatArchive = {},
                 )
                 MessageInput(
                     onSendMessage = ::onMessageSend,
@@ -209,9 +206,7 @@ private fun ScenarioInfoCard(
     chat: ChatDto,
     onBackClick: () -> Unit,
     onChatFinish: () -> Unit,
-    onChatArchive: () -> Unit,
     isMessageLoading: Boolean,
-    isAnalysisLoading: Boolean,
     messageListState: LazyListState,
     modifier: Modifier = Modifier,
 ) {
@@ -350,30 +345,6 @@ private fun ScenarioInfoCard(
                     color = MaterialTheme.colorScheme.outlineVariant,
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
-
-                // Always show the analytics button for finished chats, with proper loading state
-                if (chat.status == ChatStatus.FINISHED) {
-                    Button(
-                        onClick = { onChatArchive() },
-                        shape = MaterialTheme.shapes.small,
-                        modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(vertical = 8.dp),
-                        enabled = !isAnalysisLoading,
-                    ) {
-                        if (isAnalysisLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                strokeWidth = 2.dp,
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Analyzing...", style = MaterialTheme.typography.labelMedium)
-                        } else {
-                            Text("Get analytics", style = MaterialTheme.typography.labelMedium)
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
 
                 MessageList(
                     messages = chat.messages,
