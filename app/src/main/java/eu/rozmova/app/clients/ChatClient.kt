@@ -1,6 +1,7 @@
 package eu.rozmova.app.clients
 
 import eu.rozmova.app.domain.ChatDto
+import eu.rozmova.app.domain.ReviewDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -26,6 +27,11 @@ interface ChatClient {
     suspend fun deleteById(
         @Path("chatId") chatId: String,
     ): Response<List<ChatDto>>
+
+    @POST("chats/{chatId}/finish")
+    suspend fun finish(
+        @Path("chatId") chatId: String,
+    ): Response<FinishChatRes>
 }
 
 data class ChatCreateReq(
@@ -34,4 +40,9 @@ data class ChatCreateReq(
 
 data class ChatFetchRes(
     val chat: ChatDto,
+)
+
+data class FinishChatRes(
+    val chat: ChatDto,
+    val review: ReviewDto,
 )

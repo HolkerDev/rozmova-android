@@ -5,6 +5,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.MessageDto
+import eu.rozmova.app.domain.ReviewDto
 import eu.rozmova.app.repositories.ChatsRepository
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -27,6 +28,11 @@ sealed class MessageChatEvent {
     ) : MessageChatEvent()
 
     data object Close : MessageChatEvent()
+
+    data class ReviewReady(
+        val chat: ChatDto,
+        val review: ReviewDto,
+    ) : MessageChatEvent()
 }
 
 @HiltViewModel
@@ -48,7 +54,19 @@ class MessageChatViewModel
 
         fun archiveChat(chatId: String) = {}
 
-        fun prepareAnalytics(chatId: String) = {}
+        fun finishChat(chatId: String) =
+            intent {
+                reduce { state.copy(isLoadingPage = true) }
+                chatsRepository.finishChat(chatId = chatId).map { chatUpdate ->
+                    reduce { state.copy(chat = chatUpdate.chat, isLoadingPage = false) }
+                    postSideEffect(
+                        MessageChatEvent.ReviewReady(
+                            chat = chatUpdate.chat,
+                            review = chatUpdate.review,
+                        ),
+                    )
+                }
+            }
 
         fun sendMessage(
             chatId: String,
@@ -73,6 +91,4 @@ class MessageChatViewModel
                 }
             postSideEffect(MessageChatEvent.ScrollToBottom)
         }
-
-        fun finishChat(chatId: String) = {}
     }

@@ -47,7 +47,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,7 +88,6 @@ fun MessageChat(
     val state by viewModel.collectAsState()
 
     val messageListState = rememberLazyListState()
-    val onChatArchiveState = rememberUpdatedState(onChatArchive)
     var finishChat: FinishChat? by remember { mutableStateOf(null) }
 
     LaunchedEffect(chatId) {
@@ -112,6 +110,7 @@ fun MessageChat(
                         lastUserMsg = event.lastUserMsg,
                     )
             MessageChatEvent.ScrollToBottom -> scrollToBottom()
+            is MessageChatEvent.ReviewReady -> {}
         }
     }
 

@@ -5,6 +5,7 @@ import arrow.core.Either
 import arrow.core.raise.either
 import eu.rozmova.app.clients.ChatClient
 import eu.rozmova.app.clients.ChatCreateReq
+import eu.rozmova.app.clients.FinishChatRes
 import eu.rozmova.app.clients.MessageClient
 import eu.rozmova.app.clients.SendMessageReq
 import eu.rozmova.app.domain.ChatAnalysis
@@ -194,23 +195,23 @@ class ChatsRepository
                 }
             }
 
-        suspend fun finishChat(chatId: String): Either<InfraErrors, Unit> =
-            either {
-                try {
-                    supabaseClient.postgrest.from("chats").update(
-                        {
-                            ChatModel::status setTo ChatStatus.FINISHED
-                        },
-                    ) {
-                        filter {
-                            ChatModel::id eq chatId
+        suspend fun finishChat(chatId: String): Either<InfraErrors, FinishChatRes> =
+            Either
+                .catch {
+                    chatClient.finish(chatId).let { res ->
+                        if (res.isSuccessful) {
+                            val responseBody =
+                                res.body()
+                                    ?: throw IllegalStateException("Chat finish failed: ${res.message()}")
+                            responseBody
+                        } else {
+                            throw IllegalStateException("Chat finish failed: ${res.message()}")
                         }
                     }
-                } catch (e: Exception) {
-                    Log.e(tag, "Failed to finish chat", e)
-                    raise(InfraErrors.DatabaseError("Failed to finish chat"))
+                }.mapLeft { error ->
+                    Log.e(tag, "Error finishing chat", error)
+                    InfraErrors.NetworkError("Failed to finish chat")
                 }
-            }
 
         suspend fun sendAudioMessage(
             chatId: String,
