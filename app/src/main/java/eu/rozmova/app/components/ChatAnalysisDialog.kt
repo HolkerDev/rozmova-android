@@ -50,8 +50,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -149,6 +154,18 @@ fun ChatAnalysisDialog(
                                     review.taskCompletion.missedInstructions,
                                 )
                             }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Mistakes Section
+                        if (review.taskCompletion.mistakes.isNotEmpty()) {
+                            Text(
+                                text = stringResource(R.string.chat_analysis_mistakes),
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.padding(bottom = 8.dp),
+                            )
+                            MistakesSection(review.taskCompletion.mistakes)
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -479,6 +496,83 @@ private fun TopicItem(topic: String) {
     }
 }
 
+@Composable
+private fun parseAsteriskText(text: String): AnnotatedString {
+    return buildAnnotatedString {
+        var currentIndex = 0
+        while (currentIndex < text.length) {
+            val asteriskIndex = text.indexOf('*', currentIndex)
+            if (asteriskIndex == -1) {
+                append(text.substring(currentIndex))
+                break
+            }
+            
+            // Add text before asterisk
+            append(text.substring(currentIndex, asteriskIndex))
+            
+            // Find closing asterisk
+            val closingAsteriskIndex = text.indexOf('*', asteriskIndex + 1)
+            if (closingAsteriskIndex == -1) {
+                append(text.substring(asteriskIndex))
+                break
+            }
+            
+            // Add bold text
+            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(text.substring(asteriskIndex + 1, closingAsteriskIndex))
+            }
+            
+            currentIndex = closingAsteriskIndex + 1
+        }
+    }
+}
+
+@Composable
+private fun MistakesSection(mistakes: List<MistakeDto>) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        mistakes.forEach { mistake ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                ),
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.wrong),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                    Text(
+                        text = parseAsteriskText(mistake.wrong),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(vertical = 4.dp),
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Text(
+                        text = stringResource(R.string.correct),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Text(
+                        text = parseAsteriskText(mistake.correct),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(vertical = 4.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun ChatAnalysisDialogPreview() {
@@ -499,6 +593,10 @@ private fun ChatAnalysisDialogPreview() {
                                     wrong = "I *has* a dog",
                                     correct = "I *have* a dog",
                                 ),
+                                MistakeDto(
+                                    wrong = "I *has* a dog",
+                                    correct = "I *have* a dog",
+                                )
                             ),
                         rating = 2,
                     ),

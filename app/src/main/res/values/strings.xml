@@ -61,4 +61,7 @@
     <string name="type_message">Type a message...</string>
     <string name="send_message">Send message</string>
     <string name="message_chat_title">Writing practice</string>
+    <string name="chat_analysis_mistakes">Mistakes</string>
+    <string name="wrong">Wrong</string>
+    <string name="correct">Correct</string>
 </resources>
