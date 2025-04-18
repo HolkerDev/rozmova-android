@@ -64,4 +64,5 @@
     <string name="chat_analysis_mistakes">Mistakes</string>
     <string name="wrong">Wrong</string>
     <string name="correct">Correct</string>
+    <string name="copy_content_description">Copy to clipboard</string>
 </resources>

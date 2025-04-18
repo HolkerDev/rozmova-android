@@ -530,43 +530,85 @@ private fun parseAsteriskText(text: String): AnnotatedString {
 @Composable
 private fun MistakesSection(mistakes: List<MistakeDto>) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         mistakes.forEach { mistake ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                 ) {
-                    Text(
-                        text = stringResource(R.string.wrong),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                    Text(
-                        text = parseAsteriskText(mistake.wrong),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        modifier = Modifier.padding(vertical = 4.dp),
-                    )
+                    // Wrong version with strikethrough
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Cancel,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp),
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = parseAsteriskText(mistake.wrong),
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough
+                            ),
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    Text(
-                        text = stringResource(R.string.correct),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Text(
-                        text = parseAsteriskText(mistake.correct),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        modifier = Modifier.padding(vertical = 4.dp),
-                    )
+                    // Correct version with arrow
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = parseAsteriskText(mistake.correct),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.weight(1f),
+                        )
+                        
+                        // Copy button
+                        val context = LocalContext.current
+                        val clipboardManager = remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+                        val copiedToClipboardMsg = stringResource(R.string.copied_to_clipboard)
+                        
+                        IconButton(
+                            onClick = {
+                                val clip = ClipData.newPlainText("correction", mistake.correct)
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    clipboardManager.setPrimaryClip(clip)
+                                } else {
+                                    clipboardManager.setPrimaryClip(clip)
+                                    Toast.makeText(context, copiedToClipboardMsg, Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.ContentCopy,
+                                contentDescription = stringResource(R.string.copy_content_description),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -586,7 +628,6 @@ private fun ChatAnalysisDialogPreview() {
                         isCompleted = true,
                         metInstructions = listOf("you were good"),
                         missedInstructions = listOf("you were bad"),
-//                        missedInstructions = emptyList(),
                         mistakes =
                             listOf(
                                 MistakeDto(
