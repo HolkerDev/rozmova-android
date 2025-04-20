@@ -1,6 +1,5 @@
 package eu.rozmova.app.screens.learn
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.getOrElse
@@ -21,6 +20,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.Container
+import org.orbitmvi.orbit.ContainerHost
+import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
 
 private val DEFAULT_LEARNING_LANGUAGE = Language.GERMAN.code
@@ -32,6 +34,11 @@ sealed class LearnEvent {
     ) : LearnEvent()
 }
 
+data class LearnScreenState(
+    val weeklyScenarios: List<ScenarioDto>? = null,
+    val weeklyScenariosLoading: Boolean = false,
+)
+
 @HiltViewModel
 class LearnScreenViewModel
     @Inject
@@ -40,9 +47,9 @@ class LearnScreenViewModel
         private val userPreferencesRepository: UserPreferencesRepository,
         private val chatsRepository: ChatsRepository,
         private val localeManager: LocaleManager,
-    ) : ViewModel() {
-        private val _weeklyScenarios = MutableStateFlow<ViewState<List<ScenarioDto>>>(ViewState.Loading)
-        val weeklyScenarios = _weeklyScenarios.asStateFlow()
+    ) : ViewModel(),
+        ContainerHost<LearnScreenState, LearnEvent> {
+        override val container: Container<LearnScreenState, LearnEvent> = container(LearnScreenState())
 
         private val _todaySelectionState =
             MutableStateFlow<ViewState<TodayScenarioSelectionModel>>(ViewState.Loading)
@@ -100,19 +107,17 @@ class LearnScreenViewModel
         }
 
         private fun fetchWeeklyScenarios() =
-            viewModelScope.launch {
+            intent {
+                reduce { state.copy(weeklyScenariosLoading = true) }
                 val userLang = localeManager.getCurrentLocale().language
-                userPreferencesRepository
-                    .fetchUserPreferences()
-                    .map { it.learningLanguage }
-                    .getOrElse { DEFAULT_LEARNING_LANGUAGE }
-                    .let { learnLang ->
-                        scenariosRepository.weeklyScenarios(userLang = userLang, scenarioLang = learnLang)
-                    }.map {
-                        _weeklyScenarios.value = ViewState.Success(it)
-                    }.mapLeft {
-                        Log.e("LearnScreenViewModel", "Error trying to fetch weekly scenarios", it)
-                        _weeklyScenarios.value = ViewState.Error(it)
-                    }
+                val learnLang =
+                    userPreferencesRepository
+                        .fetchUserPreferences()
+                        .map { it.learningLanguage }
+                        .getOrElse { DEFAULT_LEARNING_LANGUAGE }
+
+                scenariosRepository.weeklyScenarios(userLang = userLang, scenarioLang = learnLang).map { scenarios ->
+                    reduce { state.copy(weeklyScenarios = scenarios, weeklyScenariosLoading = false) }
+                }
             }
     }

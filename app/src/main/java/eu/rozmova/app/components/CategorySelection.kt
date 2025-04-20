@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -47,6 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.R
+import eu.rozmova.app.components.weeklyscenarios.LoadingCard
 import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.domain.LangDto
 import eu.rozmova.app.domain.ScenarioDto
@@ -126,26 +126,13 @@ fun CategorySelection(
                 onCategorySelect = { selectedCategory = it },
             )
 
-            if (isLoading) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                }
-            } else {
-                // Scenarios grid
-                ScenariosGrid(
-                    selectedCategoryType = selectedCategory,
-                    allScenarios = scenarios,
-                    onScenarioSelect = onScenarioSelect,
-                )
-            }
+            // Scenarios grid
+            ScenariosGrid(
+                selectedCategoryType = selectedCategory,
+                allScenarios = scenarios,
+                onScenarioSelect = onScenarioSelect,
+                isLoading = isLoading,
+            )
         }
     }
 }
@@ -238,6 +225,7 @@ fun ScenariosGrid(
     onScenarioSelect: (ScenarioDto) -> Unit,
     selectedCategoryType: ScenarioTypeDto,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     // Filter scenarios based on selected category
     val scenarios =
@@ -246,6 +234,20 @@ fun ScenariosGrid(
         }
 
     Column(modifier = modifier.fillMaxHeight()) {
+        if (isLoading) {
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                LoadingCard(selectedCategoryType)
+
+                Spacer(modifier = Modifier.weight(1f))
+            }
+            return@Column
+        }
         if (scenarios.isEmpty()) {
             Box(
                 modifier =
@@ -260,26 +262,26 @@ fun ScenariosGrid(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-        } else {
-            scenarios.chunked(2).forEach { rowItems ->
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    rowItems.forEach { scenario ->
-                        ScenarioCard(
-                            scenario = scenario,
-                            onScenarioSelect = onScenarioSelect,
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
+            return@Column
+        }
+        scenarios.chunked(2).forEach { rowItems ->
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                rowItems.forEach { scenario ->
+                    ScenarioCard(
+                        scenario = scenario,
+                        onScenarioSelect = onScenarioSelect,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
 
-                    if (rowItems.size == 1) {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
+                if (rowItems.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
@@ -431,7 +433,7 @@ private fun CategorySelectionContentPreview() {
                     ),
                 ),
             onScenarioSelect = {},
-            isLoading = false,
+            isLoading = true,
         )
     }
 }

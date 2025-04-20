@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,7 +19,7 @@ import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.toScenarioType
-import eu.rozmova.app.utils.ViewState
+import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
 fun LearnScreen(
@@ -30,9 +28,9 @@ fun LearnScreen(
     viewModel: LearnScreenViewModel = hiltViewModel(),
 ) {
     val todaySelectionState by viewModel.todaySelectionState.collectAsState()
-    val weeklyScenariosState by viewModel.weeklyScenarios.collectAsState()
     val navigateToChatAction = rememberUpdatedState(navigateToChat)
     val latestChatState by viewModel.latestChat.collectAsState()
+    val state by viewModel.collectAsState()
 
     LaunchedEffect(key1 = viewModel) {
         viewModel.events.collect { event ->
@@ -79,18 +77,11 @@ fun LearnScreen(
         }
 
         item {
-            when (val weeklyScenarios = weeklyScenariosState) {
-                is ViewState.Success -> {
-                    CategorySelection(scenarios = weeklyScenarios.data, onScenarioSelect = onScenarioDtoSelect)
-                }
-                ViewState.Empty -> CircularProgressIndicator()
-                is ViewState.Error -> {
-                    // TODO: Handle the error state
-                    Text("Error loading scenarios: ${weeklyScenarios.error?.message}")
-                }
-                ViewState.Loading ->
-                    CategorySelection(scenarios = emptyList(), onScenarioSelect = onScenarioDtoSelect)
-            }
+            CategorySelection(
+                scenarios = state.weeklyScenarios ?: emptyList(),
+                isLoading = state.weeklyScenariosLoading,
+                onScenarioSelect = onScenarioDtoSelect,
+            )
         }
     }
 }
