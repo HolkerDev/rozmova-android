@@ -229,9 +229,7 @@ fun ScenariosGrid(
 ) {
     // Filter scenarios based on selected category
     val scenarios =
-        remember(selectedCategoryType) {
-            allScenarios.filter { it.scenarioType == selectedCategoryType }
-        }
+        allScenarios.filter { it.scenarioType == selectedCategoryType }
 
     Column(modifier = modifier.fillMaxHeight()) {
         if (isLoading) {
