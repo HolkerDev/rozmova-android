@@ -240,9 +240,8 @@ fun ScenariosGrid(
                         .padding(vertical = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                LoadingCard(selectedCategoryType)
-
-                Spacer(modifier = Modifier.weight(1f))
+                LoadingCard(selectedCategoryType, modifier = Modifier.weight(0.5f))
+                Spacer(modifier = Modifier.weight(0.5f))
             }
             return@Column
         }
