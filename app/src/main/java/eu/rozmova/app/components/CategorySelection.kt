@@ -81,7 +81,6 @@ fun CategorySelection(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
 ) {
-    // State for selected category - shared between components
     var selectedCategory by remember { mutableStateOf(ScenarioTypeDto.MESSAGES) }
 
     Card(
@@ -120,13 +119,11 @@ fun CategorySelection(
                 )
             }
 
-            // Categories section
             CategorySection(
                 selectedCategoryType = selectedCategory,
                 onCategorySelect = { selectedCategory = it },
             )
 
-            // Scenarios grid
             ScenariosGrid(
                 selectedCategoryType = selectedCategory,
                 allScenarios = scenarios,
@@ -147,7 +144,6 @@ fun CategorySection(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        // Category Chips
         LazyRow(
             modifier =
                 Modifier
@@ -158,7 +154,6 @@ fun CategorySection(
             items(categories) { category ->
                 val isSelected = category.type == selectedCategoryType
 
-                // Animate color changes
                 val backgroundColor by animateColorAsState(
                     targetValue =
                         if (isSelected) {
@@ -227,7 +222,6 @@ fun ScenariosGrid(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
 ) {
-    // Filter scenarios based on selected category
     val scenarios =
         allScenarios.filter { it.scenarioType == selectedCategoryType }
 
