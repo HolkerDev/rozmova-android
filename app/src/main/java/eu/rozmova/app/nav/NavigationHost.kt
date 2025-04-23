@@ -14,6 +14,7 @@ import eu.rozmova.app.screens.chat.ChatScreen
 import eu.rozmova.app.screens.chats.ChatsListScreen
 import eu.rozmova.app.screens.createchat.CreateChatScreen
 import eu.rozmova.app.screens.learn.LearnScreen
+import eu.rozmova.app.screens.library.LibraryScreen
 import eu.rozmova.app.screens.login.LoginScreen
 import eu.rozmova.app.screens.main.MainScreen
 import eu.rozmova.app.screens.settings.SettingsScreen
@@ -42,6 +43,10 @@ fun NavigationHost(
                     navController.navigate(NavRoutes.Chat.routeWith(chatId, scenarioType))
                 },
             )
+        }
+
+        composable(NavRoutes.Library.route) {
+            LibraryScreen()
         }
 
         composable(route = NavRoutes.Main.route) {

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import eu.rozmova.app.R
@@ -31,6 +32,8 @@ sealed class NavRoutes(
         ) = "chat/$chatId/${scenarioType.name}"
     }
 
+    data object Library : NavRoutes(route = "library", icon = Icons.Default.LocalLibrary, labelResourceId = R.string.library_screen)
+
     data object Settings : NavRoutes(
         route = "settings",
         icon = Icons.Default.Settings,
@@ -47,6 +50,7 @@ sealed class NavRoutes(
 fun bottomNavigationItems() =
     listOf(
         NavRoutes.Learn,
+        NavRoutes.Library,
         NavRoutes.Chats,
         NavRoutes.Settings,
     )

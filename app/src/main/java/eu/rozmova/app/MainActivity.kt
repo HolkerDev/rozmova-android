@@ -96,7 +96,7 @@ class AppViewModel
 @Composable
 private fun App(viewModel: AppViewModel = hiltViewModel()) {
     val navController = rememberNavController()
-    val bottomNavScreens = listOf(NavRoutes.Learn, NavRoutes.Chats, NavRoutes.Settings)
+    val bottomNavScreens = listOf(NavRoutes.Learn, NavRoutes.Chats, NavRoutes.Library, NavRoutes.Settings)
     val appState by viewModel.appState.collectAsState()
 
     RozmovaTheme {
