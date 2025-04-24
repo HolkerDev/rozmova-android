@@ -21,7 +21,6 @@ fun ScenarioDifficulty.toDifficulty(): Difficulty =
 enum class ScenarioType {
     CONVERSATION,
     MESSAGES,
-    EMAIL,
 }
 
 @Serializable

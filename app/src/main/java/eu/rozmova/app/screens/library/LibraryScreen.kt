@@ -148,7 +148,7 @@ private fun FilterDialog(
             Column {
                 Text("Language Level", style = MaterialTheme.typography.titleMedium)
                 Row {
-                    listOf("A1", "A2", "B1", "B2", "C1", "C2").forEach { level ->
+                    listOf("Easy", "Medium", "Hard").forEach { level ->
                         FilterChip(
                             selected = tempLevel == level,
                             onClick = { tempLevel = if (tempLevel == level) null else level },
