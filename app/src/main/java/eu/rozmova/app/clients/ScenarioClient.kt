@@ -10,6 +10,9 @@ interface ScenarioClient {
     suspend fun fetchWeeklyScenarios(
         @Body body: WeeklyScenariosBody,
     ): Response<WeeklyScenariosResponse>
+
+    @POST("scenarios/filter")
+    suspend fun fetchScenarios(@Body body: ScenariosRequest): Response<ScenariosResponse>
 }
 
 data class WeeklyScenariosResponse(
@@ -19,4 +22,15 @@ data class WeeklyScenariosResponse(
 data class WeeklyScenariosBody(
     val userLang: String,
     val scenarioLang: String,
+)
+
+data class ScenariosRequest(
+    val userLang: String,
+    val scenarioLang: String,
+    val scenarioType: String,
+    val difficulty: String,
+)
+
+data class ScenariosResponse(
+    val scenarios: List<ScenarioDto>,
 )

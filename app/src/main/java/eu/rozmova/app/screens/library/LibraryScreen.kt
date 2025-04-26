@@ -1,7 +1,7 @@
 package eu.rozmova.app.screens.library
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,7 +19,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -29,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,22 +38,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
-import eu.rozmova.app.domain.ScenarioModel
-import eu.rozmova.app.domain.ScenarioType
-import eu.rozmova.app.utils.ViewState
+import eu.rozmova.app.domain.DifficultyDto
+import eu.rozmova.app.domain.ScenarioDto
+import eu.rozmova.app.domain.ScenarioTypeDto
+import org.orbitmvi.orbit.compose.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryScreen(
-    onScenarioClick: (ScenarioModel) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LibraryScreenViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.collectAsState()
     var showFilterDialog by remember { mutableStateOf(false) }
+    var selectedDifficulty by remember { mutableStateOf<DifficultyDto>(DifficultyDto.EASY) }
+    var selectedScenarioType by remember { mutableStateOf<ScenarioTypeDto>(ScenarioTypeDto.MESSAGES) }
+    var showFinished by remember { mutableStateOf(true) }
 
     Column(modifier = modifier.fillMaxSize()) {
-        // Top App Bar with Filter Button
         TopAppBar(
             title = { Text(stringResource(R.string.library_title)) },
             actions = {
@@ -65,64 +65,32 @@ fun LibraryScreen(
             },
         )
 
-        // Filter Dialog
         if (showFilterDialog) {
             FilterDialog(
-                selectedLevel = state.selectedLevel,
-                selectedType = state.selectedType,
-                showFinishedOnly = state.showFinishedOnly,
                 onDismiss = { showFilterDialog = false },
                 onApplyFilters = { level, type, finishedOnly ->
-                    viewModel.updateFilters(level, type, finishedOnly)
-                    showFilterDialog = false
+                    selectedDifficulty = level
+                    selectedScenarioType = type
+                    showFinished = finishedOnly
                 },
+                selectedDifficulty = selectedDifficulty,
+                selectedType = selectedScenarioType,
+                showFinished = showFinished,
             )
         }
 
-        // Scenarios List
-        when (val scenariosState = state.scenarios) {
-            is ViewState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-            is ViewState.Success -> {
-                val filteredScenarios =
-                    scenariosState.data.filter { scenario ->
-                        (state.selectedLevel == null || scenario.languageLevel == state.selectedLevel) &&
-                            (state.selectedType == null || scenario.scenarioType == state.selectedType)
-                    }
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(filteredScenarios) { scenario ->
-                        ScenarioCard(
-                            scenario = scenario,
-                            onClick = { onScenarioClick(scenario) },
-                        )
-                    }
-                }
-            }
-            is ViewState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text("Error loading scenarios")
-                }
-            }
-            ViewState.Empty -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text("No scenarios available")
+        state.scenarios?.let { scenarios ->
+            Log.i("LibraryScreen", "Scenarios LOADED: $scenarios")
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(scenarios) { scenario ->
+                    ScenarioCard(
+                        scenario = scenario,
+                        onClick = { },
+                    )
                 }
             }
         }
@@ -131,16 +99,12 @@ fun LibraryScreen(
 
 @Composable
 private fun FilterDialog(
-    selectedLevel: String?,
-    selectedType: ScenarioType?,
-    showFinishedOnly: Boolean,
+    selectedDifficulty: DifficultyDto,
+    selectedType: ScenarioTypeDto,
+    showFinished: Boolean,
     onDismiss: () -> Unit,
-    onApplyFilters: (String?, ScenarioType?, Boolean) -> Unit,
+    onApplyFilters: (DifficultyDto, ScenarioTypeDto, Boolean) -> Unit,
 ) {
-    var tempLevel by remember { mutableStateOf(selectedLevel) }
-    var tempType by remember { mutableStateOf(selectedType) }
-    var tempFinishedOnly by remember { mutableStateOf(showFinishedOnly) }
-
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Filter Scenarios") },
@@ -148,11 +112,11 @@ private fun FilterDialog(
             Column {
                 Text("Language Level", style = MaterialTheme.typography.titleMedium)
                 Row {
-                    listOf("Easy", "Medium", "Hard").forEach { level ->
+                    DifficultyDto.entries.forEach { difficulty ->
                         FilterChip(
-                            selected = tempLevel == level,
-                            onClick = { tempLevel = if (tempLevel == level) null else level },
-                            label = { Text(level) },
+                            selected = selectedDifficulty == difficulty,
+                            onClick = { onApplyFilters(difficulty, selectedType, showFinished) },
+                            label = { Text(difficulty.name) },
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                     }
@@ -162,10 +126,10 @@ private fun FilterDialog(
 
                 Text("Scenario Type", style = MaterialTheme.typography.titleMedium)
                 Row {
-                    ScenarioType.entries.forEach { type ->
+                    listOf(ScenarioTypeDto.MESSAGES, ScenarioTypeDto.CONVERSATION).forEach { type ->
                         FilterChip(
-                            selected = tempType == type,
-                            onClick = { tempType = if (tempType == type) null else type },
+                            selected = selectedType == type,
+                            onClick = { onApplyFilters(selectedDifficulty, type, showFinished) },
                             label = { Text(type.name) },
                         )
                         Spacer(modifier = Modifier.width(4.dp))
@@ -179,15 +143,15 @@ private fun FilterDialog(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Checkbox(
-                        checked = tempFinishedOnly,
-                        onCheckedChange = { tempFinishedOnly = it },
+                        checked = showFinished,
+                        onCheckedChange = { onApplyFilters(selectedDifficulty, selectedType, !showFinished) },
                     )
-                    Text("Show finished only")
+                    Text("Include finished scenarios", style = MaterialTheme.typography.bodyMedium)
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = { onApplyFilters(tempLevel, tempType, tempFinishedOnly) }) {
+            TextButton(onClick = { onDismiss }) {
                 Text("Apply")
             }
         },
@@ -201,7 +165,7 @@ private fun FilterDialog(
 
 @Composable
 private fun ScenarioCard(
-    scenario: ScenarioModel,
+    scenario: ScenarioDto,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -231,7 +195,7 @@ private fun ScenarioCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = scenario.languageLevel,
+                    text = scenario.difficulty.name,
                     style = MaterialTheme.typography.labelMedium,
                 )
                 Text(

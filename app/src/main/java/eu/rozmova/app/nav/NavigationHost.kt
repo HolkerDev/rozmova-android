@@ -46,7 +46,7 @@ fun NavigationHost(
         }
 
         composable(NavRoutes.Library.route) {
-            LibraryScreen(onScenarioClick = {})
+            LibraryScreen()
         }
 
         composable(route = NavRoutes.Main.route) {
