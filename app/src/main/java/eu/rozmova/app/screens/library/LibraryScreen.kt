@@ -14,8 +14,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -35,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -181,10 +187,30 @@ private fun ScenarioCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val isPassed = true
+
     Card(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .then(
+                    if (isPassed) {
+                        Modifier // Example: faded card for passed
+                            .padding(2.dp)
+                    } else {
+                        Modifier
+                    },
+                ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors =
+            if (isPassed) {
+                CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
+            } else {
+                CardDefaults.cardColors()
+            },
     ) {
         Column(
             modifier =
@@ -192,10 +218,24 @@ private fun ScenarioCard(
                     .fillMaxWidth()
                     .padding(16.dp),
         ) {
-            Text(
-                text = scenario.title,
-                style = MaterialTheme.typography.titleMedium,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = scenario.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                if (isPassed) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = "Passed",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = scenario.situation,
@@ -205,16 +245,47 @@ private fun ScenarioCard(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = scenario.difficulty.name,
-                    style = MaterialTheme.typography.labelMedium,
-                )
-                Text(
-                    text = scenario.scenarioType.name,
-                    style = MaterialTheme.typography.labelMedium,
-                )
+                DifficultyChip(scenario.difficulty)
+                ScenarioTypeIcon(scenario.scenarioType)
             }
         }
     }
+}
+
+@Composable
+private fun DifficultyChip(difficulty: DifficultyDto) {
+    val color =
+        when (difficulty) {
+            DifficultyDto.EASY -> Color(0xFF81C784) // Green
+            DifficultyDto.MEDIUM -> Color(0xFFFFB300) // Amber
+            DifficultyDto.HARD -> Color(0xFFE57373) // Red
+            else -> MaterialTheme.colorScheme.primary
+        }
+    AssistChip(
+        onClick = { /* No-op */ },
+        label = { Text(difficulty.name) },
+        colors =
+            AssistChipDefaults.assistChipColors(
+                containerColor = color,
+                labelColor = Color.White,
+            ),
+        enabled = false,
+    )
+}
+
+@Composable
+private fun ScenarioTypeIcon(type: ScenarioTypeDto) {
+    val (icon, desc) =
+        when (type) {
+            ScenarioTypeDto.MESSAGES -> Icons.Default.Chat to "Messages"
+            ScenarioTypeDto.CONVERSATION -> Icons.Default.People to "Conversation"
+            else -> Icons.Default.Chat to "Scenario"
+        }
+    Icon(
+        imageVector = icon,
+        contentDescription = desc,
+        tint = MaterialTheme.colorScheme.primary,
+    )
 }
