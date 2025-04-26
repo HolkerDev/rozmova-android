@@ -13,7 +13,7 @@ interface ChatClient {
     @POST("chats")
     suspend fun createChat(
         @Body body: ChatCreateReq,
-    ): Response<ChatFetchRes>
+    ): Response<ChatDto>
 
     @GET("chats/{chatId}")
     suspend fun fetchChatById(
@@ -36,10 +36,6 @@ interface ChatClient {
 
 data class ChatCreateReq(
     val scenarioId: String,
-)
-
-data class ChatFetchRes(
-    val chat: ChatDto,
 )
 
 data class FinishChatRes(

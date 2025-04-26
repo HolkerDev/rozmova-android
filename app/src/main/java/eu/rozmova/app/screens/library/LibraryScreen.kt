@@ -1,6 +1,5 @@
 package eu.rozmova.app.screens.library
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -49,10 +48,12 @@ import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.domain.toDifficulty
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryScreen(
+    navigateToChat: (chatId: String, scenarioType: ScenarioTypeDto) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LibraryScreenViewModel = hiltViewModel(),
 ) {
@@ -68,6 +69,14 @@ fun LibraryScreen(
             scenarioType = selectedScenarioType,
             difficulty = selectedDifficulty,
         )
+    }
+
+    viewModel.collectSideEffect { event ->
+        when (event) {
+            is LibraryScreenEvents.ChatCreated -> {
+                navigateToChat(event.chatId, event.scenarioType)
+            }
+        }
     }
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -98,7 +107,6 @@ fun LibraryScreen(
         }
 
         state.scenarios?.let { scenarios ->
-            Log.i("LibraryScreen", "Scenarios LOADED: $scenarios")
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
@@ -107,7 +115,7 @@ fun LibraryScreen(
                 items(scenarios) { scenario ->
                     ScenarioCard(
                         scenario = scenario,
-                        onClick = { },
+                        onClick = { scenario -> viewModel.createChat(scenario.id) },
                     )
                 }
             }
@@ -190,13 +198,13 @@ private fun FilterDialog(
 @Composable
 private fun ScenarioCard(
     scenario: ScenarioDto,
-    onClick: () -> Unit,
+    onClick: (ScenarioDto) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val isPassed = true
 
     Card(
-        onClick = onClick,
+        onClick = { onClick(scenario) },
         modifier =
             modifier.fillMaxWidth().then(
                 if (isPassed) {

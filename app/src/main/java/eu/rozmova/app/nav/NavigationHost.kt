@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import eu.rozmova.app.domain.ScenarioType
+import eu.rozmova.app.domain.toScenarioType
 import eu.rozmova.app.screens.chat.ChatScreen
 import eu.rozmova.app.screens.chats.ChatsListScreen
 import eu.rozmova.app.screens.createchat.CreateChatScreen
@@ -46,7 +47,11 @@ fun NavigationHost(
         }
 
         composable(NavRoutes.Library.route) {
-            LibraryScreen()
+            LibraryScreen(
+                navigateToChat = { chatId, scenarioType ->
+                    navController.navigate(NavRoutes.Chat.routeWith(chatId, scenarioType.toScenarioType()))
+                },
+            )
         }
 
         composable(route = NavRoutes.Main.route) {

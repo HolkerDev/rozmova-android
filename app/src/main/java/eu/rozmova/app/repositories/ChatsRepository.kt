@@ -163,7 +163,7 @@ class ChatsRepository
                     chatClient.createChat(ChatCreateReq(scenarioId = scenarioId)).let { res ->
                         if (res.isSuccessful) {
                             val chat =
-                                res.body()?.chat
+                                res.body()
                                     ?: throw IllegalStateException("Chat creation failed")
                             chat
                         } else {
