@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,10 +51,18 @@ fun LibraryScreen(
     viewModel: LibraryScreenViewModel = hiltViewModel(),
 ) {
     val state by viewModel.collectAsState()
+
     var showFilterDialog by remember { mutableStateOf(false) }
     var selectedDifficulty by remember { mutableStateOf<DifficultyDto>(DifficultyDto.EASY) }
     var selectedScenarioType by remember { mutableStateOf<ScenarioTypeDto>(ScenarioTypeDto.MESSAGES) }
     var showFinished by remember { mutableStateOf(true) }
+
+    LaunchedEffect(viewModel) {
+        viewModel.fetchScenarios(
+            scenarioType = selectedScenarioType,
+            difficulty = selectedDifficulty,
+        )
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         TopAppBar(
@@ -67,7 +76,10 @@ fun LibraryScreen(
 
         if (showFilterDialog) {
             FilterDialog(
-                onDismiss = { showFilterDialog = false },
+                onDismiss = {
+                    showFilterDialog = false
+                    viewModel.fetchScenarios(selectedScenarioType, selectedDifficulty)
+                },
                 onApplyFilters = { level, type, finishedOnly ->
                     selectedDifficulty = level
                     selectedScenarioType = type
@@ -151,7 +163,7 @@ private fun FilterDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onDismiss }) {
+            TextButton(onClick = onDismiss) {
                 Text("Apply")
             }
         },
