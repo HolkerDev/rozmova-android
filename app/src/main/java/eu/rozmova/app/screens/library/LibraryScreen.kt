@@ -19,8 +19,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -29,6 +27,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -40,14 +39,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioTypeDto
+import eu.rozmova.app.domain.toDifficulty
 import org.orbitmvi.orbit.compose.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -162,7 +162,13 @@ private fun FilterDialog(
                 ) {
                     Checkbox(
                         checked = showFinished,
-                        onCheckedChange = { onApplyFilters(selectedDifficulty, selectedType, !showFinished) },
+                        onCheckedChange = {
+                            onApplyFilters(
+                                selectedDifficulty,
+                                selectedType,
+                                !showFinished,
+                            )
+                        },
                     )
                     Text("Include finished scenarios", style = MaterialTheme.typography.bodyMedium)
                 }
@@ -192,16 +198,13 @@ private fun ScenarioCard(
     Card(
         onClick = onClick,
         modifier =
-            modifier
-                .fillMaxWidth()
-                .then(
-                    if (isPassed) {
-                        Modifier // Example: faded card for passed
-                            .padding(2.dp)
-                    } else {
-                        Modifier
-                    },
-                ),
+            modifier.fillMaxWidth().then(
+                if (isPassed) {
+                    Modifier.padding(2.dp)
+                } else {
+                    Modifier
+                },
+            ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors =
             if (isPassed) {
@@ -213,10 +216,7 @@ private fun ScenarioCard(
             },
     ) {
         Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -239,6 +239,8 @@ private fun ScenarioCard(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = scenario.situation,
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.bodyMedium,
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -247,7 +249,7 @@ private fun ScenarioCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                DifficultyChip(scenario.difficulty)
+                DifficultyLabel(scenario.difficulty)
                 ScenarioTypeIcon(scenario.scenarioType)
             }
         }
@@ -255,24 +257,19 @@ private fun ScenarioCard(
 }
 
 @Composable
-private fun DifficultyChip(difficulty: DifficultyDto) {
-    val color =
-        when (difficulty) {
-            DifficultyDto.EASY -> Color(0xFF81C784) // Green
-            DifficultyDto.MEDIUM -> Color(0xFFFFB300) // Amber
-            DifficultyDto.HARD -> Color(0xFFE57373) // Red
-            else -> MaterialTheme.colorScheme.primary
-        }
-    AssistChip(
-        onClick = { /* No-op */ },
-        label = { Text(difficulty.name) },
-        colors =
-            AssistChipDefaults.assistChipColors(
-                containerColor = color,
-                labelColor = Color.White,
-            ),
-        enabled = false,
-    )
+private fun DifficultyLabel(difficulty: DifficultyDto) {
+    val diff = difficulty.toDifficulty()
+    Surface(
+        color = diff.color.copy(alpha = 0.12f),
+        shape = MaterialTheme.shapes.small,
+    ) {
+        Text(
+            text = stringResource(diff.labelId),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = diff.color,
+        )
+    }
 }
 
 @Composable
@@ -281,7 +278,6 @@ private fun ScenarioTypeIcon(type: ScenarioTypeDto) {
         when (type) {
             ScenarioTypeDto.MESSAGES -> Icons.Default.Chat to "Messages"
             ScenarioTypeDto.CONVERSATION -> Icons.Default.People to "Conversation"
-            else -> Icons.Default.Chat to "Scenario"
         }
     Icon(
         imageVector = icon,
