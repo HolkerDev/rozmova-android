@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
@@ -32,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
+import eu.rozmova.app.components.bugreport.BugReportDialog
 import eu.rozmova.app.domain.INTERFACE_LANGUAGES
 import eu.rozmova.app.domain.LEARN_LANGUAGES
 import eu.rozmova.app.domain.Language
@@ -50,6 +52,7 @@ fun SettingsScreen(
     var learnLanguage by remember { mutableStateOf<Language>(Language.GERMAN) }
     var interfaceLanguage by remember { mutableStateOf<Language>(Language.ENGLISH) }
     val isNewLanguagesEnabled by viewModel.isNewLearningLanguagesEnabled.collectAsState()
+    var showBugReportDialog by remember { mutableStateOf(false) }
 
     when (val viewState = state) {
         is SettingsViewState.Error -> Text(stringResource(R.string.error))
@@ -77,6 +80,9 @@ fun SettingsScreen(
                     showLanguageDialog = false
                 },
                 showLearningLanguageSelector = isNewLanguagesEnabled,
+                showBugReportDialog = showBugReportDialog,
+                onBugReportClick = { showBugReportDialog = true },
+                onBugReportDismiss = { showBugReportDialog = false },
                 state = viewState,
                 modifier = modifier,
             )
@@ -97,6 +103,9 @@ fun SettingsContent(
     onInterfaceDialogDismiss: () -> Unit,
     onInterfaceLangSelect: (Language) -> Unit,
     onLearnLangSelect: (Language) -> Unit,
+    showBugReportDialog: Boolean,
+    onBugReportClick: () -> Unit,
+    onBugReportDismiss: () -> Unit,
     learnLanguage: Language,
     interfaceLanguage: Language,
     state: SettingsViewState.Success,
@@ -168,6 +177,22 @@ fun SettingsContent(
             },
             modifier = Modifier.clickable(onClick = onLogOutClick),
         )
+
+        ListItem(
+            headlineContent = { Text("Report bug") },
+            leadingContent = {
+                Icon(
+                    Icons.Default.BugReport,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            },
+            modifier = Modifier.clickable(onClick = onBugReportClick),
+        )
+
+        if (showBugReportDialog) {
+            BugReportDialog(onDismiss = onBugReportDismiss)
+        }
 
         // Language Selection Dialog
         if (showLearnLanguageDialog) {

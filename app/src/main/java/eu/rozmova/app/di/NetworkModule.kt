@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import eu.rozmova.app.BuildConfig
+import eu.rozmova.app.clients.BugReportClient
 import eu.rozmova.app.clients.ChatClient
 import eu.rozmova.app.clients.MessageClient
 import eu.rozmova.app.clients.ScenarioClient
@@ -90,4 +91,8 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideMessageClient(retrofit: Retrofit): MessageClient = retrofit.create(MessageClient::class.java)
+
+    @Provides
+    @Singleton
+    fun provideBugReportClient(retrofit: Retrofit): BugReportClient = retrofit.create(BugReportClient::class.java)
 }

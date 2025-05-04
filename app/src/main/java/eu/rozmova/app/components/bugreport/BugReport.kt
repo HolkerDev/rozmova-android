@@ -31,17 +31,37 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun BugReportDialog(
     onDismiss: () -> Unit,
-    onSubmit: (String, String, String) -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: BugReportViewModel = hiltViewModel(),
 ) {
     var bugTitle by remember { mutableStateOf("") }
     var bugDescription by remember { mutableStateOf("") }
-    var contactInfo by remember { mutableStateOf("") }
-    var isSubmitting by remember { mutableStateOf(false) }
+
+    val state by viewModel.collectAsState()
+
+    viewModel.collectSideEffect { event ->
+        when (event) {
+            BugReportEvents.BugReportSent -> onDismiss()
+            BugReportEvents.Error -> onDismiss() // TODO: Handle error somehow
+        }
+    }
+
+    fun onSubmit(
+        title: String,
+        description: String,
+    ) {
+        viewModel.sendBugReport(
+            title = title,
+            description = description,
+        )
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -98,16 +118,14 @@ fun BugReportDialog(
 
                     Button(
                         onClick = {
-                            isSubmitting = true
-                            onSubmit(bugTitle, bugDescription, contactInfo)
-                            onDismiss()
+                            onSubmit(bugTitle, bugDescription)
                         },
                         enabled =
                             bugTitle.isNotBlank() &&
                                 bugDescription.isNotBlank() &&
-                                !isSubmitting,
+                                !state.isSubmitting,
                     ) {
-                        if (isSubmitting) {
+                        if (state.isSubmitting) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
                                 strokeWidth = 2.dp,
@@ -130,10 +148,6 @@ private fun BugReportDialogPreview() {
     if (show) {
         BugReportDialog(
             onDismiss = { show = false },
-            onSubmit = { title, description, contact ->
-                // Mock submission handler
-                println("Bug submitted: $title, $description, $contact")
-            },
         )
     }
 }
