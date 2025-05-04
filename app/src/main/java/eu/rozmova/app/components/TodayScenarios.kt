@@ -31,9 +31,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.R
-import eu.rozmova.app.domain.ScenarioModel
-import eu.rozmova.app.domain.TodayScenarioSelectionModel
-import eu.rozmova.app.utils.ViewState
+import eu.rozmova.app.domain.DifficultyDto
+import eu.rozmova.app.domain.LangDto
+import eu.rozmova.app.domain.ScenarioDto
+import eu.rozmova.app.domain.ScenarioTypeDto
+import eu.rozmova.app.domain.TodayScenarioSelection
 
 data class Scenario(
     val title: String,
@@ -52,8 +54,8 @@ enum class Difficulty(
 
 @Composable
 fun TodaysScenarioSelection(
-    state: ViewState<TodayScenarioSelectionModel>,
-    onScenarioClick: (ScenarioModel) -> Unit,
+    state: TodayScenarioSelection,
+    onScenarioClick: (ScenarioDto) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -64,10 +66,7 @@ fun TodaysScenarioSelection(
             ),
     ) {
         Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -88,23 +87,12 @@ fun TodaysScenarioSelection(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Handle different states
-            when (state) {
-                is ViewState.Loading -> {
-                    LoadingScenarios()
-                }
-                is ViewState.Success -> {
-                    ScenariosListCard(
-                        onScenarioClick = onScenarioClick,
-                        easyScenario = state.data.easyScenario,
-                        mediumScenario = state.data.mediumScenario,
-                        hardScenario = state.data.hardScenario,
-                    )
-                }
-                else -> {
-                    ErrorState()
-                }
-            }
+            ScenariosListCard(
+                onScenarioClick = onScenarioClick,
+                easyScenario = state.easyScenario,
+                mediumScenario = state.mediumScenario,
+                hardScenario = state.hardScenario,
+            )
         }
     }
 }
@@ -120,10 +108,7 @@ private fun LoadingScenarios(modifier: Modifier = Modifier) {
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             CircularProgressIndicator(
@@ -151,10 +136,7 @@ private fun ErrorState(modifier: Modifier = Modifier) {
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
@@ -185,10 +167,7 @@ private fun EmptyState(modifier: Modifier = Modifier) {
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
@@ -210,10 +189,10 @@ private fun EmptyState(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ScenariosListCard(
-    easyScenario: ScenarioModel,
-    mediumScenario: ScenarioModel,
-    hardScenario: ScenarioModel,
-    onScenarioClick: (ScenarioModel) -> Unit,
+    easyScenario: ScenarioDto,
+    mediumScenario: ScenarioDto,
+    hardScenario: ScenarioDto,
+    onScenarioClick: (ScenarioDto) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -254,9 +233,9 @@ private fun ScenariosListCard(
 
 @Composable
 private fun ScenarioItem(
-    scenario: ScenarioModel,
+    scenario: ScenarioDto,
     level: Difficulty,
-    onClick: (scenario: ScenarioModel) -> Unit,
+    onClick: (scenario: ScenarioDto) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -264,24 +243,27 @@ private fun ScenarioItem(
         modifier = modifier.fillMaxWidth(),
     ) {
         Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Title
+                // Title - add weight and constrain with overflow
                 Text(
                     text = scenario.title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = true),
                 )
 
-                // Difficulty Label
+                // Add a small spacer
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Difficulty Label - now won't get pushed off screen
                 Surface(
                     color = level.color.copy(alpha = 0.12f),
                     shape = MaterialTheme.shapes.small,
@@ -312,28 +294,31 @@ private fun ScenarioItem(
 @Preview(showBackground = true)
 @Composable
 private fun TodaysScenariosPreview() {
+    // sample scenario
+    val scenario =
+        ScenarioDto(
+            id = "",
+            createdAt = "",
+            userLang = LangDto.EN,
+            scenarioLang = LangDto.DE,
+            difficulty = DifficultyDto.EASY,
+            scenarioType = ScenarioTypeDto.MESSAGES,
+            title = "Sample Scenario",
+            situation = "Sample situation",
+            labels = listOf("test", "test2", "test3"),
+            helperWords = listOf(),
+            userInstructions = listOf(),
+        )
     val sampleScenarios =
-        listOf(
-            Scenario(
-                title = "Basic UI Layout",
-                description = "Learn how to create simple layouts using Jetpack Compose",
-                difficulty = Difficulty.BEGINNER,
-            ),
-            Scenario(
-                title = "State Management",
-                description = "Practice handling state in a medium-complexity application",
-                difficulty = Difficulty.INTERMEDIATE,
-            ),
-            Scenario(
-                title = "Advanced Testing",
-                description = "Master complex testing scenarios and best practices",
-                difficulty = Difficulty.ADVANCED,
-            ),
+        TodayScenarioSelection(
+            easyScenario = scenario,
+            mediumScenario = scenario,
+            hardScenario = scenario,
         )
 
     MaterialTheme {
         TodaysScenarioSelection(
-            state = ViewState.Loading,
+            state = sampleScenarios,
             onScenarioClick = {},
             modifier = Modifier.padding(16.dp),
         )

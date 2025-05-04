@@ -55,16 +55,8 @@ data class ScenarioModel(
     val wordIds: List<String>?,
 )
 
-@Serializable
-data class TodayScenarioSelectionModel(
-    @SerialName("user_language")
-    val userLanguage: String,
-    @SerialName("scenario_language")
-    val scenarioLanguage: String,
-    @SerialName("easy_scenario")
-    val easyScenario: ScenarioModel,
-    @SerialName("medium_scenario")
-    val mediumScenario: ScenarioModel,
-    @SerialName("hard_scenario")
-    val hardScenario: ScenarioModel,
+data class TodayScenarioSelection(
+    val easyScenario: ScenarioDto,
+    val mediumScenario: ScenarioDto,
+    val hardScenario: ScenarioDto,
 )

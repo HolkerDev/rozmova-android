@@ -2,6 +2,7 @@ package eu.rozmova.app.repositories
 
 import android.util.Log
 import arrow.core.Either
+import eu.rozmova.app.clients.RecommendedScenariosRequest
 import eu.rozmova.app.clients.ScenarioClient
 import eu.rozmova.app.clients.ScenariosRequest
 import eu.rozmova.app.clients.WeeklyScenariosBody
@@ -9,10 +10,9 @@ import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.ScenarioTypeDto
-import eu.rozmova.app.domain.TodayScenarioSelectionModel
+import eu.rozmova.app.domain.TodayScenarioSelection
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.Columns
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -68,38 +68,30 @@ class ScenariosRepository
                     InfraErrors.NetworkError("Error trying to fetch scenarios: $error")
                 }
 
-        suspend fun getTodaySelection(
-            learningLanguage: LanguageCode,
-            interfaceLanguage: LanguageCode,
-        ): Either<InfraErrors, TodayScenarioSelectionModel> =
+        suspend fun getTodaySelection(): Either<InfraErrors, TodayScenarioSelection> =
             Either
                 .catch {
-                    Log.i(
-                        "ScenariosRepository",
-                        "Fetching today selection for $learningLanguage and $interfaceLanguage",
-                    )
-                    supabaseClient.postgrest
-                        .from(Tables.TODAY_SCENARIO_SELECTION)
-                        .select(
-                            Columns.raw(
-                                """
-                                    id, 
-                                    created_at,
-                                    user_language, 
-                                    scenario_language,
-                                    easy_scenario:easy_scenario_id(*), 
-                                    medium_scenario:medium_scenario_id(*), 
-                                    hard_scenario:hard_scenario_id(*)
-                                """,
+                    val response =
+                        scenarioClient.fetchRecommendedScenarios(
+                            RecommendedScenariosRequest(
+                                userLang = "en",
+                                scenarioLang = "de",
                             ),
-                        ) {
-                            filter {
-                                and {
-                                    TodayScenarioSelectionModel::scenarioLanguage eq learningLanguage
-                                    TodayScenarioSelectionModel::userLanguage eq interfaceLanguage
-                                }
-                            }
-                        }.decodeSingle<TodayScenarioSelectionModel>()
+                        )
+                    Log.i("ScenariosRepository", "Today selection response: $response")
+                    if (response.isSuccessful) {
+                        response.body()?.let { resp ->
+                            TodayScenarioSelection(
+                                easyScenario = resp.easy,
+                                mediumScenario = resp.medium,
+                                hardScenario = resp.hard,
+                            )
+                        } ?: throw IllegalStateException("Response body is null")
+                    } else {
+                        throw InfraErrors.NetworkError(
+                            "Error trying to fetch today selection: ${response.errorBody()}",
+                        )
+                    }
                 }.mapLeft {
                     Log.e("ScenariosRepository", "Error trying to fetch today selection", it)
                     InfraErrors.DatabaseError("Error trying to fetch today selection")

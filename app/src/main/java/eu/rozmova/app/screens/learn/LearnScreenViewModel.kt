@@ -1,5 +1,6 @@
 package eu.rozmova.app.screens.learn
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.getOrElse
@@ -9,7 +10,7 @@ import eu.rozmova.app.domain.ChatWithScenarioModel
 import eu.rozmova.app.domain.Language
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioTypeDto
-import eu.rozmova.app.domain.TodayScenarioSelectionModel
+import eu.rozmova.app.domain.TodayScenarioSelection
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
 import eu.rozmova.app.repositories.UserPreferencesRepository
@@ -37,6 +38,7 @@ sealed class LearnEvent {
 data class LearnScreenState(
     val weeklyScenarios: List<ScenarioDto>? = null,
     val weeklyScenariosLoading: Boolean = false,
+    val recommendedScenarios: TodayScenarioSelection? = null,
 )
 
 @HiltViewModel
@@ -51,10 +53,6 @@ class LearnScreenViewModel
         ContainerHost<LearnScreenState, LearnEvent> {
         override val container: Container<LearnScreenState, LearnEvent> = container(LearnScreenState())
 
-        private val _todaySelectionState =
-            MutableStateFlow<ViewState<TodayScenarioSelectionModel>>(ViewState.Loading)
-        val todaySelectionState = _todaySelectionState.asStateFlow()
-
         private val _latestChat = MutableStateFlow<ViewState<ChatWithScenarioModel>>(ViewState.Loading)
         val latestChat = _latestChat.asStateFlow()
 
@@ -68,19 +66,16 @@ class LearnScreenViewModel
         }
 
         private fun fetchTodayScenarios() =
-            viewModelScope.launch {
+            intent {
                 userPreferencesRepository
                     .fetchUserPreferences()
                     .map { it.learningLanguage }
                     .getOrElse { DEFAULT_LEARNING_LANGUAGE }
                     .let { learnLang ->
-                        scenariosRepository.getTodaySelection(
-                            learnLang,
-                            localeManager.getCurrentLocale().language,
-                        )
+                        scenariosRepository.getTodaySelection()
                     }.map { todaySelection ->
-                        _todaySelectionState.value = ViewState.Success(todaySelection)
-                    }.mapLeft { _todaySelectionState.value = ViewState.Error(it) }
+                        reduce { state.copy(recommendedScenarios = todaySelection) }
+                    }.mapLeft { Log.e("LearnScreenViewModel", "Error fetching today scenarios", it) }
             }
 
         private fun fetchLatestChat() =

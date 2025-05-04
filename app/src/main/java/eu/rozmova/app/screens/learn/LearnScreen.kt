@@ -16,7 +16,6 @@ import eu.rozmova.app.components.CategorySelection
 import eu.rozmova.app.components.QuickResumeCard
 import eu.rozmova.app.components.TodaysScenarioSelection
 import eu.rozmova.app.domain.ScenarioDto
-import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.toScenarioType
 import org.orbitmvi.orbit.compose.collectAsState
@@ -27,7 +26,6 @@ fun LearnScreen(
     modifier: Modifier = Modifier,
     viewModel: LearnScreenViewModel = hiltViewModel(),
 ) {
-    val todaySelectionState by viewModel.todaySelectionState.collectAsState()
     val navigateToChatAction = rememberUpdatedState(navigateToChat)
     val latestChatState by viewModel.latestChat.collectAsState()
     val state by viewModel.collectAsState()
@@ -42,7 +40,7 @@ fun LearnScreen(
         }
     }
 
-    val onScenarioSelect = { scenarioModel: ScenarioModel ->
+    val onScenarioSelect = { scenarioModel: ScenarioDto ->
         viewModel.createChatFromScenario(scenarioModel.id)
     }
 
@@ -55,12 +53,14 @@ fun LearnScreen(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 16.dp),
     ) {
-        item {
-            TodaysScenarioSelection(
-                onScenarioClick = onScenarioSelect,
-                state = todaySelectionState,
-                modifier = Modifier.padding(8.dp),
-            )
+        state.recommendedScenarios?.let { recommendedScenarios ->
+            item {
+                TodaysScenarioSelection(
+                    onScenarioClick = onScenarioSelect,
+                    state = recommendedScenarios,
+                    modifier = Modifier.padding(8.dp),
+                )
+            }
         }
 
         item {
