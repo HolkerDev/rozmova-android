@@ -23,9 +23,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.CollectionsBookmark
 import androidx.compose.material.icons.rounded.Description
-import androidx.compose.material.icons.rounded.Task
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -37,11 +37,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -60,7 +61,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.components.AudioMessageItem
 import eu.rozmova.app.components.AudioRecorderButton
-import eu.rozmova.app.components.SimpleToolBar
+import eu.rozmova.app.components.InstructionsButton
+import eu.rozmova.app.components.SituationButton
 import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.components.WordItem
 import eu.rozmova.app.domain.ChatDto
@@ -72,6 +74,7 @@ import eu.rozmova.app.domain.toAudioMessage
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConversationChat(
     onBackClick: () -> Unit,
@@ -84,7 +87,6 @@ fun ConversationChat(
         viewModel.loadChat(chatId)
     }
 
-    val oldState by viewModel.state.collectAsState()
     val chatState by viewModel.state.collectAsState()
     val isRecording by viewModel.isRecording.collectAsState()
     val messageListState = rememberLazyListState()
@@ -133,6 +135,17 @@ fun ConversationChat(
 
         state.chat?.let { chat ->
             Column {
+                TopAppBar(
+                    title = { Text(text = stringResource(R.string.chat_details_title)) },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                            )
+                        }
+                    },
+                )
                 ScenarioInfoCard(
                     onBackClick = onBackClick,
                     onPlayMessage = { messageId -> viewModel.playAudio(messageId) },
@@ -141,7 +154,7 @@ fun ConversationChat(
                     messages = chat.messages,
                     chatModel = chat,
                     words = chat.scenario.helperWords,
-                    isMessageLoading = oldState.isLoading,
+                    isMessageLoading = false,
                     messageListState = messageListState,
                     onChatFinish = { viewModel.finishChat(chat.id) },
                     isAnalysisLoading = chatState.isAnalysisLoading,
@@ -160,6 +173,7 @@ fun ConversationChat(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScenarioInfoCard(
     scenario: ScenarioDto,
@@ -181,7 +195,6 @@ fun ScenarioInfoCard(
     var showInstructionsDialog by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
-        SimpleToolBar(title = stringResource(R.string.chat_details_title), onBack = onBackClick)
         Card(
             modifier =
                 Modifier
@@ -216,7 +229,7 @@ fun ScenarioInfoCard(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f),
-                    )
+                    ) // Title
                     if (words.isNotEmpty()) {
                         FilledTonalButton(
                             onClick = { showWordsBottomSheet = true },
@@ -230,11 +243,11 @@ fun ScenarioInfoCard(
                                 contentDescription = stringResource(R.string.helper_words),
                                 modifier = Modifier.size(16.dp),
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = stringResource(R.string.helper_words),
-                                style = MaterialTheme.typography.labelSmall,
-                            )
+//                            Spacer(modifier = Modifier.width(4.dp))
+//                            Text(
+//                                text = stringResource(R.string.helper_words),
+//                                style = MaterialTheme.typography.labelSmall,
+//                            )
                         }
                     }
                 }
@@ -247,63 +260,18 @@ fun ScenarioInfoCard(
                             .padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    // Situation card
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(8.dp),
+                    SituationButton(
                         modifier =
                             Modifier
                                 .weight(1f)
                                 .clickable { showSituationDialog = true },
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Description,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(16.dp),
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "Situation",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                            )
-                        }
-                    }
-
-                    // Instructions card
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(8.dp),
+                    )
+                    InstructionsButton(
                         modifier =
                             Modifier
                                 .weight(1f)
                                 .clickable { showInstructionsDialog = true },
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Task,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(16.dp),
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "Instructions",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                            )
-                        }
-                    }
+                    )
                 }
 
                 HorizontalDivider(
@@ -429,11 +397,11 @@ fun ScenarioInfoCard(
                             .fillMaxWidth()
                             .verticalScroll(rememberScrollState()),
                 ) {
-//                    Text(
-//                        text = scenario.userInstruction,
-//                        style = MaterialTheme.typography.bodyMedium,
-//                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-//                    )
+                    Text(
+                        text = scenario.userInstructions.joinToString("\n"),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             },
             confirmButton = {
@@ -555,6 +523,7 @@ fun HelperWordsBottomSheet(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LoadingComponent(
     onBackClick: () -> Unit,
@@ -565,7 +534,17 @@ private fun LoadingComponent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        SimpleToolBar(title = stringResource(R.string.loading_progress), onBack = onBackClick)
+        TopAppBar(
+            title = { Text(text = stringResource(R.string.loading_progress)) },
+            navigationIcon = {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                    )
+                }
+            },
+        )
         Spacer(modifier = Modifier.height(24.dp))
         CircularProgressIndicator(
             color = MaterialTheme.colorScheme.primary,
@@ -580,6 +559,7 @@ private fun LoadingComponent(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ErrorComponent(onBackClick: () -> Unit) {
     Column(
@@ -587,7 +567,17 @@ private fun ErrorComponent(onBackClick: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        SimpleToolBar(title = stringResource(R.string.error), onBack = onBackClick)
+        TopAppBar(
+            title = { Text(text = stringResource(R.string.error)) },
+            navigationIcon = {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                    )
+                }
+            },
+        )
         Spacer(modifier = Modifier.height(24.dp))
         Icon(
             imageVector = Icons.Rounded.Description,
