@@ -143,7 +143,12 @@ fun AudioRecorderButton(
             },
         )
 
-    Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxWidth()) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier =
+            modifier
+                .fillMaxWidth(),
+    ) {
         RecordButton(
             onRecord = {
                 when {

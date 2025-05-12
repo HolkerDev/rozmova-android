@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -59,18 +60,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
-import eu.rozmova.app.components.AudioMessageItem
 import eu.rozmova.app.components.AudioRecorderButton
 import eu.rozmova.app.components.InstructionsButton
 import eu.rozmova.app.components.SituationButton
-import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.components.WordItem
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.WordDto
-import eu.rozmova.app.domain.toAudioMessage
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -90,7 +88,7 @@ fun ConversationChat(
     val chatState by viewModel.state.collectAsState()
     val isRecording by viewModel.isRecording.collectAsState()
     val messageListState = rememberLazyListState()
-    var showModal by remember { mutableStateOf(false) }
+    var showFinishModal by remember { mutableStateOf(false) }
 
     val state by viewModel.collectAsState()
 
@@ -134,7 +132,9 @@ fun ConversationChat(
 //        }
 
         state.chat?.let { chat ->
-            Column {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+            ) {
                 TopAppBar(
                     title = { Text(text = stringResource(R.string.chat_details_title)) },
                     navigationIcon = {
@@ -146,27 +146,34 @@ fun ConversationChat(
                         }
                     },
                 )
-                ScenarioInfoCard(
-                    onBackClick = onBackClick,
-                    onPlayMessage = { messageId -> viewModel.playAudio(messageId) },
-                    onStopMessage = { viewModel.stopAudio() },
-                    scenario = chat.scenario,
-                    messages = chat.messages,
-                    chatModel = chat,
-                    words = chat.scenario.helperWords,
-                    isMessageLoading = false,
-                    messageListState = messageListState,
-                    onChatFinish = { viewModel.finishChat(chat.id) },
-                    isAnalysisLoading = chatState.isAnalysisLoading,
-                    onChatArchive = { viewModel.prepareAnalytics(chat.id) },
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+                Box(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                ) {
+                    ScenarioInfoCard(
+                        onPlayMessage = { messageId -> viewModel.playAudio(messageId) },
+                        onStopMessage = { viewModel.stopAudio() },
+                        scenario = chat.scenario,
+                        messages = chat.messages,
+                        chatModel = chat,
+                        words = chat.scenario.helperWords,
+                        isMessageLoading = false,
+                        messageListState = messageListState,
+                        onChatFinish = { viewModel.finishChat(chat.id) },
+                        isAnalysisLoading = chatState.isAnalysisLoading,
+                        onChatArchive = { viewModel.prepareAnalytics(chat.id) },
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
                 AudioRecorderButton(
                     onRecordStart = { viewModel.startRecording() },
                     onRecordStop = { viewModel.stopRecording() },
                     isDisabled = false,
                     onChatAnalyticsRequest = onChatArchive,
                     isRecording = isRecording,
+                    modifier = Modifier.padding(bottom = 16.dp),
                 )
             }
         } ?: LoadingComponent(onBackClick = { onBackClick() }, modifier = Modifier.fillMaxSize())
@@ -180,7 +187,6 @@ fun ScenarioInfoCard(
     messages: List<MessageDto>,
     words: List<WordDto>,
     chatModel: ChatDto,
-    onBackClick: () -> Unit,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
     onChatFinish: () -> Unit,
@@ -200,7 +206,7 @@ fun ScenarioInfoCard(
                 Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 8.dp)
-                    .weight(1f),
+                    .fillMaxHeight(),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             shape = RoundedCornerShape(12.dp),
             colors =
@@ -230,6 +236,7 @@ fun ScenarioInfoCard(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f),
                     ) // Title
+
                     if (words.isNotEmpty()) {
                         FilledTonalButton(
                             onClick = { showWordsBottomSheet = true },
@@ -243,11 +250,6 @@ fun ScenarioInfoCard(
                                 contentDescription = stringResource(R.string.helper_words),
                                 modifier = Modifier.size(16.dp),
                             )
-//                            Spacer(modifier = Modifier.width(4.dp))
-//                            Text(
-//                                text = stringResource(R.string.helper_words),
-//                                style = MaterialTheme.typography.labelSmall,
-//                            )
                         }
                     }
                 }
@@ -419,69 +421,6 @@ fun ScenarioInfoCard(
                     .heightIn(max = screenHeight * 0.8f),
             shape = RoundedCornerShape(16.dp),
         )
-    }
-}
-
-@Composable
-fun AudioMessageList(
-    messages: List<MessageDto>,
-    onPlayMessage: (messageId: String) -> Unit,
-    onStopMessage: () -> Unit,
-    onChatFinish: () -> Unit,
-    messageListState: LazyListState,
-    isLoadingMessage: Boolean,
-    showFinishButton: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    LazyColumn(
-        modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(vertical = 4.dp),
-        state = messageListState,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        items(messages) { message ->
-            AudioMessageItem(
-                message = message.toAudioMessage(),
-                onPlayMessage = onPlayMessage,
-                onStopMessage = onStopMessage,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-        if (isLoadingMessage) {
-            item {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp,
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Processing...",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                }
-            }
-        } else if (showFinishButton) {
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                StopChatButton(
-                    onClick = onChatFinish,
-                )
-            }
-        }
     }
 }
 

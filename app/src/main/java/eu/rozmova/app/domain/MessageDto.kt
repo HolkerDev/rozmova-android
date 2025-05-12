@@ -1,6 +1,5 @@
 package eu.rozmova.app.domain
 
-import eu.rozmova.app.components.conversationchat.AudioChatMessage
 import kotlinx.serialization.Serializable
 
 enum class Author {
@@ -16,13 +15,3 @@ data class MessageDto(
     val audioId: String?,
     val audioDuration: Int?,
 )
-
-fun MessageDto.toAudioMessage(): AudioChatMessage =
-    AudioChatMessage(
-        id = this.id,
-        isPlaying = false,
-        duration = this.audioDuration ?: 0,
-        body = this.content,
-        link = "",
-        author = this.author,
-    )
