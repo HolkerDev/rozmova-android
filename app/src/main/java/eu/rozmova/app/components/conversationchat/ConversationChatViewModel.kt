@@ -1,4 +1,5 @@
 package eu.rozmova.app.components.conversationchat
+
 import android.app.Application
 import android.media.MediaRecorder
 import android.net.Uri
@@ -19,7 +20,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.Container
+import org.orbitmvi.orbit.ContainerHost
+import org.orbitmvi.orbit.viewmodel.container
 import java.io.File
+import java.util.UUID
 import javax.inject.Inject
 
 data class ChatDetailState(
@@ -32,6 +37,11 @@ data class ChatDetailState(
     val isChatAnalysisSubmitLoading: Boolean = false,
     val chatAnalysis: ChatAnalysis? = null,
     val isAnalysisLoading: Boolean = false,
+)
+
+data class ConvoChatState(
+    val chat: ChatDto? = null,
+    val isAudioRecording: Boolean = false,
 )
 
 data class AudioState(
@@ -49,6 +59,14 @@ data class AudioChatMessage(
     val author: Author,
 )
 
+sealed interface ConvoChatEvents {
+    data object ScrollToBottom : ConvoChatEvents
+
+    data object ProposeFinish : ConvoChatEvents
+
+    data object Close : ConvoChatEvents
+}
+
 @HiltViewModel
 class ChatDetailsViewModel
     @Inject
@@ -56,32 +74,13 @@ class ChatDetailsViewModel
         private val expoPlayer: ExoPlayer,
         private val chatsRepository: ChatsRepository,
         application: Application,
-    ) : AndroidViewModel(application) {
+    ) : AndroidViewModel(application),
+        ContainerHost<ConvoChatState, ConvoChatEvents> {
+        override val container: Container<ConvoChatState, ConvoChatEvents> = container(ConvoChatState())
         private val tag = this::class.simpleName
 
         private val _state = MutableStateFlow(ChatDetailState())
         val state = _state.asStateFlow()
-        private val _shouldScrollToBottom = MutableStateFlow(false)
-        val shouldScrollToBottom = _shouldScrollToBottom.asStateFlow()
-        private val _shouldProposeToFinishChat = MutableStateFlow(false)
-        val shouldProposeToFinishChat = _shouldProposeToFinishChat.asStateFlow()
-
-        private val _navigateToChatList = MutableStateFlow(false)
-        val navigateToChatList = _navigateToChatList.asStateFlow()
-
-        fun scrollToBottom() {
-            if (_shouldScrollToBottom.value) return
-            if (_state.value.messages.isNullOrEmpty()) return
-            _shouldScrollToBottom.update { true }
-        }
-
-        fun resetProposal() {
-            _shouldProposeToFinishChat.update { false }
-        }
-
-        fun onScrollToBottom() {
-            _shouldScrollToBottom.update { false }
-        }
 
         private var mediaRecorder: MediaRecorder? = null
         private var audioFile: File? = null
@@ -105,101 +104,88 @@ class ChatDetailsViewModel
             )
         }
 
-        fun onChatAnalysisSubmit() =
-            viewModelScope.launch {
-                _state.update { it.copy(isChatAnalysisSubmitLoading = true) }
-                chatsRepository.archiveChat(_state.value.chat!!.id).fold(
-                    { error ->
-                        _state.update { it.copy(isChatAnalysisSubmitLoading = false, error = error.message) }
-                    },
-                    { _navigateToChatList.update { true } },
-                )
-            }
-
-        val onAudioSaved = {
-            viewModelScope.launch {
-                _state.update { it.copy(isLoading = true) }
-                scrollToBottom()
-                chatsRepository
-                    .sendAudioMessage(
-                        chatId = _state.value.chat!!.id,
-                        audioFile!!,
-                    ).map { response ->
-                        if (response.shouldFinishChat) {
-                            _shouldProposeToFinishChat.update { true }
-                        }
-//                        response.messages.sortedBy { it.createdAt }.map { message ->
-//                            AudioChatMessage(
-//                                id = message.id,
-//                                isPlaying = false,
-//                                body = message.content,
-//                                link = message.audioId,
-//                                author = message.author,
-//                                duration = message.audioDuration,
+//        fun onChatAnalysisSubmit() =
+//            viewModelScope.launch {
+//                _state.update { it.copy(isChatAnalysisSubmitLoading = true) }
+//                chatsRepository.archiveChat(_state.value.chat!!.id).fold(
+//                    { error ->
+//                        _state.update {
+//                            it.copy(
+//                                isChatAnalysisSubmitLoading = false,
+//                                error = error.message,
 //                            )
 //                        }
-                    }.fold(
-                        { error ->
-                            _state.update { it.copy(isLoading = false, error = error.message) }
-                        },
-                        { chatMessages ->
-//                            _state.update {
-//                                it.copy(
-//                                    isLoading = false,
-//                                    messages = chatMessages,
-//                                )
-//                            }
-                        },
-                    )
-                scrollToBottom()
+//                    },
+//                    { _navigateToChatList.update { true } },
+//                )
+//            }
+
+        fun onAudioSaved() =
+            intent {
+                _state.update { it.copy(isLoading = true) }
+                val chatId = state.chat?.id ?: throw IllegalStateException("Chat ID is null")
+                val file = audioFile ?: throw IllegalStateException("Audio file is null")
+
+                chatsRepository
+                    .sendAudioMessage(chatId = chatId, file)
+                    .map { response ->
+                        if (response.shouldFinish) {
+                            postSideEffect(ConvoChatEvents.ProposeFinish)
+                        }
+                        reduce { state.copy(chat = response.chat) }
+                    }.mapLeft { error ->
+                        Log.e("ChatDetailsViewModel", "Error sending audio message: ${error.message}")
+                    }
             }
-        }
 
-        fun startRecording() {
-            try {
-                val outputDir = getApplication<Application>().getExternalFilesDir(Environment.DIRECTORY_MUSIC)
-                audioFile = File(outputDir, "recording_${System.currentTimeMillis()}.mp4")
+        fun startRecording() =
+            intent {
+                try {
+                    val outputDir = getApplication<Application>().getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+                    val fileId = UUID.randomUUID()
+                    audioFile = File(outputDir, "$fileId.mp4")
 
-                mediaRecorder =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        MediaRecorder(getApplication())
-                    } else {
-                        MediaRecorder()
+                    mediaRecorder =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            MediaRecorder(getApplication())
+                        } else {
+                            MediaRecorder()
+                        }
+
+                    mediaRecorder?.apply {
+                        setAudioSource(MediaRecorder.AudioSource.MIC)
+                        setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                        setAudioEncodingBitRate(128000) // 128 kbps
+                        setAudioSamplingRate(44100) // 44.1 kHz
+                        setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                        setOutputFile(audioFile?.absolutePath)
+                        prepare()
+                        start()
                     }
 
-                mediaRecorder?.apply {
-                    setAudioSource(MediaRecorder.AudioSource.MIC)
-                    setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-                    setAudioEncodingBitRate(128000) // 128 kbps
-                    setAudioSamplingRate(44100) // 44.1 kHz
-                    setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-                    setOutputFile(audioFile?.absolutePath)
-                    prepare()
-                    start()
+                    reduce { state.copy(isAudioRecording = true) }
+                } catch (e: Exception) {
+                    Log.e(tag, "Error starting recording: ${e.message}")
+                    reduce { state.copy(isAudioRecording = false) }
                 }
-
-                _isRecording.value = true
-            } catch (e: Exception) {
-                Log.e(tag, "Error starting recording: ${e.message}")
-                _isRecording.value = false
             }
-        }
 
-        fun stopRecording() {
-            try {
-                mediaRecorder?.apply {
-                    stop()
-                    release()
+        fun stopRecording() =
+            intent {
+                try {
+                    mediaRecorder?.apply {
+                        stop()
+                        release()
+                    }
+                    mediaRecorder = null
+
+                    onAudioSaved()
+                } catch (e: Exception) {
+                    Log.e(tag, "Error stopping recording: ${e.message}")
+                } finally {
+                    reduce { state.copy(isAudioRecording = false) }
                 }
-                mediaRecorder = null
-
-                onAudioSaved()
-            } catch (e: Exception) {
-                Log.e(tag, "Error stopping recording: ${e.message}")
-            } finally {
-                _isRecording.value = false
             }
-        }
 
         fun finishChat(chatId: String) =
             viewModelScope.launch {
@@ -218,7 +204,12 @@ class ChatDetailsViewModel
                 chatsRepository
                     .getAnalytics(chatId)
                     .map { chatAnalysis ->
-                        _state.update { it.copy(isAnalysisLoading = false, chatAnalysis = chatAnalysis) }
+                        _state.update {
+                            it.copy(
+                                isAnalysisLoading = false,
+                                chatAnalysis = chatAnalysis,
+                            )
+                        }
                     }.mapLeft {
                         Log.e(tag, "Error preparing chat analytics: ${it.message}")
                     }
@@ -231,31 +222,15 @@ class ChatDetailsViewModel
         }
 
         fun loadChat(chatId: String) =
-            viewModelScope.launch {
-                _state.update { state -> state.copy(isLoading = true) }
-//                try {
-//                    val chat = chatsRepository.fetchChatById(chatId)
-//                    _state.update { state ->
-//                        state.copy(
-//                            chat = chat,
-//                            isLoading = false,
-//                            messages =
-//                                chat.messages.sortedBy { msg -> msg.createdAt }.map { msg ->
-//                                    AudioChatMessage(
-//                                        id = msg.id,
-//                                        isPlaying = false,
-//                                        body = msg.transcription,
-//                                        link = msg.audioReference,
-//                                        author = msg.author,
-//                                        duration = msg.audioDuration,
-//                                    )
-//                                },
-//                        )
-//                    }
-//                    scrollToBottom()
-//                } catch (e: Exception) {
-//                    Log.e("ChatDetailsViewModel", "Error loading chat", e)
-//                }
+            intent {
+                chatsRepository
+                    .fetchChatById(chatId)
+                    .map { chat ->
+                        reduce { state.copy(chat = chat) }
+                        postSideEffect(ConvoChatEvents.ScrollToBottom)
+                    }.mapLeft { err ->
+                        Log.e(tag, "Error loading chat: ${err.message}")
+                    }
             }
 
         fun playAudio(messageId: String) =
@@ -286,7 +261,8 @@ class ChatDetailsViewModel
         ): Uri {
             if (isUser) {
                 val audioName = audioLink.split("/").last()
-                val outputDir = getApplication<Application>().getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+                val outputDir =
+                    getApplication<Application>().getExternalFilesDir(Environment.DIRECTORY_MUSIC)
                 val audioFile = File(outputDir, audioName)
                 val audioUri = Uri.fromFile(audioFile)
                 return audioUri

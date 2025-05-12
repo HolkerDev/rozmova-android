@@ -2,11 +2,13 @@ package eu.rozmova.app.repositories
 
 import android.util.Log
 import arrow.core.Either
+import arrow.core.catch
 import arrow.core.raise.either
 import eu.rozmova.app.clients.ChatClient
 import eu.rozmova.app.clients.ChatCreateReq
 import eu.rozmova.app.clients.FinishChatRes
 import eu.rozmova.app.clients.MessageClient
+import eu.rozmova.app.clients.SendAudioReq
 import eu.rozmova.app.clients.SendMessageReq
 import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.ChatDto
@@ -71,8 +73,8 @@ class ChatsRepository
                     val columns =
                         Columns.raw(
                             """
-                                    *,
-                                    scenario:scenario_id(*)
+                                *,
+                                scenario:scenario_id(*)
                                   """,
                         )
                     supabaseClient
@@ -216,27 +218,41 @@ class ChatsRepository
         suspend fun sendAudioMessage(
             chatId: String,
             messageAudioFile: File,
-        ): Either<InfraErrors, ChatResponse> =
-            either {
-                try {
+        ): Either<InfraErrors, ChatUpdate> =
+            Either
+                .catch {
                     val userId =
-                        supabaseClient.auth.currentUserOrNull()?.id ?: raise(InfraErrors.AuthError("User is not authenticated"))
+                        supabaseClient.auth.currentUserOrNull()?.id ?: throw InfraErrors.AuthError("User is not authenticated")
+
                     val filePath = "$userId/${messageAudioFile.name}"
                     supabaseClient.storage
                         .from("audio-messages")
                         .upload(filePath, messageAudioFile.readBytes())
+
                     val response =
-                        supabaseClient.functions.invoke(
-                            "send-audio-message",
-                            mapOf("chatId" to chatId, "audioPath" to filePath),
+                        messageClient.sendAudioMessage(
+                            SendAudioReq(
+                                chatId = chatId,
+                                audioId = messageAudioFile.name,
+                            ),
                         )
-                    Log.i(tag, "Message sent: ${response.body<String>()}")
-                    response.body<ChatResponse>()
-                } catch (e: Exception) {
-                    Log.e(tag, "Failed to send message", e)
-                    raise(InfraErrors.DatabaseError("Failed to send message"))
+
+                    if (response.isSuccessful) {
+                        val responseBody =
+                            response.body()
+                                ?: throw IllegalStateException("Audio message send failed: ${response.message()}")
+
+                        ChatUpdate(
+                            chat = responseBody.chat,
+                            shouldFinish = responseBody.shouldFinish,
+                        )
+                    } else {
+                        throw IllegalStateException("Audio message send failed: ${response.message()}")
+                    }
+                }.mapLeft { error ->
+                    Log.e(tag, "Error sending audio message", error)
+                    InfraErrors.NetworkError("Failed to send audio message")
                 }
-            }
 
         suspend fun sendMessage(
             chatId: String,

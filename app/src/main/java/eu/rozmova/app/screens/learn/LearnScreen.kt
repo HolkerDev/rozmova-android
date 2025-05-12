@@ -51,7 +51,7 @@ fun LearnScreen(
     // Wrap the content in a scrollable Column
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 16.dp),
+        contentPadding = PaddingValues(bottom = 8.dp),
     ) {
         state.recommendedScenarios?.let { recommendedScenarios ->
             item {

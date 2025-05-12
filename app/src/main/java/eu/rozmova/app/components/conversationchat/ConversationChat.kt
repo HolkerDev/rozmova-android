@@ -48,7 +48,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,7 +57,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.rozmova.app.R
 import eu.rozmova.app.components.AudioMessageItem
 import eu.rozmova.app.components.AudioRecorderButton
@@ -67,8 +65,12 @@ import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.components.WordItem
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatStatus
+import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.WordDto
+import eu.rozmova.app.domain.toAudioMessage
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun ConversationChat(
@@ -82,32 +84,24 @@ fun ConversationChat(
         viewModel.loadChat(chatId)
     }
 
-    val onChatArchiveState = rememberUpdatedState(onChatArchive)
-    val state by viewModel.state.collectAsState()
+    val oldState by viewModel.state.collectAsState()
     val chatState by viewModel.state.collectAsState()
     val isRecording by viewModel.isRecording.collectAsState()
-    val shouldScrollToBottom by viewModel.shouldScrollToBottom.collectAsStateWithLifecycle()
-    val shouldProposeToFinishChat by viewModel.shouldProposeToFinishChat.collectAsState()
-    val chatArchived by viewModel.navigateToChatList.collectAsStateWithLifecycle()
     val messageListState = rememberLazyListState()
     var showModal by remember { mutableStateOf(false) }
 
-    LaunchedEffect(shouldScrollToBottom) {
-        if (shouldScrollToBottom && chatState.messages != null) {
-            messageListState.animateScrollToItem(chatState.messages!!.size - 1)
-            viewModel.onScrollToBottom()
-        }
-    }
+    val state by viewModel.collectAsState()
 
-    LaunchedEffect(shouldProposeToFinishChat) {
-        if (shouldProposeToFinishChat) {
-            showModal = true
-        }
-    }
-
-    LaunchedEffect(chatArchived) {
-        if (chatArchived) {
-            onChatArchiveState.value()
+    viewModel.collectSideEffect { event ->
+        when (event) {
+            ConvoChatEvents.Close -> TODO()
+            ConvoChatEvents.ProposeFinish -> TODO()
+            ConvoChatEvents.ScrollToBottom ->
+                state.chat?.takeIf { it.messages.size > 1 }?.let { chat ->
+                    messageListState.animateScrollToItem(
+                        chat.messages.size - 1,
+                    )
+                }
         }
     }
 
@@ -137,49 +131,47 @@ fun ConversationChat(
 //            )
 //        }
 
-        if (state.isLoading && state.chat == null) {
-            LoadingComponent(onBackClick)
-        } else if (!state.error.isNullOrBlank()) {
-            ErrorComponent(onBackClick)
-        } else {
-            chatState.chat?.let { chat ->
+        state.chat?.let { chat ->
+            Column {
                 ScenarioInfoCard(
                     onBackClick = onBackClick,
-                    onRecordStart = { viewModel.startRecording() },
-                    onRecordStop = { viewModel.stopRecording() },
                     onPlayMessage = { messageId -> viewModel.playAudio(messageId) },
                     onStopMessage = { viewModel.stopAudio() },
-                    isRecording = isRecording,
                     scenario = chat.scenario,
-                    messages = chatState.messages ?: emptyList(),
+                    messages = chat.messages,
                     chatModel = chat,
                     words = chat.scenario.helperWords,
-                    isMessageLoading = state.isLoading,
+                    isMessageLoading = oldState.isLoading,
                     messageListState = messageListState,
                     onChatFinish = { viewModel.finishChat(chat.id) },
                     isAnalysisLoading = chatState.isAnalysisLoading,
                     onChatArchive = { viewModel.prepareAnalytics(chat.id) },
                 )
-            } ?: LoadingComponent(onBackClick)
-        }
+                Spacer(modifier = Modifier.height(16.dp))
+                AudioRecorderButton(
+                    onRecordStart = { viewModel.startRecording() },
+                    onRecordStop = { viewModel.stopRecording() },
+                    isDisabled = false,
+                    onChatAnalyticsRequest = onChatArchive,
+                    isRecording = isRecording,
+                )
+            }
+        } ?: LoadingComponent(onBackClick = { onBackClick() }, modifier = Modifier.fillMaxSize())
     }
 }
 
 @Composable
 fun ScenarioInfoCard(
     scenario: ScenarioDto,
-    messages: List<AudioChatMessage>,
+    messages: List<MessageDto>,
     words: List<WordDto>,
     chatModel: ChatDto,
     onBackClick: () -> Unit,
-    onRecordStart: () -> Unit,
-    onRecordStop: () -> Unit,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
     onChatFinish: () -> Unit,
     onChatArchive: () -> Unit,
     isMessageLoading: Boolean,
-    isRecording: Boolean,
     isAnalysisLoading: Boolean,
     messageListState: LazyListState,
     modifier: Modifier = Modifier,
@@ -354,15 +346,6 @@ fun ScenarioInfoCard(
                     showFinishButton = messages.isNotEmpty() && chatModel.status == ChatStatus.IN_PROGRESS,
                     modifier = Modifier.weight(1f),
                 )
-
-                Spacer(modifier = Modifier.height(16.dp))
-                AudioRecorderButton(
-                    onRecordStart = onRecordStart,
-                    onRecordStop = onRecordStop,
-                    isDisabled = isMessageLoading || chatModel.status == ChatStatus.FINISHED,
-                    onChatAnalyticsRequest = onChatArchive,
-                    isRecording = isRecording,
-                )
             }
         }
     }
@@ -377,7 +360,12 @@ fun ScenarioInfoCard(
     if (showSituationDialog) {
         val screenHeight = LocalConfiguration.current.screenHeightDp.dp
         AlertDialog(
-            properties = DialogProperties(dismissOnClickOutside = true, dismissOnBackPress = true, usePlatformDefaultWidth = false),
+            properties =
+                DialogProperties(
+                    dismissOnClickOutside = true,
+                    dismissOnBackPress = true,
+                    usePlatformDefaultWidth = false,
+                ),
             onDismissRequest = { showSituationDialog = false },
             title = {
                 Text(
@@ -420,7 +408,12 @@ fun ScenarioInfoCard(
     if (showInstructionsDialog) {
         val screenHeight = LocalConfiguration.current.screenHeightDp.dp
         AlertDialog(
-            properties = DialogProperties(dismissOnClickOutside = true, dismissOnBackPress = true, usePlatformDefaultWidth = false),
+            properties =
+                DialogProperties(
+                    dismissOnClickOutside = true,
+                    dismissOnBackPress = true,
+                    usePlatformDefaultWidth = false,
+                ),
             onDismissRequest = { showInstructionsDialog = false },
             title = {
                 Text(
@@ -463,7 +456,7 @@ fun ScenarioInfoCard(
 
 @Composable
 fun AudioMessageList(
-    messages: List<AudioChatMessage>,
+    messages: List<MessageDto>,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
     onChatFinish: () -> Unit,
@@ -480,7 +473,7 @@ fun AudioMessageList(
     ) {
         items(messages) { message ->
             AudioMessageItem(
-                message = message,
+                message = message.toAudioMessage(),
                 onPlayMessage = onPlayMessage,
                 onStopMessage = onStopMessage,
                 modifier = Modifier.fillMaxWidth(),

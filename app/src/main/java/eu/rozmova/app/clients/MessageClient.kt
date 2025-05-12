@@ -10,6 +10,11 @@ interface MessageClient {
     suspend fun sendTextMessage(
         @Body body: SendMessageReq,
     ): Response<SendMessageRes>
+
+    @POST("messages/audio")
+    suspend fun sendAudioMessage(
+        @Body body: SendAudioReq,
+    ): Response<SendAudioRes>
 }
 
 data class SendMessageReq(
@@ -18,6 +23,16 @@ data class SendMessageReq(
 )
 
 data class SendMessageRes(
+    val chat: ChatDto,
+    val shouldFinish: Boolean,
+)
+
+data class SendAudioReq(
+    val chatId: String,
+    val audioId: String,
+)
+
+data class SendAudioRes(
     val chat: ChatDto,
     val shouldFinish: Boolean,
 )
