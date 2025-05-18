@@ -2,11 +2,11 @@ package eu.rozmova.app.repositories
 
 import android.util.Log
 import arrow.core.Either
-import arrow.core.catch
 import arrow.core.raise.either
 import eu.rozmova.app.clients.ChatClient
 import eu.rozmova.app.clients.ChatCreateReq
 import eu.rozmova.app.clients.FinishChatRes
+import eu.rozmova.app.clients.GenSignedUrlReq
 import eu.rozmova.app.clients.MessageClient
 import eu.rozmova.app.clients.SendAudioReq
 import eu.rozmova.app.clients.SendMessageReq
@@ -224,16 +224,28 @@ class ChatsRepository
                     val userId =
                         supabaseClient.auth.currentUserOrNull()?.id ?: throw InfraErrors.AuthError("User is not authenticated")
 
-                    val filePath = "$userId/${messageAudioFile.name}"
-                    supabaseClient.storage
-                        .from("audio-messages")
-                        .upload(filePath, messageAudioFile.readBytes())
+                    val fileId = messageAudioFile.name.substringBefore(".")
+
+                    val signedUrlResponse =
+                        messageClient.getSignedUrl(
+                            GenSignedUrlReq(
+                                fileId = fileId,
+                            ),
+                        )
+
+                    if (signedUrlResponse.isSuccessful.not()) {
+                        throw IllegalStateException("Audio message send failed: ${signedUrlResponse.message()}")
+                    }
+
+                    val signedUrl =
+                        signedUrlResponse.body()?.url
+                            ?: throw IllegalStateException("Audio message send failed: ${signedUrlResponse.message()}")
 
                     val response =
                         messageClient.sendAudioMessage(
                             SendAudioReq(
                                 chatId = chatId,
-                                audioId = messageAudioFile.name,
+                                audioId = messageAudioFile.name.substringBefore("."),
                             ),
                         )
 

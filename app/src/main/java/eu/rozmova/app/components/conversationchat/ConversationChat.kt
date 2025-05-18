@@ -86,7 +86,6 @@ fun ConversationChat(
     }
 
     val chatState by viewModel.state.collectAsState()
-    val isRecording by viewModel.isRecording.collectAsState()
     val messageListState = rememberLazyListState()
     var showFinishModal by remember { mutableStateOf(false) }
 
@@ -172,7 +171,7 @@ fun ConversationChat(
                     onRecordStop = { viewModel.stopRecording() },
                     isDisabled = false,
                     onChatAnalyticsRequest = onChatArchive,
-                    isRecording = isRecording,
+                    isRecording = state.isAudioRecording,
                     modifier = Modifier.padding(bottom = 16.dp),
                 )
             }

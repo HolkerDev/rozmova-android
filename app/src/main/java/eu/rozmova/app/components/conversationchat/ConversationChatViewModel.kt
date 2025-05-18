@@ -42,6 +42,7 @@ data class ChatDetailState(
 data class ConvoChatState(
     val chat: ChatDto? = null,
     val isAudioRecording: Boolean = false,
+    val isMessageLoading: Boolean = false,
 )
 
 data class AudioState(
@@ -122,7 +123,7 @@ class ChatDetailsViewModel
 
         fun onAudioSaved() =
             intent {
-                _state.update { it.copy(isLoading = true) }
+                reduce { state.copy(isMessageLoading = true) }
                 val chatId = state.chat?.id ?: throw IllegalStateException("Chat ID is null")
                 val file = audioFile ?: throw IllegalStateException("Audio file is null")
 
@@ -132,9 +133,10 @@ class ChatDetailsViewModel
                         if (response.shouldFinish) {
                             postSideEffect(ConvoChatEvents.ProposeFinish)
                         }
-                        reduce { state.copy(chat = response.chat) }
+                        reduce { state.copy(chat = response.chat, isMessageLoading = false) }
                     }.mapLeft { error ->
                         Log.e("ChatDetailsViewModel", "Error sending audio message: ${error.message}")
+                        reduce { state.copy(isMessageLoading = false) }
                     }
             }
 
