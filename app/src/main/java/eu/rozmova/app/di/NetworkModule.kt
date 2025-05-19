@@ -7,11 +7,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import eu.rozmova.app.BuildConfig
-import eu.rozmova.app.clients.BugReportClient
-import eu.rozmova.app.clients.ChatClient
-import eu.rozmova.app.clients.MessageClient
-import eu.rozmova.app.clients.ScenarioClient
-import eu.rozmova.app.clients.network.AuthInterceptor
+import eu.rozmova.app.clients.backend.BugReportClient
+import eu.rozmova.app.clients.backend.ChatClient
+import eu.rozmova.app.clients.backend.MessageClient
+import eu.rozmova.app.clients.backend.ScenarioClient
+import eu.rozmova.app.clients.backend.network.AuthInterceptor
 import eu.rozmova.app.utils.instantDeserializer
 import eu.rozmova.app.utils.instantSerializer
 import io.github.jan.supabase.SupabaseClient

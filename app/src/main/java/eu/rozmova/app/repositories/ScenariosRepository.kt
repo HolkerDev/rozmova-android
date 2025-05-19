@@ -2,10 +2,10 @@ package eu.rozmova.app.repositories
 
 import android.util.Log
 import arrow.core.Either
-import eu.rozmova.app.clients.RecommendedScenariosRequest
-import eu.rozmova.app.clients.ScenarioClient
-import eu.rozmova.app.clients.ScenariosRequest
-import eu.rozmova.app.clients.WeeklyScenariosBody
+import eu.rozmova.app.clients.backend.RecommendedScenariosRequest
+import eu.rozmova.app.clients.backend.ScenarioClient
+import eu.rozmova.app.clients.backend.ScenariosRequest
+import eu.rozmova.app.clients.backend.WeeklyScenariosBody
 import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioModel

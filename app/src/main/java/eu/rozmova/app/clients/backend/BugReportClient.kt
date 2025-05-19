@@ -1,4 +1,4 @@
-package eu.rozmova.app.clients
+package eu.rozmova.app.clients.backend
 
 import retrofit2.Response
 import retrofit2.http.Body

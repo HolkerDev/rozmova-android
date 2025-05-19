@@ -37,7 +37,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.components.conversationchat.AudioChatMessage
 import eu.rozmova.app.domain.Author
-import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.utils.formatDuration
 
 @Composable
@@ -174,7 +173,6 @@ private fun AudioMessageItemPreview() {
                 body = "Hello, how are you?",
                 duration = 10000,
                 isPlaying = false,
-                link = "randomLink",
             ),
         onPlayMessage = {},
         onStopMessage = {},

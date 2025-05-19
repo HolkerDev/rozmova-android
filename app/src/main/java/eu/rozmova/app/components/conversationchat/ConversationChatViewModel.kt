@@ -16,10 +16,12 @@ import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.repositories.ChatsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -41,6 +43,7 @@ data class ChatDetailState(
 
 data class ConvoChatState(
     val chat: ChatDto? = null,
+    val messages: List<AudioChatMessage> = emptyList(),
     val isAudioRecording: Boolean = false,
     val isMessageLoading: Boolean = false,
 )
@@ -56,7 +59,6 @@ data class AudioChatMessage(
     val isPlaying: Boolean,
     val duration: Int = 0,
     val body: String,
-    val link: String,
     val author: Author,
 )
 
@@ -85,9 +87,6 @@ class ChatDetailsViewModel
 
         private var mediaRecorder: MediaRecorder? = null
         private var audioFile: File? = null
-
-        private val _isRecording = MutableStateFlow(false)
-        val isRecording = _isRecording.asStateFlow()
 
         val onAudioFinished = {
             _state.update { it.copy(messages = it.messages?.map { msg -> msg.copy(isPlaying = false) }) }
@@ -228,48 +227,54 @@ class ChatDetailsViewModel
                 chatsRepository
                     .fetchChatById(chatId)
                     .map { chat ->
-                        reduce { state.copy(chat = chat) }
+                        reduce { state.copy(chat = chat, messages = chat.messages.map { it.toAudioMessage() }) }
                         postSideEffect(ConvoChatEvents.ScrollToBottom)
                     }.mapLeft { err ->
                         Log.e(tag, "Error loading chat: ${err.message}")
                     }
             }
 
-        fun playAudio(messageId: String) =
-            viewModelScope.launch {
+        fun playAudio(msgId: String) =
+            intent {
                 try {
                     stopAudio()
-                    val message =
-                        _state.value.messages?.first { it.id == messageId }
-                            ?: throw IllegalStateException("Message not found")
-                    val audioUri = buildAudioUri(message.link, message.author == Author.USER)
-                    expoPlayer.setMediaItem(MediaItem.fromUri(audioUri))
-                    expoPlayer.prepare()
-                    expoPlayer.play()
-                    _state.update { it.copy(messages = it.messages?.map { msg -> msg.copy(isPlaying = msg.id == messageId) }) }
+                    val messageToPlay =
+                        state.chat?.messages?.find { it.id == msgId } ?: throw IllegalStateException("Message not found")
+                    val audioUri = buildAudioUri(messageToPlay.audioId, messageToPlay.author == Author.USER)
+                    withContext(Dispatchers.Main) {
+                        expoPlayer.setMediaItem(MediaItem.fromUri(audioUri))
+                        expoPlayer.prepare()
+                        expoPlayer.play()
+                    }
                 } catch (e: Exception) {
                     Log.e("ChatDetailsViewModel", "Error playing audio", e)
                 }
             }
 
-        fun stopAudio() {
-            expoPlayer.stop()
-            _state.update { it.copy(messages = it.messages?.map { msg -> msg.copy(isPlaying = false) }) }
-        }
+        fun stopAudio() =
+            intent {
+                withContext(Dispatchers.Main) {
+                    expoPlayer.stop()
+                }
+//            _state.update { it.copy(messages = it.messages?.map { msg -> msg.copy(isPlaying = false) }) }
+            }
 
         private suspend fun buildAudioUri(
-            audioLink: String,
+            audioId: String?,
             isUser: Boolean,
         ): Uri {
+            if (audioId == null || audioId.isEmpty()) {
+                throw IllegalArgumentException("Audio ID cannot be empty")
+            }
             if (isUser) {
-                val audioName = audioLink.split("/").last()
                 val outputDir =
                     getApplication<Application>().getExternalFilesDir(Environment.DIRECTORY_MUSIC)
-                val audioFile = File(outputDir, audioName)
+                val audioFile = File(outputDir, "$audioId.mp4")
                 val audioUri = Uri.fromFile(audioFile)
                 return audioUri
             } else {
-                return Uri.parse(chatsRepository.getPublicAudioLink(audioLink))
+                return TODO()
+//                return Uri.parse(chatsRepository.getPublicAudioLink(audioLink))
             }
         }
     }

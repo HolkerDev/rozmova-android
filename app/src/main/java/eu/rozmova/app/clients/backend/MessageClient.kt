@@ -1,4 +1,4 @@
-package eu.rozmova.app.clients
+package eu.rozmova.app.clients.backend
 
 import eu.rozmova.app.domain.ChatDto
 import retrofit2.Response

@@ -135,8 +135,6 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation(libs.firebase.crashlytics)
 
-    implementation("com.amazonaws:aws-android-sdk-s3:2.78.0")
-
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)

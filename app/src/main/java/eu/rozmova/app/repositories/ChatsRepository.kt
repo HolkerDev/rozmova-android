@@ -3,13 +3,14 @@ package eu.rozmova.app.repositories
 import android.util.Log
 import arrow.core.Either
 import arrow.core.raise.either
-import eu.rozmova.app.clients.ChatClient
-import eu.rozmova.app.clients.ChatCreateReq
-import eu.rozmova.app.clients.FinishChatRes
-import eu.rozmova.app.clients.GenSignedUrlReq
-import eu.rozmova.app.clients.MessageClient
-import eu.rozmova.app.clients.SendAudioReq
-import eu.rozmova.app.clients.SendMessageReq
+import eu.rozmova.app.clients.backend.ChatClient
+import eu.rozmova.app.clients.backend.ChatCreateReq
+import eu.rozmova.app.clients.backend.FinishChatRes
+import eu.rozmova.app.clients.backend.GenSignedUrlReq
+import eu.rozmova.app.clients.backend.MessageClient
+import eu.rozmova.app.clients.backend.SendAudioReq
+import eu.rozmova.app.clients.backend.SendMessageReq
+import eu.rozmova.app.clients.s3.S3Client
 import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatModel
@@ -64,6 +65,7 @@ class ChatsRepository
         private val supabaseClient: SupabaseClient,
         private val chatClient: ChatClient,
         private val messageClient: MessageClient,
+        private val s3Client: S3Client,
     ) {
         private val tag = this::class.simpleName
 
@@ -221,9 +223,6 @@ class ChatsRepository
         ): Either<InfraErrors, ChatUpdate> =
             Either
                 .catch {
-                    val userId =
-                        supabaseClient.auth.currentUserOrNull()?.id ?: throw InfraErrors.AuthError("User is not authenticated")
-
                     val fileId = messageAudioFile.name.substringBefore(".")
 
                     val signedUrlResponse =
@@ -240,6 +239,8 @@ class ChatsRepository
                     val signedUrl =
                         signedUrlResponse.body()?.url
                             ?: throw IllegalStateException("Audio message send failed: ${signedUrlResponse.message()}")
+
+                    s3Client.uploadFile(signedUrl, messageAudioFile)
 
                     val response =
                         messageClient.sendAudioMessage(

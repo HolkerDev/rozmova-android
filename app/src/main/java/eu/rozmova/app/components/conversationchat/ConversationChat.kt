@@ -66,7 +66,6 @@ import eu.rozmova.app.components.SituationButton
 import eu.rozmova.app.components.WordItem
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatStatus
-import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.WordDto
 import org.orbitmvi.orbit.compose.collectAsState
@@ -155,7 +154,7 @@ fun ConversationChat(
                         onPlayMessage = { messageId -> viewModel.playAudio(messageId) },
                         onStopMessage = { viewModel.stopAudio() },
                         scenario = chat.scenario,
-                        messages = chat.messages,
+                        messages = state.messages,
                         chatModel = chat,
                         words = chat.scenario.helperWords,
                         isMessageLoading = false,
@@ -183,7 +182,7 @@ fun ConversationChat(
 @Composable
 fun ScenarioInfoCard(
     scenario: ScenarioDto,
-    messages: List<MessageDto>,
+    messages: List<AudioChatMessage>,
     words: List<WordDto>,
     chatModel: ChatDto,
     onPlayMessage: (messageId: String) -> Unit,

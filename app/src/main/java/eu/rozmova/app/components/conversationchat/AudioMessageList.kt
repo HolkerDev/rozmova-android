@@ -30,13 +30,12 @@ fun MessageDto.toAudioMessage(): AudioChatMessage =
         isPlaying = false,
         duration = this.audioDuration ?: 0,
         body = this.content,
-        link = "",
         author = this.author,
     )
 
 @Composable
 fun AudioMessageList(
-    messages: List<MessageDto>,
+    messages: List<AudioChatMessage>,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
     onChatFinish: () -> Unit,
@@ -53,7 +52,7 @@ fun AudioMessageList(
     ) {
         items(messages) { message ->
             AudioMessageItem(
-                message = message.toAudioMessage(),
+                message = message,
                 onPlayMessage = onPlayMessage,
                 onStopMessage = onStopMessage,
                 modifier = Modifier.fillMaxWidth(),

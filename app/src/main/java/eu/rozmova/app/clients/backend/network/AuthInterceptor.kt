@@ -1,4 +1,4 @@
-package eu.rozmova.app.clients.network
+package eu.rozmova.app.clients.backend.network
 
 import android.util.Log
 import io.github.jan.supabase.SupabaseClient
@@ -33,10 +33,10 @@ class AuthInterceptor
                 return chain.proceed(requestWithContentType)
             }
 
-            // Get the latest access token
             val accessToken =
                 runBlocking {
                     try {
+                        supabaseClient.auth.refreshCurrentSession()
                         supabaseClient.auth.currentSessionOrNull()?.accessToken
                     } catch (e: Exception) {
                         Log.e(tag, "Failed to get access token", e)

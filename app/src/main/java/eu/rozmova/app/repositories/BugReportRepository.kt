@@ -2,8 +2,8 @@ package eu.rozmova.app.repositories
 
 import android.util.Log
 import arrow.core.Either
-import eu.rozmova.app.clients.BugReportClient
-import eu.rozmova.app.clients.SendBugReportReq
+import eu.rozmova.app.clients.backend.BugReportClient
+import eu.rozmova.app.clients.backend.SendBugReportReq
 import javax.inject.Inject
 import javax.inject.Singleton
 
