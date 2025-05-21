@@ -15,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.ChatDto
+import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.repositories.ChatsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -240,7 +241,7 @@ class ChatDetailsViewModel
                     stopAudio()
                     val messageToPlay =
                         state.chat?.messages?.find { it.id == msgId } ?: throw IllegalStateException("Message not found")
-                    val audioUri = buildAudioUri(messageToPlay.audioId, messageToPlay.author == Author.USER)
+                    val audioUri = buildAudioUri(messageToPlay)
                     Log.i(tag, "Audio URI: $audioUri")
                     withContext(Dispatchers.Main) {
                         expoPlayer.setMediaItem(MediaItem.fromUri(audioUri))
@@ -257,10 +258,10 @@ class ChatDetailsViewModel
                 expoPlayer.stop()
             }
 
-        private suspend fun buildAudioUri(
-            audioId: String?,
-            isUser: Boolean,
-        ): Uri {
+        private fun buildAudioUri(messageDto: MessageDto): Uri {
+            val audioId = messageDto.audioId
+            val audioLink = messageDto.link
+            val isUser = messageDto.author == Author.USER
             if (audioId == null || audioId.isEmpty()) {
                 throw IllegalArgumentException("Audio ID cannot be empty")
             }
@@ -271,8 +272,7 @@ class ChatDetailsViewModel
                 val audioUri = Uri.fromFile(audioFile)
                 return audioUri
             } else {
-                return TODO()
-//                return Uri.parse(chatsRepository.getPublicAudioLink(audioLink))
+                return Uri.parse(audioLink)
             }
         }
     }

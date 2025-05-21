@@ -13,5 +13,6 @@ data class MessageDto(
     val content: String,
     val author: Author,
     val audioId: String?,
+    val link: String?,
     val audioDuration: Int?,
 )

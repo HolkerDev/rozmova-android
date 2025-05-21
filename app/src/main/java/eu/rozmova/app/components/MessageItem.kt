@@ -80,6 +80,7 @@ private fun MessageItemPreview() {
                 author = Author.USER,
                 audioId = null,
                 audioDuration = 0,
+                link = "",
             ),
     )
 }
