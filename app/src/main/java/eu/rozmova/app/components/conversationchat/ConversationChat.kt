@@ -152,7 +152,7 @@ fun ConversationChat(
                 ) {
                     ScenarioInfoCard(
                         onPlayMessage = { messageId -> viewModel.playAudio(messageId) },
-                        onStopMessage = { viewModel.stopAudio() },
+                        onStopMessage = { },
                         scenario = chat.scenario,
                         messages = state.messages,
                         chatModel = chat,

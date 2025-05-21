@@ -241,6 +241,7 @@ class ChatDetailsViewModel
                     val messageToPlay =
                         state.chat?.messages?.find { it.id == msgId } ?: throw IllegalStateException("Message not found")
                     val audioUri = buildAudioUri(messageToPlay.audioId, messageToPlay.author == Author.USER)
+                    Log.i(tag, "Audio URI: $audioUri")
                     withContext(Dispatchers.Main) {
                         expoPlayer.setMediaItem(MediaItem.fromUri(audioUri))
                         expoPlayer.prepare()
@@ -251,12 +252,9 @@ class ChatDetailsViewModel
                 }
             }
 
-        fun stopAudio() =
-            intent {
-                withContext(Dispatchers.Main) {
-                    expoPlayer.stop()
-                }
-//            _state.update { it.copy(messages = it.messages?.map { msg -> msg.copy(isPlaying = false) }) }
+        private suspend fun stopAudio() =
+            withContext(Dispatchers.Main) {
+                expoPlayer.stop()
             }
 
         private suspend fun buildAudioUri(
