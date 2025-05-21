@@ -28,7 +28,6 @@ fun MessageDto.toAudioMessage(): AudioChatMessage =
     AudioChatMessage(
         id = this.id,
         isPlaying = false,
-        duration = this.audioDuration ?: 0,
         body = this.content,
         author = this.author,
     )

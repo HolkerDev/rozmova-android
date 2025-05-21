@@ -37,7 +37,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.components.conversationchat.AudioChatMessage
 import eu.rozmova.app.domain.Author
-import eu.rozmova.app.utils.formatDuration
 
 @Composable
 fun AudioMessageItem(
@@ -119,11 +118,6 @@ fun AudioMessageItem(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Text(
-                        text = formatDuration(message.duration),
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-
                     // Transcription toggle button
                     IconButton(
                         onClick = { showTranscription = !showTranscription },
@@ -171,7 +165,6 @@ private fun AudioMessageItemPreview() {
                 id = "1",
                 author = Author.USER,
                 body = "Hello, how are you?",
-                duration = 10000,
                 isPlaying = false,
             ),
         onPlayMessage = {},

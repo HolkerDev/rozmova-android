@@ -79,7 +79,6 @@ private fun MessageItemPreview() {
                 content = "Hello, world!",
                 author = Author.USER,
                 audioId = null,
-                audioDuration = 0,
                 link = "",
             ),
     )

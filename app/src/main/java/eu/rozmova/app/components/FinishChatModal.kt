@@ -77,7 +77,6 @@ private fun YesNoDialogPreview() {
                 content = "Danke.",
                 author = Author.USER,
                 audioId = null,
-                audioDuration = null,
                 link = "",
             ),
         lastBotMsg =
@@ -86,7 +85,6 @@ private fun YesNoDialogPreview() {
                 content = "You're welcome.",
                 author = Author.BOT,
                 audioId = null,
-                audioDuration = 0,
                 link = "",
             ),
         onYesClick = {},

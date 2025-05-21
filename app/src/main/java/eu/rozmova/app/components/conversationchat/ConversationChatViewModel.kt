@@ -58,7 +58,6 @@ data class AudioState(
 data class AudioChatMessage(
     val id: String,
     val isPlaying: Boolean,
-    val duration: Int = 0,
     val body: String,
     val author: Author,
 )
@@ -89,9 +88,12 @@ class ChatDetailsViewModel
         private var mediaRecorder: MediaRecorder? = null
         private var audioFile: File? = null
 
-        val onAudioFinished = {
-            _state.update { it.copy(messages = it.messages?.map { msg -> msg.copy(isPlaying = false) }) }
-        }
+        fun onAudioFinished() =
+            intent {
+                reduce {
+                    state.copy(messages = state.messages.map { msg -> msg.copy(isPlaying = false) })
+                }
+            }
 
         init {
             expoPlayer.addListener(
@@ -238,7 +240,15 @@ class ChatDetailsViewModel
         fun playAudio(msgId: String) =
             intent {
                 try {
-                    stopAudio()
+                    stopPlayer()
+                    reduce {
+                        state.copy(
+                            messages =
+                                state.messages.map { msg ->
+                                    msg.copy(isPlaying = false)
+                                },
+                        )
+                    }
                     val messageToPlay =
                         state.chat?.messages?.find { it.id == msgId } ?: throw IllegalStateException("Message not found")
                     val audioUri = buildAudioUri(messageToPlay)
@@ -248,12 +258,38 @@ class ChatDetailsViewModel
                         expoPlayer.prepare()
                         expoPlayer.play()
                     }
+                    reduce {
+                        state.copy(
+                            messages =
+                                state.messages.map { msg ->
+                                    AudioChatMessage(
+                                        id = msg.id,
+                                        isPlaying = msg.id == msgId,
+                                        body = msg.body,
+                                        author = msg.author,
+                                    )
+                                },
+                        )
+                    }
                 } catch (e: Exception) {
                     Log.e("ChatDetailsViewModel", "Error playing audio", e)
                 }
             }
 
-        private suspend fun stopAudio() =
+        fun stopAudio() =
+            intent {
+                stopPlayer()
+                reduce {
+                    state.copy(
+                        messages =
+                            state.messages.map { msg ->
+                                msg.copy(isPlaying = false)
+                            },
+                    )
+                }
+            }
+
+        private suspend fun stopPlayer() =
             withContext(Dispatchers.Main) {
                 expoPlayer.stop()
             }
