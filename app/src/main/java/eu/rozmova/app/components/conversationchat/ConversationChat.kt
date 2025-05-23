@@ -64,10 +64,12 @@ import eu.rozmova.app.components.AudioRecorderButton
 import eu.rozmova.app.components.InstructionsButton
 import eu.rozmova.app.components.SituationButton
 import eu.rozmova.app.components.WordItem
+import eu.rozmova.app.components.messagechat.FinishChat
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.WordDto
+import eu.rozmova.app.modules.convochat.components.shouldfinishdialog.ShouldFinishAudioDialog
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -80,20 +82,24 @@ fun ConversationChat(
     modifier: Modifier = Modifier,
     viewModel: ChatDetailsViewModel = hiltViewModel(),
 ) {
+    val chatState by viewModel.state.collectAsState()
+    val messageListState = rememberLazyListState()
+    var finishChat: FinishChat? by remember { mutableStateOf(null) }
+    val state by viewModel.collectAsState()
+
     LaunchedEffect(chatId) {
         viewModel.loadChat(chatId)
     }
 
-    val chatState by viewModel.state.collectAsState()
-    val messageListState = rememberLazyListState()
-    var showFinishModal by remember { mutableStateOf(false) }
-
-    val state by viewModel.collectAsState()
-
     viewModel.collectSideEffect { event ->
         when (event) {
             ConvoChatEvents.Close -> TODO()
-            ConvoChatEvents.ProposeFinish -> TODO()
+            is ConvoChatEvents.ProposeFinish ->
+                finishChat =
+                    FinishChat(
+                        lastBotMsg = event.lastBotMsg,
+                        lastUserMsg = event.lastUserMsg,
+                    )
             ConvoChatEvents.ScrollToBottom ->
                 state.chat?.takeIf { it.messages.size > 1 }?.let { chat ->
                     messageListState.animateScrollToItem(
@@ -101,6 +107,23 @@ fun ConversationChat(
                     )
                 }
         }
+    }
+
+    finishChat?.let { data ->
+        ShouldFinishAudioDialog(
+            lastBotMsg = data.lastBotMsg,
+            lastUserMsg = data.lastUserMsg,
+            onYesClick = {
+                finishChat = null
+                viewModel.finishChat(chatId)
+            },
+            onNoClick = {
+                finishChat = null
+            },
+            onDismiss = {
+                finishChat = null
+            },
+        )
     }
 
     Column(modifier = modifier.fillMaxSize()) {

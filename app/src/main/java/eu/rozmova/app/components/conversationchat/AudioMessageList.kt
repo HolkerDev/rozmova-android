@@ -24,10 +24,10 @@ import eu.rozmova.app.components.AudioMessageItem
 import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.domain.MessageDto
 
-fun MessageDto.toAudioMessage(): AudioChatMessage =
+fun MessageDto.toAudioMessage(isPlaying: Boolean = false): AudioChatMessage =
     AudioChatMessage(
         id = this.id,
-        isPlaying = false,
+        isPlaying = isPlaying,
         body = this.content,
         author = this.author,
     )

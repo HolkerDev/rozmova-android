@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.util.Log
+import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
@@ -65,7 +66,10 @@ data class AudioChatMessage(
 sealed interface ConvoChatEvents {
     data object ScrollToBottom : ConvoChatEvents
 
-    data object ProposeFinish : ConvoChatEvents
+    data class ProposeFinish(
+        val lastBotMsg: MessageDto,
+        val lastUserMsg: MessageDto,
+    ) : ConvoChatEvents
 
     data object Close : ConvoChatEvents
 }
@@ -133,9 +137,21 @@ class ChatDetailsViewModel
                     .sendAudioMessage(chatId = chatId, file)
                     .map { response ->
                         if (response.shouldFinish) {
-                            postSideEffect(ConvoChatEvents.ProposeFinish)
+                            val messages = response.chat.messages
+                            postSideEffect(
+                                ConvoChatEvents.ProposeFinish(
+                                    lastBotMsg = messages.last(),
+                                    lastUserMsg = messages[messages.size - 2],
+                                ),
+                            )
                         }
-                        reduce { state.copy(chat = response.chat, isMessageLoading = false) }
+                        reduce {
+                            state.copy(
+                                chat = response.chat,
+                                isMessageLoading = false,
+                                messages = response.chat.messages.map { it.toAudioMessage() },
+                            )
+                        }
                     }.mapLeft { error ->
                         Log.e("ChatDetailsViewModel", "Error sending audio message: ${error.message}")
                         reduce { state.copy(isMessageLoading = false) }
@@ -308,7 +324,7 @@ class ChatDetailsViewModel
                 val audioUri = Uri.fromFile(audioFile)
                 return audioUri
             } else {
-                return Uri.parse(audioLink)
+                return audioLink!!.toUri()
             }
         }
     }
