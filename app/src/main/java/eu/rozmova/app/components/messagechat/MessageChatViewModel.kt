@@ -12,7 +12,6 @@ import javax.inject.Inject
 
 data class MessageChatState(
     val chat: ChatDto? = null,
-    val isLoadingPage: Boolean = false,
     val isLoadingMessage: Boolean = false,
     val isLoadingReview: Boolean = false,
     val review: ReviewDto? = null,
@@ -41,21 +40,18 @@ class MessageChatViewModel
         fun loadChat(chatId: String) =
             intent {
                 chatsRepository.fetchChatById(chatId = chatId).map { chat ->
-                    reduce { state.copy(chat = chat, isLoadingPage = false) }
+                    reduce { state.copy(chat = chat) }
                     postSideEffect(MessageChatEvent.ScrollToBottom)
                 }
             }
 
-        fun archiveChat(chatId: String) = {}
-
         fun finishChat(chatId: String) =
             intent {
-                reduce { state.copy(isLoadingPage = true, isLoadingReview = true) }
+                reduce { state.copy(isLoadingReview = true) }
                 chatsRepository.finishChat(chatId = chatId).map { chatUpdate ->
                     reduce {
                         state.copy(
                             chat = chatUpdate.chat,
-                            isLoadingPage = false,
                             isLoadingReview = false,
                             review = chatUpdate.review,
                         )

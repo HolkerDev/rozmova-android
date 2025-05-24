@@ -29,7 +29,6 @@ import androidx.compose.material.icons.rounded.CollectionsBookmark
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -61,6 +60,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.components.AudioRecorderButton
+import eu.rozmova.app.components.ChatAnalysisDialog
 import eu.rozmova.app.components.InstructionsButton
 import eu.rozmova.app.components.SituationButton
 import eu.rozmova.app.components.WordItem
@@ -78,11 +78,11 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 fun ConversationChat(
     onBackClick: () -> Unit,
     onChatArchive: () -> Unit,
+    onReviewAccept: () -> Unit,
     chatId: String,
     modifier: Modifier = Modifier,
     viewModel: ChatDetailsViewModel = hiltViewModel(),
 ) {
-    val chatState by viewModel.state.collectAsState()
     val messageListState = rememberLazyListState()
     var finishChat: FinishChat? by remember { mutableStateOf(null) }
     val state by viewModel.collectAsState()
@@ -126,32 +126,50 @@ fun ConversationChat(
         )
     }
 
+    if (state.isReviewLoading) {
+        AlertDialog(
+            onDismissRequest = { },
+            title = {
+                Text(
+                    "Analyzing conversation",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            },
+            text = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 2.dp,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        "Please wait while we analyze your conversation...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            },
+            confirmButton = {},
+            containerColor = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(16.dp),
+        )
+    }
+
+    state.review?.let {
+        ChatAnalysisDialog(
+            review = it,
+            onConfirm = { onReviewAccept() },
+            isLoading = false,
+        )
+    }
+
     Column(modifier = modifier.fillMaxSize()) {
-//        ShouldFinishChatDialog(
-//            showDialog = showModal,
-//            onYesClick = {
-//                showModal = false
-//                viewModel.finishChat(chatState.chat!!.id)
-//                viewModel.resetProposal()
-//            },
-//            onNoClick = {
-//                showModal = false
-//                viewModel.resetProposal()
-//            },
-//            onDismiss = {
-//                showModal = false
-//                viewModel.resetProposal()
-//            },
-//        )
-
-//        state.chatAnalysis?.let {
-//            ChatAnalysisDialog(
-//                review = it,
-//                onConfirm = { viewModel.onChatAnalysisSubmit() },
-//                isLoading = chatState.isChatAnalysisSubmitLoading,
-//            )
-//        }
-
         state.chat?.let { chat ->
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -180,11 +198,9 @@ fun ConversationChat(
                         messages = state.messages,
                         chatModel = chat,
                         words = chat.scenario.helperWords,
-                        isMessageLoading = false,
+                        isMessageLoading = state.isMessageLoading,
                         messageListState = messageListState,
                         onChatFinish = { viewModel.finishChat(chat.id) },
-                        isAnalysisLoading = chatState.isAnalysisLoading,
-                        onChatArchive = { viewModel.prepareAnalytics(chat.id) },
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -211,9 +227,7 @@ fun ScenarioInfoCard(
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
     onChatFinish: () -> Unit,
-    onChatArchive: () -> Unit,
     isMessageLoading: Boolean,
-    isAnalysisLoading: Boolean,
     messageListState: LazyListState,
     modifier: Modifier = Modifier,
 ) {
@@ -302,30 +316,6 @@ fun ScenarioInfoCard(
                     color = MaterialTheme.colorScheme.outlineVariant,
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
-
-                // Always show the analytics button for finished chats
-                if (chatModel.status == ChatStatus.FINISHED) {
-                    Button(
-                        onClick = { onChatArchive() },
-                        shape = MaterialTheme.shapes.small,
-                        modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(vertical = 8.dp),
-                        enabled = !isAnalysisLoading,
-                    ) {
-                        if (isAnalysisLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                strokeWidth = 2.dp,
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Analyzing...", style = MaterialTheme.typography.labelMedium)
-                        } else {
-                            Text("Get analytics", style = MaterialTheme.typography.labelMedium)
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
 
                 AudioMessageList(
                     messages = messages,

@@ -8,21 +8,16 @@ import android.os.Environment
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.Author
-import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.MessageDto
+import eu.rozmova.app.domain.ReviewDto
 import eu.rozmova.app.repositories.ChatsRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
@@ -31,29 +26,13 @@ import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 
-data class ChatDetailState(
-    val isLoading: Boolean = true,
-    val error: String? = null,
-    val chat: ChatDto? = null,
-    val messages: List<AudioChatMessage>? = null,
-    val audioPlayback: AudioState = AudioState(false, null, null),
-    val isRecording: Boolean = false,
-    val isChatAnalysisSubmitLoading: Boolean = false,
-    val chatAnalysis: ChatAnalysis? = null,
-    val isAnalysisLoading: Boolean = false,
-)
-
 data class ConvoChatState(
     val chat: ChatDto? = null,
     val messages: List<AudioChatMessage> = emptyList(),
     val isAudioRecording: Boolean = false,
+    val isReviewLoading: Boolean = false,
     val isMessageLoading: Boolean = false,
-)
-
-data class AudioState(
-    val isLoading: Boolean,
-    val error: String?,
-    val currentMessageIdPlaying: String?,
+    val review: ReviewDto? = null,
 )
 
 data class AudioChatMessage(
@@ -86,9 +65,6 @@ class ChatDetailsViewModel
         override val container: Container<ConvoChatState, ConvoChatEvents> = container(ConvoChatState())
         private val tag = this::class.simpleName
 
-        private val _state = MutableStateFlow(ChatDetailState())
-        val state = _state.asStateFlow()
-
         private var mediaRecorder: MediaRecorder? = null
         private var audioFile: File? = null
 
@@ -111,21 +87,19 @@ class ChatDetailsViewModel
             )
         }
 
-//        fun onChatAnalysisSubmit() =
-//            viewModelScope.launch {
-//                _state.update { it.copy(isChatAnalysisSubmitLoading = true) }
-//                chatsRepository.archiveChat(_state.value.chat!!.id).fold(
-//                    { error ->
-//                        _state.update {
-//                            it.copy(
-//                                isChatAnalysisSubmitLoading = false,
-//                                error = error.message,
-//                            )
-//                        }
-//                    },
-//                    { _navigateToChatList.update { true } },
-//                )
-//            }
+        fun finishChat(chatId: String) =
+            intent {
+                reduce { state.copy(isReviewLoading = true) }
+                chatsRepository.finishChat(chatId = chatId).map { chatUpdate ->
+                    reduce {
+                        state.copy(
+                            chat = chatUpdate.chat,
+                            isReviewLoading = false,
+                            review = chatUpdate.review,
+                        )
+                    }
+                }
+            }
 
         fun onAudioSaved() =
             intent {
@@ -205,34 +179,6 @@ class ChatDetailsViewModel
                 } finally {
                     reduce { state.copy(isAudioRecording = false) }
                 }
-            }
-
-        fun finishChat(chatId: String) =
-            viewModelScope.launch {
-                _state.update { it.copy(isLoading = true) }
-//                chatsRepository.finishChat(chatId).map {
-//                    _state.update {
-//                        it.copy(chat = it.chat?.copy(chatModel = it.chat.chatModel.copy(status = ChatStatus.FINISHED)))
-//                    } // TODO: Refactor this bullshit, I just hate this part of the code, like wtf
-//                    _state.update { it.copy(isLoading = false) }
-//                } // TODO: Handle error
-            }
-
-        fun prepareAnalytics(chatId: String) =
-            viewModelScope.launch {
-                _state.update { it.copy(isAnalysisLoading = true) }
-                chatsRepository
-                    .getAnalytics(chatId)
-                    .map { chatAnalysis ->
-                        _state.update {
-                            it.copy(
-                                isAnalysisLoading = false,
-                                chatAnalysis = chatAnalysis,
-                            )
-                        }
-                    }.mapLeft {
-                        Log.e(tag, "Error preparing chat analytics: ${it.message}")
-                    }
             }
 
         override fun onCleared() {

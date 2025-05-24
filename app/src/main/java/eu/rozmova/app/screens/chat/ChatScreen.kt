@@ -26,11 +26,9 @@ fun ChatScreen(
             ConversationChat(
                 chatId = chatId,
                 onBackClick = onBack,
+                onReviewAccept = onMain,
                 onChatArchive = onMain,
             )
-        }
-        else -> {
-            Log.e("ChatScreen", "Unhandled scenario type: $scenarioType")
         }
     }
 }
