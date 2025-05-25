@@ -72,4 +72,12 @@
     <string name="onboarding_lang_description">Виберіть мову, яка є найбільш зручною. Це набагато спростить досвід навчання.</string>
     <string name="lang_pl">Польська</string>
     <string name="onboarding_learn_lang_title">Виберіть мову вивчення</string>
+    <string name="onboarding_privacy_title">Ваша приватність важлива</string>
+    <string name="onboarding_privacy_description">Ми поважаємо вашу конфіденційність і зобов\'язуємося захищати ваші персональні дані. Ось як ми обробляємо вашу інформацію.</string>
+    <string name="privacy_audio_not_saved_title">Конфіденційність аудіо</string>
+    <string name="privacy_audio_not_saved_description">Аудіо шифрується, обробляється на серверах та одразу видаляється. Ми зберігаємо лише текст.</string>
+    <string name="privacy_data_storage_title">Безпечне зберігання в ЄС</string>
+    <string name="privacy_data_storage_description">Текстові повідомлення в розмовах надійно зберігаються на серверах, розташованих в ЄС.</string>
+    <string name="privacy_data_deletion_title">Контроль даних</string>
+    <string name="privacy_data_deletion_description">Ви маєте повний контроль над своїми даними. Запросіть видалення всієї вашої інформації в будь-який час через нашу підтримку.</string>
 </resources>

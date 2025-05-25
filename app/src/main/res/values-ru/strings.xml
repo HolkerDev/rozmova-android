@@ -72,4 +72,12 @@
     <string name="onboarding_lang_description">Выберите язык, который вам более удобен. Это гораздо упростит опыт обучения.</string>
     <string name="lang_pl">Польский</string>
     <string name="onboarding_learn_lang_title">Выберите язык обучения</string>
+    <string name="onboarding_privacy_title">Ваша конфиденциальность важна</string>
+    <string name="onboarding_privacy_description">Мы уважаем вашу конфиденциальность и обязуемся защищать ваши персональные данные. Вот как мы обрабатываем вашу информацию.</string>
+    <string name="privacy_audio_not_saved_title">Конфиденциальность аудио</string>
+    <string name="privacy_audio_not_saved_description">Аудио шифруется, обрабатывается на серверах и сразу же удаляется. Мы сохраняем только текст.</string>
+    <string name="privacy_data_storage_title">Безопасное хранение в ЕС</string>
+    <string name="privacy_data_storage_description">Ответы бота и ваши сообщения в разговорах надежно хранятся на серверах, расположенных в Европейском союзе.</string>
+    <string name="privacy_data_deletion_title">Контроль данных</string>
+    <string name="privacy_data_deletion_description">Вы имеете полный контроль над своими данными. Запросите удаление всей вашей информации в любое время через нашу поддержку.</string>
 </resources>

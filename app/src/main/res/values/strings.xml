@@ -75,7 +75,7 @@
     <string name="privacy_audio_not_saved_title">Audio Privacy</string>
     <string name="privacy_audio_not_saved_description">Your voice answers are encrypted and briefly processed on our servers for transcription, then immediately deleted. Audio files are never permanently stored - only transcribed text is kept.</string>
     <string name="privacy_data_storage_title">Secure EU Storage</string>
-    <string name="privacy_data_storage_description">Bot responses and your conversation messages are securely stored on servers located in the European Union.</string>
+    <string name="privacy_data_storage_description">Bot responses and your conversation text messages are securely stored on servers located in the European Union.</string>
     <string name="privacy_data_deletion_title">Data Control</string>
     <string name="privacy_data_deletion_description">You have full control over your data. Request deletion of all your information at any time through our support.</string>
 </resources>
