@@ -70,4 +70,6 @@
     <string name="library_title">Библиотека</string>
     <string name="onboarding_lang_title">Выберите родной язык</string>
     <string name="onboarding_lang_description">Выберите язык, который вам более удобен. Это гораздо упростит опыт обучения.</string>
+    <string name="lang_pl">Польский</string>
+    <string name="onboarding_learn_lang_title">Выберите язык обучения</string>
 </resources>

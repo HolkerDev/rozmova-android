@@ -70,4 +70,6 @@
     <string name="library_title">Бібліотека</string>
     <string name="onboarding_lang_title">Виберіть рідну мову</string>
     <string name="onboarding_lang_description">Виберіть мову, яка є найбільш зручною. Це набагато спростить досвід навчання.</string>
+    <string name="lang_pl">Польська</string>
+    <string name="onboarding_learn_lang_title">Виберіть мову вивчення</string>
 </resources>

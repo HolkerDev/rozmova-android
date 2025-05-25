@@ -68,4 +68,6 @@
     <string name="library_title">Library</string>
     <string name="onboarding_lang_title">Choose your native language</string>
     <string name="onboarding_lang_description">Select the language you are most comfortable with. This will help us provide a better experience for you.</string>
+    <string name="lang_pl">Polish</string>
+    <string name="onboarding_learn_lang_title">Choose the language you learn</string>
 </resources>

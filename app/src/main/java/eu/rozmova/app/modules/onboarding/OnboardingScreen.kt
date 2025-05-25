@@ -22,58 +22,27 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.modules.onboarding.components.SelectLanguageOnboarding
+import eu.rozmova.app.modules.onboarding.components.SelectLearningLangOnboarding
 import eu.rozmova.app.utils.LocaleManager
 import kotlinx.coroutines.launch
-
-// Data class for onboarding pages
-data class OnboardingPage(
-    val title: String,
-    val description: String,
-    val icon: ImageVector,
-    val backgroundColor: Color,
-)
-
-// Sample onboarding data
-val onboardingPages =
-    listOf(
-        OnboardingPage(
-            title = "Welcome to Our App",
-            description = "Discover amazing features that will transform your daily routine and boost your productivity.",
-            icon = Icons.Default.Star,
-            backgroundColor = Color(0xFF6200EE),
-        ),
-        OnboardingPage(
-            title = "Lightning Fast",
-            description = "Experience blazing fast performance with our optimized algorithms and smart caching system.",
-            icon = Icons.Default.Speed,
-            backgroundColor = Color(0xFF03DAC6),
-        ),
-        OnboardingPage(
-            title = "Secure & Private",
-            description = "Your data is protected with end-to-end encryption and advanced security measures.",
-            icon = Icons.Default.Security,
-            backgroundColor = Color(0xFFFF6B35),
-        ),
-    )
 
 @Composable
 fun OnboardingScreen(
@@ -96,8 +65,9 @@ private fun Content(
     onOnboardingComplete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val pagerState = rememberPagerState(pageCount = { onboardingPages.size })
+    val pagerState = rememberPagerState(pageCount = { 3 })
     val coroutineScope = rememberCoroutineScope()
+    var learningLang by remember { mutableStateOf<String>("de") }
 
     Box(
         modifier =
@@ -109,14 +79,18 @@ private fun Content(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
         ) { page ->
-            SelectLanguageOnboarding(
-                startLang = startLanguage,
-                onLangSelect = { langCode -> setLang(langCode) },
-            )
-//            OnboardingPageContent(
-//                page = onboardingPages[page],
-//                modifier = Modifier.fillMaxSize(),
-//            )
+            when (page) {
+                0 ->
+                    SelectLanguageOnboarding(
+                        startLang = startLanguage,
+                        onLangSelect = { langCode -> setLang(langCode) },
+                    )
+                1 ->
+                    SelectLearningLangOnboarding(
+                        onLangSelect = { learningLang = it },
+                        selectedLang = learningLang,
+                    )
+            }
         }
 
         // Bottom section with indicators and buttons
@@ -133,7 +107,7 @@ private fun Content(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(bottom = 32.dp),
             ) {
-                repeat(onboardingPages.size) { index ->
+                repeat(3) { index ->
                     PageIndicator(
                         isSelected = index == pagerState.currentPage,
 //                        color = onboardingPages[pagerState.currentPage].backgroundColor,
@@ -151,7 +125,7 @@ private fun Content(
                 // Next/Get Started button
                 FloatingActionButton(
                     onClick = {
-                        if (pagerState.currentPage < onboardingPages.size - 1) {
+                        if (pagerState.currentPage < 2) {
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
                             }
@@ -166,13 +140,13 @@ private fun Content(
                 ) {
                     Icon(
                         imageVector =
-                            if (pagerState.currentPage < onboardingPages.size - 1) {
+                            if (pagerState.currentPage < 2) {
                                 Icons.Default.ArrowForward
                             } else {
                                 Icons.Default.Check
                             },
                         contentDescription =
-                            if (pagerState.currentPage < onboardingPages.size - 1) {
+                            if (pagerState.currentPage < 2) {
                                 "Next"
                             } else {
                                 "Get Started"
