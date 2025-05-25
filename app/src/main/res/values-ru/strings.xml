@@ -44,7 +44,7 @@
     <string name="today_selection_title">Сегодняшняя рекомендация</string>
     <string name="resume_scenario">Продолжить сценарий</string>
     <string name="scenario_continue">Продолжить</string>
-    <string name="categories">Категории</string>
+    <string name="categories">Недавно добавлено</string>
     <string name="category_conversation">Разговор</string>
     <string name="category_message">Переписка</string>
     <string name="category_email">Имейл</string>
@@ -80,4 +80,5 @@
     <string name="privacy_data_storage_description">Ответы бота и ваши сообщения в разговорах надежно хранятся на серверах, расположенных в Европейском союзе.</string>
     <string name="privacy_data_deletion_title">Контроль данных</string>
     <string name="privacy_data_deletion_description">Вы имеете полный контроль над своими данными. Запросите удаление всей вашей информации в любое время через нашу поддержку.</string>
+    <string name="practice_title">Практика</string>
 </resources>

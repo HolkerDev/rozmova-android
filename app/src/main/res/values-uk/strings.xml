@@ -44,7 +44,7 @@
     <string name="today_selection_title">Сьогоднішня рекомендація</string>
     <string name="resume_scenario">Продовжити сценарій</string>
     <string name="scenario_continue">Продовжити</string>
-    <string name="categories">Категорії</string>
+    <string name="categories">Нещодавно додане</string>
     <string name="category_conversation">Розмова</string>
     <string name="category_message">Переписка</string>
     <string name="category_email">Імейл</string>
@@ -80,4 +80,5 @@
     <string name="privacy_data_storage_description">Текстові повідомлення в розмовах надійно зберігаються на серверах, розташованих в ЄС.</string>
     <string name="privacy_data_deletion_title">Контроль даних</string>
     <string name="privacy_data_deletion_description">Ви маєте повний контроль над своїми даними. Запросіть видалення всієї вашої інформації в будь-який час через нашу підтримку.</string>
+    <string name="practice_title">Практика</string>
 </resources>

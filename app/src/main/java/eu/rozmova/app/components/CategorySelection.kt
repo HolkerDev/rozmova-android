@@ -41,7 +41,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -75,7 +74,7 @@ val categories =
     )
 
 @Composable
-fun CategorySelection(
+fun RecentlyAdded(
     scenarios: List<ScenarioDto>,
     onScenarioSelect: (ScenarioDto) -> Unit,
     modifier: Modifier = Modifier,
@@ -103,7 +102,6 @@ fun CategorySelection(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
             ) {
                 Icon(
                     imageVector = Icons.Default.Category,
@@ -113,8 +111,7 @@ fun CategorySelection(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = stringResource(R.string.categories),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -381,7 +378,7 @@ fun ScenarioCard(
 @Composable
 private fun CategorySelectionLoadingPreview() {
     MaterialTheme {
-        CategorySelection(
+        RecentlyAdded(
             scenarios = emptyList(),
             onScenarioSelect = {},
             isLoading = true,
@@ -393,7 +390,7 @@ private fun CategorySelectionLoadingPreview() {
 @Composable
 private fun CategorySelectionContentPreview() {
     MaterialTheme {
-        CategorySelection(
+        RecentlyAdded(
             scenarios =
                 listOf(
                     ScenarioDto(

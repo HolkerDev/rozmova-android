@@ -42,7 +42,7 @@
     <string name="today_selection_title">Today\'s scenario selection</string>
     <string name="resume_scenario">Resume scenario</string>
     <string name="scenario_continue">Continue</string>
-    <string name="categories">Categories</string>
+    <string name="categories">Recently added</string>
     <string name="category_conversation">Conversation</string>
     <string name="category_message">Message</string>
     <string name="category_email">Email</string>
@@ -78,4 +78,5 @@
     <string name="privacy_data_storage_description">Bot responses and your conversation text messages are securely stored on servers located in the European Union.</string>
     <string name="privacy_data_deletion_title">Data Control</string>
     <string name="privacy_data_deletion_description">You have full control over your data. Request deletion of all your information at any time through our support.</string>
+    <string name="practice_title">Practice</string>
 </resources>
