@@ -1,11 +1,11 @@
 package eu.rozmova.app.screens.learn
 
+import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
@@ -19,10 +19,12 @@ import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.toScenarioType
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun LearnScreen(
     navigateToChat: (chatId: String, scenarioType: ScenarioType) -> Unit,
+    startOnboarding: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LearnScreenViewModel = hiltViewModel(),
 ) {
@@ -30,25 +32,23 @@ fun LearnScreen(
     val latestChatState by viewModel.latestChat.collectAsState()
     val state by viewModel.collectAsState()
 
-    LaunchedEffect(key1 = viewModel) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is LearnEvent.ChatCreated -> {
-                    navigateToChatAction.value(event.chatId, event.scenarioType.toScenarioType())
-                }
+    viewModel.collectSideEffect { event ->
+        when (event) {
+            is LearnEvent.ChatCreated -> {
+                navigateToChatAction.value(event.chatId, event.scenarioType.toScenarioType())
+            }
+
+            LearnEvent.StartOnboarding -> {
+                Log.i("LearnScreen", "Starting onboarding")
+                startOnboarding()
             }
         }
     }
 
-    val onScenarioSelect = { scenarioModel: ScenarioDto ->
-        viewModel.createChatFromScenario(scenarioModel.id)
-    }
+    fun onScenarioSelect(scenario: ScenarioDto) = viewModel.createChatFromScenario(scenario.id)
 
-    val onScenarioDtoSelect = { scenarioDto: ScenarioDto ->
-        viewModel.createChatFromScenario(scenarioId = scenarioDto.id)
-    }
+    fun onScenarioDtoSelect(scenario: ScenarioDto) = viewModel.createChatFromScenario(scenarioId = scenario.id)
 
-    // Wrap the content in a scrollable Column
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 8.dp),
@@ -56,7 +56,9 @@ fun LearnScreen(
         state.recommendedScenarios?.let { recommendedScenarios ->
             item {
                 TodaysScenarioSelection(
-                    onScenarioClick = onScenarioSelect,
+                    onScenarioClick = { scenario ->
+                        onScenarioSelect(scenario)
+                    },
                     state = recommendedScenarios,
                     modifier = Modifier.padding(8.dp),
                 )
@@ -80,7 +82,9 @@ fun LearnScreen(
             CategorySelection(
                 scenarios = state.weeklyScenarios ?: emptyList(),
                 isLoading = state.weeklyScenariosLoading,
-                onScenarioSelect = onScenarioDtoSelect,
+                onScenarioSelect = { scenario ->
+                    onScenarioDtoSelect(scenario)
+                },
             )
         }
     }

@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.toScenarioType
+import eu.rozmova.app.modules.onboarding.OnboardingScreen
 import eu.rozmova.app.screens.chat.ChatScreen
 import eu.rozmova.app.screens.chats.ChatsListScreen
 import eu.rozmova.app.screens.createchat.CreateChatScreen
@@ -40,6 +41,7 @@ fun NavigationHost(
 
         composable(NavRoutes.Learn.route) {
             LearnScreen(
+                startOnboarding = { navController.navigate(NavRoutes.Onboarding.route) },
                 navigateToChat = { chatId, scenarioType ->
                     navController.navigate(NavRoutes.Chat.routeWith(chatId, scenarioType))
                 },
@@ -63,6 +65,14 @@ fun NavigationHost(
 
         composable(route = NavRoutes.Login.route) {
             LoginScreen()
+        }
+
+        composable(route = NavRoutes.Onboarding.route) {
+            OnboardingScreen(onLearn = {
+                navController.navigate(NavRoutes.Learn.route) {
+                    popUpTo(NavRoutes.Onboarding.route) { inclusive = true }
+                }
+            })
         }
 
         composable(route = NavRoutes.CreateChat.route) {

@@ -13,12 +13,11 @@ import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.domain.TodayScenarioSelection
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
+import eu.rozmova.app.repositories.SettingsRepository
 import eu.rozmova.app.repositories.UserPreferencesRepository
 import eu.rozmova.app.utils.LocaleManager
 import eu.rozmova.app.utils.ViewState
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
@@ -33,6 +32,8 @@ sealed class LearnEvent {
         val chatId: String,
         val scenarioType: ScenarioTypeDto,
     ) : LearnEvent()
+
+    data object StartOnboarding : LearnEvent()
 }
 
 data class LearnScreenState(
@@ -47,6 +48,7 @@ class LearnScreenViewModel
     constructor(
         private val scenariosRepository: ScenariosRepository,
         private val userPreferencesRepository: UserPreferencesRepository,
+        private val settingsRepository: SettingsRepository,
         private val chatsRepository: ChatsRepository,
         private val localeManager: LocaleManager,
     ) : ViewModel(),
@@ -56,14 +58,22 @@ class LearnScreenViewModel
         private val _latestChat = MutableStateFlow<ViewState<ChatWithScenarioModel>>(ViewState.Loading)
         val latestChat = _latestChat.asStateFlow()
 
-        private val _events = MutableSharedFlow<LearnEvent>()
-        val events = _events.asSharedFlow()
-
         init {
             fetchTodayScenarios()
             fetchLatestChat()
             fetchWeeklyScenarios()
+            fetchLearningLanguage()
         }
+
+        private fun fetchLearningLanguage() =
+            intent {
+                if (settingsRepository.getLearningLang() == null) {
+                    Log.i("LearnScreenViewModel", "No learning language set, starting onboarding")
+                    postSideEffect(
+                        LearnEvent.StartOnboarding,
+                    )
+                }
+            }
 
         private fun fetchTodayScenarios() =
             intent {
@@ -93,13 +103,12 @@ class LearnScreenViewModel
                     }.mapLeft { _latestChat.value = ViewState.Error(it) }
             }
 
-        fun createChatFromScenario(scenarioId: String) {
-            viewModelScope.launch {
+        fun createChatFromScenario(scenarioId: String) =
+            intent {
                 chatsRepository.createChatFromScenario(scenarioId).map { createdChat ->
-                    _events.emit(LearnEvent.ChatCreated(createdChat.id, createdChat.scenario.scenarioType))
+                    postSideEffect(LearnEvent.ChatCreated(createdChat.id, createdChat.scenario.scenarioType))
                 }
             }
-        }
 
         private fun fetchWeeklyScenarios() =
             intent {

@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalFoundationApi::class)
 
 package eu.rozmova.app.modules.onboarding
+import android.util.Log
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -26,6 +27,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,14 +49,19 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun OnboardingScreen(
+    onLearn: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: OnboardingScreenViewModel = hiltViewModel(),
 ) {
     val lang = viewModel.getCurrentLanguage()
+
     Content(
         startLanguage = lang,
-        setLang = { langCode -> viewModel.selectLanguage(langCode) },
-        onOnboardingComplete = { viewModel.completeOnboarding() },
+        setInterfaceLang = { langCode -> viewModel.selectLanguage(langCode) },
+        setLearnLang = { learningLang ->
+            viewModel.saveLearningLanguage(learningLang)
+        },
+        onOnboardingComplete = { onLearn() },
         modifier = modifier,
     )
 }
@@ -62,13 +69,19 @@ fun OnboardingScreen(
 @Composable
 private fun Content(
     startLanguage: String,
-    setLang: (String) -> Unit,
+    setInterfaceLang: (String) -> Unit,
+    setLearnLang: (String) -> Unit,
     onOnboardingComplete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pagerState = rememberPagerState(pageCount = { 3 })
     val coroutineScope = rememberCoroutineScope()
     var learningLang by remember { mutableStateOf<String>("de") }
+
+    LaunchedEffect(learningLang) {
+        Log.i("Onboarding", "Selected learning language: $learningLang")
+        setLearnLang(learningLang)
+    }
 
     Box(
         modifier =
@@ -84,11 +97,13 @@ private fun Content(
                 0 ->
                     SelectLanguageOnboarding(
                         startLang = startLanguage,
-                        onLangSelect = { langCode -> setLang(langCode) },
+                        onLangSelect = { langCode -> setInterfaceLang(langCode) },
                     )
                 1 ->
                     SelectLearningLangOnboarding(
-                        onLangSelect = { learningLang = it },
+                        onLangSelect = {
+                            learningLang = it
+                        },
                         selectedLang = learningLang,
                     )
                 2 -> PrivacyNoticeOnboarding()
@@ -191,8 +206,9 @@ private fun OnboardingScreenPreview() {
     MaterialTheme {
         Content(
             startLanguage = localeManager.getCurrentLocale().language,
-            setLang = { lang -> localeManager.setLocale(lang) },
+            setInterfaceLang = { lang -> localeManager.setLocale(lang) },
             onOnboardingComplete = {},
+            setLearnLang = {},
         )
     }
 }

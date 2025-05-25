@@ -2,6 +2,7 @@ package eu.rozmova.app.modules.onboarding
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import eu.rozmova.app.repositories.SettingsRepository
 import eu.rozmova.app.utils.LocaleManager
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -16,6 +17,7 @@ class OnboardingScreenViewModel
     @Inject
     constructor(
         private val localeManager: LocaleManager,
+        private val settingsRepository: SettingsRepository,
     ) : ViewModel(),
         ContainerHost<OnboardingScreenState, Unit> {
         override val container = container<OnboardingScreenState, Unit>(OnboardingScreenState())
@@ -29,9 +31,8 @@ class OnboardingScreenViewModel
 
         fun getCurrentLanguage(): String = localeManager.getCurrentLocale().language
 
-        fun completeOnboarding() {
+        fun saveLearningLanguage(learningLang: String) =
             intent {
-                // Logic to mark onboarding as complete
+                settingsRepository.setLearningLang(learningLang)
             }
-        }
     }

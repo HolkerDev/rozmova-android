@@ -8,6 +8,7 @@ import eu.rozmova.app.domain.Language
 import eu.rozmova.app.domain.UserPreference
 import eu.rozmova.app.domain.getLanguageByCode
 import eu.rozmova.app.repositories.AuthRepository
+import eu.rozmova.app.repositories.SettingsRepository
 import eu.rozmova.app.repositories.UserPreferencesRepository
 import eu.rozmova.app.services.Feature
 import eu.rozmova.app.services.FeatureService
@@ -38,6 +39,7 @@ class SettingsScreenViewModel
         private val authRepository: AuthRepository,
         private val userPreferencesRepository: UserPreferencesRepository,
         private val featureService: FeatureService,
+        private val settingsRepository: SettingsRepository,
         private val localeManager: LocaleManager,
     ) : ViewModel() {
         private val _state = MutableStateFlow<SettingsViewState>(SettingsViewState.Loading)
@@ -86,6 +88,7 @@ class SettingsScreenViewModel
 
         fun signOut() {
             viewModelScope.launch {
+                settingsRepository.clearLearningLang()
                 _state.value = SettingsViewState.Loading
                 authRepository.signOut()
             }

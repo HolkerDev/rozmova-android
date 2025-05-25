@@ -44,6 +44,8 @@ sealed class NavRoutes(
 
     data object Login : NavRoutes(route = "login")
 
+    data object Onboarding : NavRoutes(route = "onboarding")
+
     fun getLabel(context: Context): String? = labelResourceId?.let { context.getString(it) }
 }
 
