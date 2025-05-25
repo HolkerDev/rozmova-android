@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
@@ -30,22 +28,20 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import eu.rozmova.app.modules.onboarding.components.SelectLanguageOnboarding
+import eu.rozmova.app.utils.LocaleManager
 import kotlinx.coroutines.launch
 
 // Data class for onboarding pages
@@ -82,14 +78,30 @@ val onboardingPages =
 @Composable
 fun OnboardingScreen(
     modifier: Modifier = Modifier,
-    onOnboardingComplete: () -> Unit = {},
+    viewModel: OnboardingScreenViewModel = hiltViewModel(),
+) {
+    val lang = viewModel.getCurrentLanguage()
+    Content(
+        startLanguage = lang,
+        setLang = { langCode -> viewModel.selectLanguage(langCode) },
+        onOnboardingComplete = { viewModel.completeOnboarding() },
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun Content(
+    startLanguage: String,
+    setLang: (String) -> Unit,
+    onOnboardingComplete: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val pagerState = rememberPagerState(pageCount = { onboardingPages.size })
     val coroutineScope = rememberCoroutineScope()
 
     Box(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
     ) {
@@ -97,10 +109,14 @@ fun OnboardingScreen(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
         ) { page ->
-            OnboardingPageContent(
-                page = onboardingPages[page],
-                modifier = Modifier.fillMaxSize(),
+            SelectLanguageOnboarding(
+                startLang = startLanguage,
+                onLangSelect = { langCode -> setLang(langCode) },
             )
+//            OnboardingPageContent(
+//                page = onboardingPages[page],
+//                modifier = Modifier.fillMaxSize(),
+//            )
         }
 
         // Bottom section with indicators and buttons
@@ -120,7 +136,8 @@ fun OnboardingScreen(
                 repeat(onboardingPages.size) { index ->
                     PageIndicator(
                         isSelected = index == pagerState.currentPage,
-                        color = onboardingPages[pagerState.currentPage].backgroundColor,
+//                        color = onboardingPages[pagerState.currentPage].backgroundColor,
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
@@ -128,24 +145,9 @@ fun OnboardingScreen(
             // Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Skip button
-                if (pagerState.currentPage < onboardingPages.size - 1) {
-                    TextButton(
-                        onClick = { onOnboardingComplete() },
-                    ) {
-                        Text(
-                            text = "Skip",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                } else {
-                    Spacer(modifier = Modifier.width(64.dp))
-                }
-
                 // Next/Get Started button
                 FloatingActionButton(
                     onClick = {
@@ -157,7 +159,8 @@ fun OnboardingScreen(
                             onOnboardingComplete()
                         }
                     },
-                    containerColor = onboardingPages[pagerState.currentPage].backgroundColor,
+//                    containerColor = onboardingPages[pagerState.currentPage].backgroundColor,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White,
                     modifier = Modifier.size(56.dp),
                 ) {
@@ -182,62 +185,7 @@ fun OnboardingScreen(
 }
 
 @Composable
-fun OnboardingPageContent(
-    page: OnboardingPage,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier.padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        // Icon with background
-        Box(
-            modifier =
-                Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .background(page.backgroundColor.copy(alpha = 0.1f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = page.icon,
-                contentDescription = null,
-                modifier = Modifier.size(64.dp),
-                tint = page.backgroundColor,
-            )
-        }
-
-        Spacer(modifier = Modifier.height(48.dp))
-
-        // Title
-        Text(
-            text = page.title,
-            style =
-                MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                ),
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Description
-        Text(
-            text = page.description,
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            lineHeight = 24.sp,
-        )
-
-        Spacer(modifier = Modifier.height(120.dp)) // Space for bottom section
-    }
-}
-
-@Composable
-fun PageIndicator(
+private fun PageIndicator(
     isSelected: Boolean,
     color: Color,
     modifier: Modifier = Modifier,
@@ -263,7 +211,12 @@ fun PageIndicator(
 @Preview(showBackground = true)
 @Composable
 private fun OnboardingScreenPreview() {
+    val localeManager = LocaleManager(LocalContext.current)
     MaterialTheme {
-        OnboardingScreen()
+        Content(
+            startLanguage = localeManager.getCurrentLocale().language,
+            setLang = { lang -> localeManager.setLocale(lang) },
+            onOnboardingComplete = {},
+        )
     }
 }

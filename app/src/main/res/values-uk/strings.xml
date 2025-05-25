@@ -62,4 +62,12 @@
     <string name="type_message">Впищіть повідомлення</string>
     <string name="send_message">Вислати повідомлення</string>
     <string name="message_chat_title">Практика</string>
+    <string name="chat_analysis_mistakes">Помилки</string>
+    <string name="wrong">Неправильно</string>
+    <string name="correct">Правильно</string>
+    <string name="copy_content_description">Скопіювати</string>
+    <string name="library_screen">Бібліотека</string>
+    <string name="library_title">Бібліотека</string>
+    <string name="onboarding_lang_title">Виберіть рідну мову</string>
+    <string name="onboarding_lang_description">Виберіть мову, яка є найбільш зручною. Це набагато спростить досвід навчання.</string>
 </resources>

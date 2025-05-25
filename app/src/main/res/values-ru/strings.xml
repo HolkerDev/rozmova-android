@@ -62,4 +62,12 @@
     <string name="type_message">Введите сообщение...</string>
     <string name="send_message">Выслать сообщение</string>
     <string name="message_chat_title">Практика</string>
+    <string name="chat_analysis_mistakes">Ошибки</string>
+    <string name="wrong">Неправильно</string>
+    <string name="correct">Правильно</string>
+    <string name="copy_content_description">Скопировать</string>
+    <string name="library_screen">Библиотека</string>
+    <string name="library_title">Библиотека</string>
+    <string name="onboarding_lang_title">Выберите родной язык</string>
+    <string name="onboarding_lang_description">Выберите язык, который вам более удобен. Это гораздо упростит опыт обучения.</string>
 </resources>

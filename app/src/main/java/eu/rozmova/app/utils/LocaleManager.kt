@@ -1,6 +1,5 @@
 package eu.rozmova.app.utils
 
-import android.app.Activity
 import android.app.LocaleManager
 import android.content.Context
 import android.os.Build
@@ -52,9 +51,9 @@ class LocaleManager
             @Suppress("DEPRECATION")
             resources.updateConfiguration(configuration, displayMetrics)
 
-            // Recreate the activity to apply changes
-            if (context is Activity) {
-                context.recreate()
-            }
+//            // Recreate the activity to apply changes
+//            if (context is Activity) {
+//                context.recreate()
+//            }
         }
     }
