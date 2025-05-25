@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import eu.rozmova.app.modules.onboarding.components.PrivacyNoticeOnboarding
 import eu.rozmova.app.modules.onboarding.components.SelectLanguageOnboarding
 import eu.rozmova.app.modules.onboarding.components.SelectLearningLangOnboarding
 import eu.rozmova.app.utils.LocaleManager
@@ -90,6 +91,7 @@ private fun Content(
                         onLangSelect = { learningLang = it },
                         selectedLang = learningLang,
                     )
+                2 -> PrivacyNoticeOnboarding()
             }
         }
 

@@ -70,4 +70,12 @@
     <string name="onboarding_lang_description">Select the language you are most comfortable with. This will help us provide a better experience for you.</string>
     <string name="lang_pl">Polish</string>
     <string name="onboarding_learn_lang_title">Choose the language you learn</string>
+    <string name="onboarding_privacy_title">Your Privacy Matters</string>
+    <string name="onboarding_privacy_description">We respect your privacy and are committed to protecting your personal data. Here\'s how we handle your information.</string>
+    <string name="privacy_audio_not_saved_title">Audio Privacy</string>
+    <string name="privacy_audio_not_saved_description">Your voice answers are encrypted and briefly processed on our servers for transcription, then immediately deleted. Audio files are never permanently stored - only transcribed text is kept.</string>
+    <string name="privacy_data_storage_title">Secure EU Storage</string>
+    <string name="privacy_data_storage_description">Bot responses and your conversation messages are securely stored on servers located in the European Union.</string>
+    <string name="privacy_data_deletion_title">Data Control</string>
+    <string name="privacy_data_deletion_description">You have full control over your data. Request deletion of all your information at any time through our support.</string>
 </resources>

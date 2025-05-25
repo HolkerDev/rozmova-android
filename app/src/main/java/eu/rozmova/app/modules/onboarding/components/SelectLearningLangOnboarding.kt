@@ -65,7 +65,6 @@ fun SelectLearningLangOnboarding(
                     .fillMaxSize()
                     .padding(paddingValues),
         ) {
-            // Header Section
             Column(
                 modifier =
                     Modifier
@@ -89,20 +88,10 @@ fun SelectLearningLangOnboarding(
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center,
                 )
-
-//                Spacer(modifier = Modifier.height(8.dp))
-//
-//                Text(
-//                    text = stringResource(R.string.onboarding_lang_description),
-//                    style = MaterialTheme.typography.bodyLarge,
-//                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-//                    textAlign = TextAlign.Center,
-//                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Language List
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
