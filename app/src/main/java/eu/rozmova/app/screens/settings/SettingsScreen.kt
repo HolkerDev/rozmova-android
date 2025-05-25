@@ -23,7 +23,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,56 +36,56 @@ import eu.rozmova.app.components.bugreport.BugReportDialog
 import eu.rozmova.app.domain.INTERFACE_LANGUAGES
 import eu.rozmova.app.domain.LEARN_LANGUAGES
 import eu.rozmova.app.domain.Language
+import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsScreenViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsState()
     val onLogOutClicked: () -> Unit = {
         viewModel.signOut()
     }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showInterfaceSelectionDialog by remember { mutableStateOf(false) }
-    var learnLanguage by remember { mutableStateOf<Language>(Language.GERMAN) }
-    var interfaceLanguage by remember { mutableStateOf<Language>(Language.ENGLISH) }
-    val isNewLanguagesEnabled by viewModel.isNewLearningLanguagesEnabled.collectAsState()
     var showBugReportDialog by remember { mutableStateOf(false) }
 
-    when (val viewState = state) {
-        is SettingsViewState.Error -> Text(stringResource(R.string.error))
-        SettingsViewState.Loading -> LinearProgressIndicator()
-        is SettingsViewState.Success -> {
-            interfaceLanguage = viewState.interfaceLang
-            learnLanguage = viewState.learningLang
-            SettingsContent(
-                showInterfaceLanguageDialog = showInterfaceSelectionDialog,
-                showLearnLanguageDialog = showLanguageDialog,
-                onLogOutClick = onLogOutClicked,
-                onLearningLangSelectClick = { showLanguageDialog = true },
-                onInterfaceLangSelectClick = { showInterfaceSelectionDialog = true },
-                onInterfaceLangSelect = { language ->
-                    showInterfaceSelectionDialog = false
-                    viewModel.setLocale(language.code)
-                },
-                learnLanguage = learnLanguage,
-                interfaceLanguage = interfaceLanguage,
-                onLearningDialogDismiss = { showLanguageDialog = false },
-                onInterfaceDialogDismiss = { showInterfaceSelectionDialog = false },
-                onLearnLangSelect = { language ->
-                    learnLanguage = language
-                    viewModel.setLearningLanguage(language, viewState.isGreekEnabled)
-                    showLanguageDialog = false
-                },
-                showLearningLanguageSelector = isNewLanguagesEnabled,
-                showBugReportDialog = showBugReportDialog,
-                onBugReportClick = { showBugReportDialog = true },
-                onBugReportDismiss = { showBugReportDialog = false },
-                state = viewState,
-                modifier = modifier,
-            )
-        }
+    var learnLanguage by remember { mutableStateOf<Language>(Language.GERMAN) }
+    var interfaceLanguage by remember { mutableStateOf<Language>(Language.ENGLISH) }
+
+    val state by viewModel.collectAsState()
+
+    if (state.isLoading) {
+        LinearProgressIndicator()
+    }
+
+    state.langSettings?.let { langSettings ->
+        learnLanguage = langSettings.learningLang
+        interfaceLanguage = langSettings.interfaceLang
+        SettingsContent(
+            showInterfaceLanguageDialog = showInterfaceSelectionDialog,
+            showLearnLanguageDialog = showLanguageDialog,
+            onLogOutClick = onLogOutClicked,
+            onLearningLangSelectClick = { showLanguageDialog = true },
+            onInterfaceLangSelectClick = { showInterfaceSelectionDialog = true },
+            onInterfaceLangSelect = { language ->
+                showInterfaceSelectionDialog = false
+                viewModel.setLocale(language.code)
+            },
+            learnLanguage = learnLanguage,
+            interfaceLanguage = interfaceLanguage,
+            onLearningDialogDismiss = { showLanguageDialog = false },
+            onInterfaceDialogDismiss = { showInterfaceSelectionDialog = false },
+            onLearnLangSelect = { language ->
+                showLanguageDialog = false
+                viewModel.setLearningLanguage(language)
+            },
+            showLearningLanguageSelector = true,
+            showBugReportDialog = showBugReportDialog,
+            onBugReportClick = { showBugReportDialog = true },
+            onBugReportDismiss = { showBugReportDialog = false },
+            modifier = modifier,
+        )
     }
 }
 
@@ -108,7 +107,6 @@ fun SettingsContent(
     onBugReportDismiss: () -> Unit,
     learnLanguage: Language,
     interfaceLanguage: Language,
-    state: SettingsViewState.Success,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxSize()) {
@@ -127,7 +125,7 @@ fun SettingsContent(
         if (showLearningLanguageSelector) {
             ListItem(
                 headlineContent = { Text(stringResource(R.string.language_to_learn)) },
-                supportingContent = { Text(stringResource(state.learningLang.resId)) },
+                supportingContent = { Text(stringResource(learnLanguage.resId)) },
                 leadingContent = {
                     Icon(Icons.Default.Language, contentDescription = null)
                 },
@@ -144,7 +142,7 @@ fun SettingsContent(
         // Interface Language
         ListItem(
             headlineContent = { Text(stringResource(R.string.interface_language)) },
-            supportingContent = { Text(text = stringResource(state.interfaceLang.resId)) },
+            supportingContent = { Text(text = stringResource(interfaceLanguage.resId)) },
             leadingContent = {
                 Icon(Icons.Default.Translate, contentDescription = null)
             },
@@ -167,18 +165,6 @@ fun SettingsContent(
         )
 
         ListItem(
-            headlineContent = { Text(stringResource(R.string.logout)) },
-            leadingContent = {
-                Icon(
-                    Icons.AutoMirrored.Default.Logout,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
-                )
-            },
-            modifier = Modifier.clickable(onClick = onLogOutClick),
-        )
-
-        ListItem(
             headlineContent = { Text("Report bug") },
             leadingContent = {
                 Icon(
@@ -188,6 +174,18 @@ fun SettingsContent(
                 )
             },
             modifier = Modifier.clickable(onClick = onBugReportClick),
+        )
+
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.logout)) },
+            leadingContent = {
+                Icon(
+                    Icons.AutoMirrored.Default.Logout,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            },
+            modifier = Modifier.clickable(onClick = onLogOutClick),
         )
 
         if (showBugReportDialog) {

@@ -1,100 +1,92 @@
 package eu.rozmova.app.screens.settings
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import arrow.core.getOrElse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.Language
-import eu.rozmova.app.domain.UserPreference
 import eu.rozmova.app.domain.getLanguageByCode
 import eu.rozmova.app.repositories.AuthRepository
 import eu.rozmova.app.repositories.SettingsRepository
-import eu.rozmova.app.repositories.UserPreferencesRepository
-import eu.rozmova.app.services.Feature
-import eu.rozmova.app.services.FeatureService
 import eu.rozmova.app.utils.LocaleManager
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.Container
+import org.orbitmvi.orbit.ContainerHost
+import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
 
-sealed class SettingsViewState {
-    data object Loading : SettingsViewState()
+data class LangSettings(
+    val interfaceLang: Language = Language.ENGLISH,
+    val learningLang: Language = Language.GERMAN,
+)
 
-    data class Success(
-        val interfaceLang: Language,
-        val learningLang: Language,
-        val isGreekEnabled: Boolean = false,
-    ) : SettingsViewState()
-
-    data class Error(
-        val msg: String,
-    ) : SettingsViewState()
-}
+data class SettingsState(
+    val isLoading: Boolean = true,
+    val langSettings: LangSettings? = null,
+)
 
 @HiltViewModel
 class SettingsScreenViewModel
     @Inject
     constructor(
         private val authRepository: AuthRepository,
-        private val userPreferencesRepository: UserPreferencesRepository,
-        private val featureService: FeatureService,
         private val settingsRepository: SettingsRepository,
         private val localeManager: LocaleManager,
-    ) : ViewModel() {
-        private val _state = MutableStateFlow<SettingsViewState>(SettingsViewState.Loading)
-        val state = _state.asStateFlow()
-
-        private val _isNewLearningLanguagesEnabled = MutableStateFlow(false)
-        val isNewLearningLanguagesEnabled = _isNewLearningLanguagesEnabled.asStateFlow()
+    ) : ViewModel(),
+        ContainerHost<SettingsState, Unit> {
+        override val container: Container<SettingsState, Unit> = container(SettingsState())
 
         init {
-            fetchFF()
             fetchCurrentLangPreferences()
         }
 
         private fun fetchCurrentLangPreferences() =
-            viewModelScope.launch {
-                _state.value =
-                    userPreferencesRepository
-                        .fetchUserPreferences()
-                        .getOrElse { UserPreference.DEFAULT }
-                        .let { userPrefs ->
-                            SettingsViewState.Success(
-                                interfaceLang = getLanguageByCode(localeManager.getCurrentLocale().language),
-                                learningLang = getLanguageByCode(userPrefs.learningLanguage),
-                                isGreekEnabled = userPrefs.hasGreekEnabled ?: false,
-                            )
-                        }
-            }
-
-        private fun fetchFF() {
-            featureService.isFeatureEnabled(Feature.MoreLearningLanguages).let {
-                _isNewLearningLanguagesEnabled.value = it
-            }
-        }
-
-        fun setLearningLanguage(
-            language: Language,
-            isGreekEnabled: Boolean,
-        ) = viewModelScope.launch {
-            userPreferencesRepository
-                .updateUserPreferences(
-                    UserPreference(learningLanguage = language.code, hasGreekEnabled = isGreekEnabled),
-                ).also {
-                    fetchCurrentLangPreferences()
+            intent {
+                val learnLang = settingsRepository.getLearningLang() ?: Language.GERMAN.code
+                val interfaceLang = localeManager.getCurrentLocale().language
+                Log.i("SettingsScreenViewModel", "Current interface language: $interfaceLang")
+                reduce {
+                    state.copy(
+                        isLoading = false,
+                        langSettings =
+                            LangSettings(
+                                learningLang = getLanguageByCode(learnLang),
+                                interfaceLang = getLanguageByCode(interfaceLang),
+                            ),
+                    )
                 }
-        }
+            }
+
+//        private fun fetchFF() {
+//            featureService.isFeatureEnabled(Feature.MoreLearningLanguages).let {
+//                _isNewLearningLanguagesEnabled.value = it
+//            }
+//        }
+
+        fun setLearningLanguage(language: Language) =
+            intent {
+                settingsRepository.setLearningLang(language.code)
+                reduce {
+                    state.copy(
+                        langSettings = state.langSettings?.copy(learningLang = language),
+                    )
+                }
+            }
 
         fun signOut() {
             viewModelScope.launch {
                 settingsRepository.clearLearningLang()
-                _state.value = SettingsViewState.Loading
                 authRepository.signOut()
             }
         }
 
-        fun setLocale(languageCode: String) {
-            localeManager.setLocale(languageCode)
-        }
+        fun setLocale(languageCode: String) =
+            intent {
+                localeManager.setLocale(languageCode)
+                reduce {
+                    state.copy(
+                        langSettings = state.langSettings?.copy(interfaceLang = getLanguageByCode(languageCode)),
+                    )
+                }
+            }
     }
