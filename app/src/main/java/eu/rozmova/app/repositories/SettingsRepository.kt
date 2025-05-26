@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import eu.rozmova.app.domain.Language
+import eu.rozmova.app.utils.LocaleManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -20,9 +21,12 @@ val learnLangKey = stringPreferencesKey("learn_lang")
 class SettingsRepository
     @Inject
     constructor(
+        private val localeManager: LocaleManager,
         @ApplicationContext private val context: Context,
     ) {
         private val dataStore: DataStore<Preferences> = context.dataStore
+
+        fun getInterfaceLang(): String = localeManager.getCurrentLocale().language
 
         suspend fun getLearningLang(): String? =
             dataStore.data

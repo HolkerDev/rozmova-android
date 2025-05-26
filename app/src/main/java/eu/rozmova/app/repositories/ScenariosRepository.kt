@@ -41,6 +41,8 @@ class ScenariosRepository
                 }.decodeAs<List<ScenarioModel>>()
 
         suspend fun getAllWithFilter(
+            userLang: String,
+            scenarioLang: String,
             scenarioType: ScenarioTypeDto,
             difficulty: DifficultyDto,
         ): Either<InfraErrors, List<ScenarioDto>> =
@@ -49,8 +51,8 @@ class ScenariosRepository
                     val scenarios =
                         scenarioClient.fetchScenarios(
                             ScenariosRequest(
-                                userLang = "en",
-                                scenarioLang = "de",
+                                userLang = userLang,
+                                scenarioLang = scenarioLang,
                                 scenarioType = scenarioType.name,
                                 difficulty = difficulty.name,
                             ),

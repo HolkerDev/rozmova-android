@@ -7,6 +7,7 @@ import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
+import eu.rozmova.app.repositories.SettingsRepository
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -28,6 +29,7 @@ class LibraryScreenViewModel
     @Inject
     constructor(
         private val scenariosRepository: ScenariosRepository,
+        private val settingsRepository: SettingsRepository,
         private val chatsRepository: ChatsRepository,
     ) : ViewModel(),
         ContainerHost<LibraryScreenState, LibraryScreenEvents> {
@@ -37,7 +39,9 @@ class LibraryScreenViewModel
             scenarioType: ScenarioTypeDto,
             difficulty: DifficultyDto,
         ) = intent {
-            scenariosRepository.getAllWithFilter(scenarioType, difficulty).map { scenarios ->
+            val userLang = settingsRepository.getLearningLangOrDefault()
+            val interfaceLang = settingsRepository.getInterfaceLang()
+            scenariosRepository.getAllWithFilter(userLang, interfaceLang, scenarioType, difficulty).map { scenarios ->
                 reduce { state.copy(scenarios = scenarios) }
             } // TODO: Map error to state
         }
