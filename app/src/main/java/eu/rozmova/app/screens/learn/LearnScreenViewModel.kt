@@ -73,7 +73,7 @@ class LearnScreenViewModel
             intent {
                 val learnLang = settingsRepository.getLearningLangOrDefault()
                 val userLang = localeManager.getCurrentLocale().language
-                scenariosRepository.getTodaySelection(learnLang, userLang).map { recScenarios ->
+                scenariosRepository.getTodaySelection(userLang, learnLang).map { recScenarios ->
                     reduce { state.copy(recommendedScenarios = recScenarios) }
                 }
             }
