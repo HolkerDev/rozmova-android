@@ -25,6 +25,9 @@ interface ChatClient {
         @Body body: FetchAllReq,
     ): Response<List<ChatDto>>
 
+    @GET("chats/latest")
+    suspend fun fetchLatestChat(): Response<ChatDto?>
+
     @DELETE("chats/{chatId}")
     suspend fun deleteById(
         @Path("chatId") chatId: String,

@@ -2,9 +2,8 @@ package eu.rozmova.app.screens.learn
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import eu.rozmova.app.domain.ChatStatus
+import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatWithScenarioModel
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioTypeDto
@@ -16,7 +15,6 @@ import eu.rozmova.app.utils.LocaleManager
 import eu.rozmova.app.utils.ViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -35,6 +33,7 @@ data class LearnScreenState(
     val weeklyScenarios: List<ScenarioDto>? = null,
     val weeklyScenariosLoading: Boolean = false,
     val recommendedScenarios: TodayScenarioSelection? = null,
+    val latestChat: ChatDto? = null,
 )
 
 @HiltViewModel
@@ -79,18 +78,10 @@ class LearnScreenViewModel
             }
 
         private fun fetchLatestChat() =
-            viewModelScope.launch {
-                chatsRepository
-                    .fetchChats()
-                    .map { chats ->
-                        chats
-                            .filter { it.status == ChatStatus.IN_PROGRESS }
-                            .takeIf { it.isNotEmpty() }
-                            ?.last()
-                            ?.let {
-                                _latestChat.value = ViewState.Success(it)
-                            } ?: run { _latestChat.value = ViewState.Empty }
-                    }.mapLeft { _latestChat.value = ViewState.Error(it) }
+            intent {
+                chatsRepository.fetchLatest().map {
+                    reduce { state.copy(latestChat = it) }
+                }
             }
 
         fun createChatFromScenario(scenarioId: String) =

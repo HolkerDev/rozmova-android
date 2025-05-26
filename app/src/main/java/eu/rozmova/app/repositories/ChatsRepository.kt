@@ -2,7 +2,6 @@ package eu.rozmova.app.repositories
 
 import android.util.Log
 import arrow.core.Either
-import arrow.core.raise.either
 import eu.rozmova.app.clients.backend.ChatClient
 import eu.rozmova.app.clients.backend.ChatCreateReq
 import eu.rozmova.app.clients.backend.FetchAllReq
@@ -12,25 +11,13 @@ import eu.rozmova.app.clients.backend.MessageClient
 import eu.rozmova.app.clients.backend.SendAudioReq
 import eu.rozmova.app.clients.backend.SendMessageReq
 import eu.rozmova.app.clients.s3.S3Client
-import eu.rozmova.app.domain.ChatAnalysis
 import eu.rozmova.app.domain.ChatDto
-import eu.rozmova.app.domain.ChatModel
-import eu.rozmova.app.domain.ChatStatus
-import eu.rozmova.app.domain.ChatWithScenarioModel
 import eu.rozmova.app.domain.MessageDto
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.functions.functions
-import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.Columns
-import io.github.jan.supabase.storage.storage
 import io.ktor.client.call.body
 import kotlinx.serialization.Serializable
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.time.Duration.Companion.seconds
 
 sealed class InfraErrors(
     msg: String,
@@ -63,33 +50,28 @@ data class ChatUpdate(
 class ChatsRepository
     @Inject
     constructor(
-        private val supabaseClient: SupabaseClient,
         private val chatClient: ChatClient,
         private val messageClient: MessageClient,
         private val s3Client: S3Client,
     ) {
         private val tag = this::class.simpleName
 
-        suspend fun fetchChats(): Either<InfraErrors, List<ChatWithScenarioModel>> =
-            either {
-                try {
-                    val columns =
-                        Columns.raw(
-                            """
-                                *,
-                                scenario:scenario_id(*)
-                                  """,
-                        )
-                    supabaseClient
-                        .postgrest
-                        .from(Tables.CHATS)
-                        .select(columns)
-                        .decodeList<ChatWithScenarioModel>()
-                } catch (e: Exception) {
-                    Log.e(tag, "Failed to fetch chats", e)
-                    raise(InfraErrors.DatabaseError("Failed to fetch chats"))
+        suspend fun fetchLatest(): Either<InfraErrors, ChatDto?> =
+            Either
+                .catch {
+                    chatClient.fetchLatestChat().let { res ->
+                        if (res.isSuccessful) {
+                            res.body()
+                        } else if (res.code() == 404) {
+                            null
+                        } else {
+                            throw IllegalStateException("Latest chat failed to fetch: ${res.message()}")
+                        }
+                    }
+                }.mapLeft { e ->
+                    Log.e(tag, "Failed to fetch latest chat", e)
+                    InfraErrors.DatabaseError("Failed to fetch latest chat")
                 }
-            }
 
         suspend fun fetchAll(
             userLang: String,
@@ -129,24 +111,6 @@ class ChatsRepository
                     InfraErrors.NetworkError("Failed to delete chat")
                 }
 
-        suspend fun archiveChat(chatId: String): Either<InfraErrors, Unit> =
-            either {
-                try {
-                    supabaseClient.from(Tables.CHATS).update(
-                        {
-                            ChatModel::status setTo ChatStatus.ARCHIVED
-                        },
-                    ) {
-                        filter {
-                            ChatModel::id eq chatId
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.e(tag, "Failed to archive chat", e)
-                    raise(InfraErrors.DatabaseError("Failed to archive chat"))
-                }
-            }
-
         suspend fun fetchChatById(chatId: String): Either<InfraErrors, ChatDto> =
             Either
                 .catch {
@@ -182,26 +146,6 @@ class ChatsRepository
                     Log.e(tag, "Failed to create chat", e)
                     InfraErrors.NetworkError("Failed to create chat")
                 }
-
-        suspend fun getPublicAudioLink(audioPath: String): String {
-            val userId =
-                supabaseClient.auth.currentUserOrNull()?.id
-                    ?: throw IllegalStateException("User is not authenticated")
-            return supabaseClient.storage
-                .from("audio-messages")
-                .createSignedUrl("$userId/$audioPath", 60.seconds)
-        }
-
-        suspend fun getAnalytics(chatId: String): Either<InfraErrors, ChatAnalysis> =
-            either {
-                try {
-                    val response = supabaseClient.functions.invoke("finish-chat", mapOf("chatId" to chatId))
-                    response.body<ChatAnalysis>()
-                } catch (e: Exception) {
-                    Log.e(tag, "Failed to prepare chat analytics", e)
-                    raise(InfraErrors.DatabaseError("Failed to prepare chat analytics"))
-                }
-            }
 
         suspend fun finishChat(chatId: String): Either<InfraErrors, FinishChatRes> =
             Either

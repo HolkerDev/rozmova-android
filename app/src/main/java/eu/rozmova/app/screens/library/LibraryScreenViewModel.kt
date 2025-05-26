@@ -39,9 +39,9 @@ class LibraryScreenViewModel
             scenarioType: ScenarioTypeDto,
             difficulty: DifficultyDto,
         ) = intent {
-            val userLang = settingsRepository.getLearningLangOrDefault()
-            val interfaceLang = settingsRepository.getInterfaceLang()
-            scenariosRepository.getAllWithFilter(userLang, interfaceLang, scenarioType, difficulty).map { scenarios ->
+            val scenarioLang = settingsRepository.getLearningLangOrDefault()
+            val userLang = settingsRepository.getInterfaceLang()
+            scenariosRepository.getAllWithFilter(userLang, scenarioLang, scenarioType, difficulty).map { scenarios ->
                 reduce { state.copy(scenarios = scenarios) }
             } // TODO: Map error to state
         }

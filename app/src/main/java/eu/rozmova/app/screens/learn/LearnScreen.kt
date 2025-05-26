@@ -36,7 +36,6 @@ fun LearnScreen(
     viewModel: LearnScreenViewModel = hiltViewModel(),
 ) {
     val navigateToChatAction = rememberUpdatedState(navigateToChat)
-    val latestChatState by viewModel.latestChat.collectAsState()
     val state by viewModel.collectAsState()
 
     viewModel.collectSideEffect { event ->
@@ -70,22 +69,23 @@ fun LearnScreen(
                             onScenarioSelect(scenario)
                         },
                         state = recommendedScenarios,
-                        modifier = Modifier.padding(8.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     )
                 }
             }
-
-            item {
-                QuickResumeCard(
-                    chat = latestChatState,
-                    onContinueClick = { chatId, scenarioType ->
-                        navigateToChat(
-                            chatId,
-                            scenarioType,
-                        )
-                    },
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                )
+            state.latestChat?.let { latestChat ->
+                item {
+                    QuickResumeCard(
+                        chat = latestChat,
+                        onContinueClick = { chatId, scenarioType ->
+                            navigateToChat(
+                                chatId,
+                                scenarioType,
+                            )
+                        },
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    )
+                }
             }
 
             item {
