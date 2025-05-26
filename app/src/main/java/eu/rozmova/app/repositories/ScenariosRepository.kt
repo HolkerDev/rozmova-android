@@ -68,14 +68,17 @@ class ScenariosRepository
                     InfraErrors.NetworkError("Error trying to fetch scenarios: $error")
                 }
 
-        suspend fun getTodaySelection(): Either<InfraErrors, TodayScenarioSelection> =
+        suspend fun getTodaySelection(
+            userLang: String,
+            scenarioLang: String,
+        ): Either<InfraErrors, TodayScenarioSelection> =
             Either
                 .catch {
                     val response =
                         scenarioClient.fetchRecommendedScenarios(
                             RecommendedScenariosRequest(
-                                userLang = "en",
-                                scenarioLang = "de",
+                                userLang = userLang,
+                                scenarioLang = scenarioLang,
                             ),
                         )
                     Log.i("ScenariosRepository", "Today selection response: $response")

@@ -1,0 +1,80 @@
+# fastlane/Fastfile
+default_platform(:android)
+
+platform :android do
+  desc "Deploy to Internal Testing Track (No Google Review Required)"
+  lane :deploy_internal do
+    # Build the signed release AAB
+    gradle(
+      task: "bundleRelease",
+      properties: {
+        "android.injected.signing.store.file" => "app/release.keystore",
+        "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["KEY_PASSWORD"]
+      }
+    )
+
+    # Upload to Google Play Internal Testing (no review needed)
+    upload_to_play_store(
+      track: 'internal',                    # Internal testing track
+      aab: 'app/build/outputs/bundle/release/app-release.aab',
+      skip_upload_metadata: true,           # Skip metadata upload
+      skip_upload_images: true,             # Skip images upload
+      skip_upload_screenshots: true,        # Skip screenshots upload
+      release_status: 'completed'           # Release immediately (no review)
+    )
+
+    puts "✅ App uploaded to Internal Testing track!"
+    puts "📱 Your internal testers can now download it from Play Store"
+    puts "🔗 Share the internal testing link with your testers"
+  end
+
+  desc "Deploy to Closed Testing (Alpha/Beta)"
+  lane :deploy_alpha do
+    gradle(
+      task: "bundleRelease",
+      properties: {
+        "android.injected.signing.store.file" => "app/release.keystore",
+        "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["KEY_PASSWORD"]
+      }
+    )
+
+    upload_to_play_store(
+      track: 'alpha',                       # Alpha testing track
+      aab: 'app/build/outputs/bundle/release/app-release.aab',
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      release_status: 'completed'
+    )
+  end
+
+  desc "Deploy to Production (Requires Google Review)"
+  lane :deploy_production do
+    gradle(
+      task: "bundleRelease",
+      properties: {
+        "android.injected.signing.store.file" => "app/release.keystore",
+        "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["KEY_PASSWORD"]
+      }
+    )
+
+    upload_to_play_store(
+      track: 'production',                  # Production track
+      aab: 'app/build/outputs/bundle/release/app-release.aab',
+      skip_upload_metadata: false,          # Include metadata for production
+      skip_upload_images: false,            # Include images for production
+      skip_upload_screenshots: false,       # Include screenshots for production
+      release_status: 'draft'               # Keep as draft for manual review
+    )
+
+    puts "⚠️  App uploaded as DRAFT to Production track"
+    puts "👀 Google review required before going live"
+    puts "🔍 Go to Play Console to submit for review"
+  end
+end

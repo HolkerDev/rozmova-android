@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import eu.rozmova.app.domain.Language
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -28,6 +29,8 @@ class SettingsRepository
                 .map { preferences ->
                     preferences[learnLangKey]
                 }.first()
+
+        suspend fun getLearningLangOrDefault(): String = getLearningLang() ?: Language.GERMAN.code
 
         suspend fun setLearningLang(lang: String) {
             dataStore.edit { preferences ->

@@ -1,0 +1,5 @@
+app_identifier("eu.rozmova.app")
+
+json_key_file("./fastlane/google-play-key.json")
+
+package_name("eu.rozmova.app")
