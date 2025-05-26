@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.repositories.ChatsRepository
+import eu.rozmova.app.repositories.SettingsRepository
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
@@ -20,6 +21,7 @@ class ChatsListViewModel
     @Inject
     constructor(
         private val chatsRepository: ChatsRepository,
+        private val settingsRepository: SettingsRepository,
     ) : ViewModel(),
         ContainerHost<ChatsListState, Nothing> {
         override val container = container<ChatsListState, Nothing>(ChatsListState())
@@ -32,8 +34,10 @@ class ChatsListViewModel
         fun loadChats() =
             intent {
                 reduce { state.copy(isLoading = true) }
+                val scenarioLang = settingsRepository.getLearningLangOrDefault()
+                val userLang = settingsRepository.getInterfaceLang()
                 chatsRepository
-                    .fetchAll()
+                    .fetchAll(userLang, scenarioLang)
                     .map { chats ->
                         reduce { state.copy(isLoading = false, chats = chats) }
                     }.mapLeft { error ->

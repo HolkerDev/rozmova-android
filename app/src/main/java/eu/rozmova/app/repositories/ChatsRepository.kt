@@ -5,6 +5,7 @@ import arrow.core.Either
 import arrow.core.raise.either
 import eu.rozmova.app.clients.backend.ChatClient
 import eu.rozmova.app.clients.backend.ChatCreateReq
+import eu.rozmova.app.clients.backend.FetchAllReq
 import eu.rozmova.app.clients.backend.FinishChatRes
 import eu.rozmova.app.clients.backend.GenSignedUrlReq
 import eu.rozmova.app.clients.backend.MessageClient
@@ -90,10 +91,13 @@ class ChatsRepository
                 }
             }
 
-        suspend fun fetchAll(): Either<InfraErrors, List<ChatDto>> =
+        suspend fun fetchAll(
+            userLang: String,
+            scenarioLang: String,
+        ): Either<InfraErrors, List<ChatDto>> =
             Either
                 .catch {
-                    chatClient.fetchAll().let { res ->
+                    chatClient.fetchAll(FetchAllReq(userLang, scenarioLang)).let { res ->
                         if (res.isSuccessful) {
                             val chats =
                                 res.body()

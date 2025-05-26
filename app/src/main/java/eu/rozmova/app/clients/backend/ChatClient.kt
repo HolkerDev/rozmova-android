@@ -10,7 +10,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface ChatClient {
-    @POST("chats")
+    @POST("chats/new")
     suspend fun createChat(
         @Body body: ChatCreateReq,
     ): Response<ChatDto>
@@ -20,8 +20,10 @@ interface ChatClient {
         @Path("chatId") chatId: String,
     ): Response<ChatDto>
 
-    @GET("chats")
-    suspend fun fetchAll(): Response<List<ChatDto>>
+    @POST("chats")
+    suspend fun fetchAll(
+        @Body body: FetchAllReq,
+    ): Response<List<ChatDto>>
 
     @DELETE("chats/{chatId}")
     suspend fun deleteById(
@@ -33,6 +35,11 @@ interface ChatClient {
         @Path("chatId") chatId: String,
     ): Response<FinishChatRes>
 }
+
+data class FetchAllReq(
+    val userLang: String,
+    val scenarioLang: String,
+)
 
 data class ChatCreateReq(
     val scenarioId: String,
