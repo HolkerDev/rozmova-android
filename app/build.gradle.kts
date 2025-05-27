@@ -64,7 +64,15 @@ android {
         resourceConfigurations += listOf("en", "uk", "ru")
     }
 
-
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+        }
+    }
     buildFeatures {
         compose = true
         buildConfig = true
@@ -77,22 +85,19 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            storeFile = file("release.keystore")
-            storePassword = System.getenv("KEYSTORE_PASSWORD")
-            keyAlias = System.getenv("KEY_ALIAS")
-            keyPassword = System.getenv("KEY_PASSWORD")
+        signingConfigs {
+            create("release") {
+                storeFile = file("release.keystore")
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
         }
-    }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
-            signingConfig = signingConfigs.getByName("release")
+        buildTypes {
+            getByName("release") {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
