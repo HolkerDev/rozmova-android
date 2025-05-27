@@ -10,6 +10,8 @@ sealed class Language(
 
     data object GERMAN : Language(R.string.lang_de, "de")
 
+    data object POLISH : Language(R.string.lang_pl, "pl")
+
     data object GREEK : Language(R.string.lang_el, "el")
 
     data object UKRAINIAN : Language(R.string.lang_uk, "uk")
@@ -21,13 +23,14 @@ fun getLanguageByCode(code: String): Language =
     when (code) {
         "en" -> Language.ENGLISH
         "de" -> Language.GERMAN
+        "pl" -> Language.POLISH
         "el" -> Language.GREEK
         "uk" -> Language.UKRAINIAN
         "ru" -> Language.RUSSIAN
         else -> Language.ENGLISH
     }
 
-val LEARN_LANGUAGES = listOf(Language.GERMAN, Language.GREEK)
+val LEARN_LANGUAGES = listOf(Language.GERMAN, Language.POLISH, Language.GREEK)
 
 val INTERFACE_LANGUAGES =
     listOf(
