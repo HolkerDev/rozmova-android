@@ -94,7 +94,7 @@ class ScenariosRepository
                         } ?: throw IllegalStateException("Response body is null")
                     } else {
                         throw InfraErrors.NetworkError(
-                            "Error trying to fetch today selection: ${response.errorBody()}",
+                            "Error trying to fetch today selection: $response",
                         )
                     }
                 }.mapLeft {

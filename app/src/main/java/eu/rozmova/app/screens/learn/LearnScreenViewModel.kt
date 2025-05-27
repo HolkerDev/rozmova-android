@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ChatDto
-import eu.rozmova.app.domain.ChatWithScenarioModel
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.domain.TodayScenarioSelection
@@ -12,9 +11,6 @@ import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
 import eu.rozmova.app.repositories.SettingsRepository
 import eu.rozmova.app.utils.LocaleManager
-import eu.rozmova.app.utils.ViewState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -47,9 +43,6 @@ class LearnScreenViewModel
     ) : ViewModel(),
         ContainerHost<LearnScreenState, LearnEvent> {
         override val container: Container<LearnScreenState, LearnEvent> = container(LearnScreenState())
-
-        private val _latestChat = MutableStateFlow<ViewState<ChatWithScenarioModel>>(ViewState.Loading)
-        val latestChat = _latestChat.asStateFlow()
 
         init {
             fetchTodayScenarios()
