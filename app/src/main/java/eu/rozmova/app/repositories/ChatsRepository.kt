@@ -12,9 +12,7 @@ import eu.rozmova.app.clients.backend.SendAudioReq
 import eu.rozmova.app.clients.backend.SendMessageReq
 import eu.rozmova.app.clients.s3.S3Client
 import eu.rozmova.app.domain.ChatDto
-import eu.rozmova.app.domain.MessageDto
 import io.ktor.client.call.body
-import kotlinx.serialization.Serializable
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,20 +24,10 @@ sealed class InfraErrors(
         val msg: String,
     ) : InfraErrors(msg)
 
-    data class AuthError(
-        val msg: String,
-    ) : InfraErrors(msg)
-
     data class NetworkError(
         val msg: String,
     ) : InfraErrors(msg)
 }
-
-@Serializable
-data class ChatResponse(
-    val messages: List<MessageDto>,
-    val shouldFinishChat: Boolean,
-)
 
 data class ChatUpdate(
     val chat: ChatDto,

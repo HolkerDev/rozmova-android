@@ -84,6 +84,7 @@ fun ShouldFinishAudioDialog(
         confirmButton = {
             Button(
                 onClick = {
+                    viewModel.stopAudio()
                     onYesClick()
                     onDismiss()
                 },
@@ -95,6 +96,7 @@ fun ShouldFinishAudioDialog(
         dismissButton = {
             TextButton(
                 onClick = {
+                    viewModel.stopAudio()
                     onNoClick()
                     onDismiss()
                 },

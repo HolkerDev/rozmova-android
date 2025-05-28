@@ -115,12 +115,15 @@ fun ConversationChat(
             lastUserMsg = data.lastUserMsg,
             onYesClick = {
                 finishChat = null
+                viewModel.stopAudio()
                 viewModel.finishChat(chatId)
             },
             onNoClick = {
+                viewModel.stopAudio()
                 finishChat = null
             },
             onDismiss = {
+                viewModel.stopAudio()
                 finishChat = null
             },
         )
