@@ -11,6 +11,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -33,8 +34,8 @@ fun ShouldFinishAudioDialog(
     onDismiss: () -> Unit,
     viewModel: ShouldFinishAudioVM = hiltViewModel(),
 ) {
-    var botMsg by mutableStateOf(lastBotMsg.toAudioMessage())
-    var userMsg by mutableStateOf(lastUserMsg.toAudioMessage())
+    var botMsg by remember { mutableStateOf(lastBotMsg.toAudioMessage()) }
+    var userMsg by remember { mutableStateOf(lastUserMsg.toAudioMessage()) }
 
     viewModel.collectSideEffect { event ->
         when (event) {
