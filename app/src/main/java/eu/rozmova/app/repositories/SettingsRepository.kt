@@ -16,6 +16,7 @@ import javax.inject.Singleton
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 val learnLangKey = stringPreferencesKey("learn_lang")
+val salutationKey = stringPreferencesKey("salutation")
 
 @Singleton
 class SettingsRepository
@@ -34,6 +35,18 @@ class SettingsRepository
                     preferences[learnLangKey]
                 }.first()
 
+        suspend fun getSalutation(): String? =
+            dataStore.data
+                .map { preferences ->
+                    preferences[salutationKey]
+                }.first()
+
+        suspend fun setSalutation(salutation: String) {
+            dataStore.edit { preferences ->
+                preferences[salutationKey] = salutation
+            }
+        }
+
         suspend fun getLearningLangOrDefault(): String = getLearningLang() ?: Language.GERMAN.code
 
         suspend fun setLearningLang(lang: String) {
@@ -45,6 +58,12 @@ class SettingsRepository
         suspend fun clearLearningLang() {
             dataStore.edit { preferences ->
                 preferences.remove(learnLangKey)
+            }
+        }
+
+        suspend fun clearSalutation() {
+            dataStore.edit { preferences ->
+                preferences.remove(salutationKey)
             }
         }
     }

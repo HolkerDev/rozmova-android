@@ -76,6 +76,7 @@ class SettingsScreenViewModel
         fun signOut() {
             viewModelScope.launch {
                 settingsRepository.clearLearningLang()
+                settingsRepository.clearSalutation()
                 authRepository.signOut()
             }
         }

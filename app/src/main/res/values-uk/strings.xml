@@ -91,4 +91,8 @@
     <string name="analysing_conversation">Аналізуємо розмову</string>
     <string name="analyse_wait">Будь ласка почекайте на аналіз розмови...</string>
     <string name="propose_idea">Запропонувати ідею</string>
+    <string name="salutation_mr">Пан</string>
+    <string name="salutation_ms">Пані</string>
+    <string name="onboarding_salutation_title">Виберіть звернення</string>
+    <string name="onboarding_salutation_description">Будь ласка вкажіть як до вас звертатися. Це покращить занурення підчас розмов в сценарії.</string>
 </resources>

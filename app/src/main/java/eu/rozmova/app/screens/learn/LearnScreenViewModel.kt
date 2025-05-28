@@ -53,7 +53,9 @@ class LearnScreenViewModel
 
         private fun fetchLearningLanguage() =
             intent {
-                if (settingsRepository.getLearningLang() == null) {
+                val learnLang = settingsRepository.getLearningLang()
+                val salutation = settingsRepository.getSalutation()
+                if (learnLang == null || salutation == null) {
                     Log.i("LearnScreenViewModel", "No learning language set, starting onboarding")
                     postSideEffect(
                         LearnEvent.StartOnboarding,

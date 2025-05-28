@@ -44,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.modules.onboarding.components.PrivacyNoticeOnboarding
 import eu.rozmova.app.modules.onboarding.components.SelectLanguageOnboarding
 import eu.rozmova.app.modules.onboarding.components.SelectLearningLangOnboarding
+import eu.rozmova.app.modules.onboarding.components.SelectSalutationOnboarding
 import eu.rozmova.app.utils.LocaleManager
 import kotlinx.coroutines.launch
 
@@ -54,6 +55,7 @@ fun OnboardingScreen(
     viewModel: OnboardingScreenViewModel = hiltViewModel(),
 ) {
     val lang = viewModel.getCurrentLanguage()
+    viewModel.saveSalutation("mr") // Default salutation
 
     Content(
         startLanguage = lang,
@@ -62,6 +64,10 @@ fun OnboardingScreen(
             viewModel.saveLearningLanguage(learningLang)
         },
         onOnboardingComplete = { onLearn() },
+        onSalutationSelect = { salutationCode ->
+            Log.i("Onboarding", "Selected salutation: $salutationCode")
+            viewModel.saveSalutation(salutationCode)
+        },
         modifier = modifier,
     )
 }
@@ -71,6 +77,7 @@ private fun Content(
     startLanguage: String,
     setInterfaceLang: (String) -> Unit,
     setLearnLang: (String) -> Unit,
+    onSalutationSelect: (String) -> Unit,
     onOnboardingComplete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -106,7 +113,13 @@ private fun Content(
                         },
                         selectedLang = learningLang,
                     )
-                2 -> PrivacyNoticeOnboarding()
+                2 ->
+                    SelectSalutationOnboarding(
+                        onSalutationSelect = { salutationCode ->
+                            onSalutationSelect(salutationCode)
+                        },
+                    )
+                3 -> PrivacyNoticeOnboarding()
             }
         }
 
@@ -208,6 +221,7 @@ private fun OnboardingScreenPreview() {
             startLanguage = localeManager.getCurrentLocale().language,
             setInterfaceLang = { lang -> localeManager.setLocale(lang) },
             onOnboardingComplete = {},
+            onSalutationSelect = {},
             setLearnLang = {},
         )
     }
