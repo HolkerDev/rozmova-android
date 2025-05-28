@@ -131,7 +131,7 @@ fun ConversationChat(
             onDismissRequest = { },
             title = {
                 Text(
-                    "Analyzing conversation",
+                    stringResource(R.string.analysing_conversation),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -149,7 +149,7 @@ fun ConversationChat(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        "Please wait while we analyze your conversation...",
+                        text = stringResource(R.string.analyse_wait),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -350,7 +350,7 @@ fun ScenarioInfoCard(
             onDismissRequest = { showSituationDialog = false },
             title = {
                 Text(
-                    "Situation",
+                    stringResource(R.string.situation),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -373,7 +373,7 @@ fun ScenarioInfoCard(
                 TextButton(
                     onClick = { showSituationDialog = false },
                 ) {
-                    Text("Close")
+                    Text(stringResource(R.string.close_content_description))
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -398,7 +398,7 @@ fun ScenarioInfoCard(
             onDismissRequest = { showInstructionsDialog = false },
             title = {
                 Text(
-                    "Instructions",
+                    stringResource(R.string.instructions),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -411,7 +411,7 @@ fun ScenarioInfoCard(
                             .verticalScroll(rememberScrollState()),
                 ) {
                     Text(
-                        text = scenario.userInstructions.joinToString("\n"),
+                        text = scenario.userInstructions.joinToString("\n\n") { it.task },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -421,7 +421,7 @@ fun ScenarioInfoCard(
                 TextButton(
                     onClick = { showInstructionsDialog = false },
                 ) {
-                    Text("Close")
+                    Text(stringResource(R.string.close_content_description))
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,

@@ -88,4 +88,5 @@
     <string name="answering">Answering...</string>
     <string name="analysing_conversation">Analysing conversation</string>
     <string name="analyse_wait">Please wait while we analyze your conversation...</string>
+    <string name="propose_idea">Propose an idea</string>
 </resources>

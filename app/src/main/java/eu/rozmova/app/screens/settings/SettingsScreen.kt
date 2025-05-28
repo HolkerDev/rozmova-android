@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -164,12 +164,12 @@ fun SettingsContent(
         )
 
         ListItem(
-            headlineContent = { Text("Report bug") },
+            headlineContent = { Text(stringResource(R.string.propose_idea)) },
             leadingContent = {
                 Icon(
-                    Icons.Default.BugReport,
+                    Icons.Default.Lightbulb,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             },
             modifier = Modifier.clickable(onClick = onBugReportClick),

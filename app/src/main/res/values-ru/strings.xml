@@ -90,4 +90,5 @@
     <string name="answering">Отвечает...</string>
     <string name="analysing_conversation">Анализируем разговор</string>
     <string name="analyse_wait">Пожалуйста ожидайте, пока мы анализируем Ваш разговор...</string>
+    <string name="propose_idea">Предложить идею</string>
 </resources>

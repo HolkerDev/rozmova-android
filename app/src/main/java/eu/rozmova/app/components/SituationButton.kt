@@ -15,7 +15,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import eu.rozmova.app.R
 
 @Composable
 fun SituationButton(modifier: Modifier = Modifier) {
@@ -36,7 +38,7 @@ fun SituationButton(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = "Situation",
+                text = stringResource(R.string.situation),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
