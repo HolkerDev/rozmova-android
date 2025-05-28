@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -49,6 +48,14 @@ import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.domain.toDifficulty
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
+
+enum class ScenarioType(
+    val scenarioTypeDto: ScenarioTypeDto,
+    val labelId: Int,
+) {
+    MESSAGES(ScenarioTypeDto.MESSAGES, R.string.category_message),
+    CONVERSATION(ScenarioTypeDto.CONVERSATION, R.string.category_conversation),
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -133,16 +140,16 @@ private fun FilterDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Filter Scenarios") },
+        title = { Text(stringResource(R.string.filter_dialog_title)) },
         text = {
             Column {
-                Text("Language Level", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.filter_dialog_lang_levels), style = MaterialTheme.typography.titleMedium)
                 Row {
                     DifficultyDto.entries.forEach { difficulty ->
                         FilterChip(
                             selected = selectedDifficulty == difficulty,
                             onClick = { onApplyFilters(difficulty, selectedType, showFinished) },
-                            label = { Text(difficulty.name) },
+                            label = { Text(stringResource(difficulty.toDifficulty().labelId)) },
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                     }
@@ -150,46 +157,27 @@ private fun FilterDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("Scenario Type", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.filter_dialog_scenario_type), style = MaterialTheme.typography.titleMedium)
                 Row {
-                    listOf(ScenarioTypeDto.MESSAGES, ScenarioTypeDto.CONVERSATION).forEach { type ->
+                    listOf(ScenarioType.MESSAGES, ScenarioType.CONVERSATION).forEach { type ->
                         FilterChip(
-                            selected = selectedType == type,
-                            onClick = { onApplyFilters(selectedDifficulty, type, showFinished) },
-                            label = { Text(type.name) },
+                            selected = selectedType == type.scenarioTypeDto,
+                            onClick = { onApplyFilters(selectedDifficulty, type.scenarioTypeDto, showFinished) },
+                            label = { Text(stringResource(type.labelId)) },
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                     }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Checkbox(
-                        checked = showFinished,
-                        onCheckedChange = {
-                            onApplyFilters(
-                                selectedDifficulty,
-                                selectedType,
-                                !showFinished,
-                            )
-                        },
-                    )
-                    Text("Include finished scenarios", style = MaterialTheme.typography.bodyMedium)
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Apply")
+                Text(stringResource(R.string.apply))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )

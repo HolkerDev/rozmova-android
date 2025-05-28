@@ -23,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.CollectionsBookmark
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Task
@@ -36,11 +37,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,7 +63,6 @@ import eu.rozmova.app.components.ChatAnalysisDialog
 import eu.rozmova.app.components.MessageInput
 import eu.rozmova.app.components.MessageItem
 import eu.rozmova.app.components.ShouldFinishChatDialog
-import eu.rozmova.app.components.SimpleToolBar
 import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.components.WordItem
 import eu.rozmova.app.domain.ChatDto
@@ -147,7 +149,7 @@ fun MessageChat(
                 onDismissRequest = { },
                 title = {
                     Text(
-                        "Analyzing conversation",
+                        stringResource(R.string.analysing_conversation),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -165,7 +167,7 @@ fun MessageChat(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            "Please wait while we analyze your conversation...",
+                            stringResource(R.string.analyse_wait),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -201,6 +203,7 @@ fun MessageChat(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ScenarioInfoCard(
     chat: ChatDto,
@@ -215,12 +218,22 @@ private fun ScenarioInfoCard(
     var showInstructionsDialog by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
-        SimpleToolBar(title = stringResource(R.string.message_chat_title), onBack = onBackClick)
+        TopAppBar(
+            title = { Text(stringResource(R.string.message_chat_title)) },
+            navigationIcon = {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                    )
+                }
+            },
+        )
         Card(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .padding(horizontal = 12.dp)
                     .weight(1f),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             shape = RoundedCornerShape(12.dp),
@@ -264,11 +277,6 @@ private fun ScenarioInfoCard(
                                 contentDescription = stringResource(R.string.helper_words),
                                 modifier = Modifier.size(16.dp),
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = stringResource(R.string.helper_words),
-                                style = MaterialTheme.typography.labelSmall,
-                            )
                         }
                     }
                 }
@@ -302,7 +310,7 @@ private fun ScenarioInfoCard(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "Situation",
+                                text = stringResource(R.string.situation),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
@@ -331,7 +339,7 @@ private fun ScenarioInfoCard(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "Instructions",
+                                text = stringResource(R.string.instructions),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
@@ -371,7 +379,7 @@ private fun ScenarioInfoCard(
             onDismissRequest = { showSituationDialog = false },
             title = {
                 Text(
-                    "Situation",
+                    text = stringResource(R.string.situation),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -394,7 +402,7 @@ private fun ScenarioInfoCard(
                 TextButton(
                     onClick = { showSituationDialog = false },
                 ) {
-                    Text("Close")
+                    Text(stringResource(R.string.close_content_description))
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -414,7 +422,7 @@ private fun ScenarioInfoCard(
             onDismissRequest = { showInstructionsDialog = false },
             title = {
                 Text(
-                    "Instructions",
+                    text = stringResource(R.string.instructions),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -428,7 +436,7 @@ private fun ScenarioInfoCard(
                 ) {
                     Text(
                         text =
-                            chat.scenario.userInstructions.joinToString("\n") { it.task },
+                            chat.scenario.userInstructions.joinToString("\n\n") { it.task },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -438,7 +446,7 @@ private fun ScenarioInfoCard(
                 TextButton(
                     onClick = { showInstructionsDialog = false },
                 ) {
-                    Text("Close")
+                    Text(stringResource(R.string.close_content_description))
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -493,7 +501,7 @@ fun MessageList(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "Typing...",
+                            text = stringResource(R.string.answering),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
                         )
@@ -546,98 +554,5 @@ fun HelperWordsBottomSheet(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun LoadingComponent(
-    onBackClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        SimpleToolBar(title = stringResource(R.string.loading_progress), onBack = onBackClick)
-        Spacer(modifier = Modifier.height(24.dp))
-        CircularProgressIndicator(
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(48.dp),
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Loading conversation...",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-@Composable
-private fun ErrorComponent(onBackClick: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        SimpleToolBar(title = stringResource(R.string.error), onBack = onBackClick)
-        Spacer(modifier = Modifier.height(24.dp))
-        Icon(
-            imageVector = Icons.Rounded.Description,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(48.dp),
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = stringResource(R.string.error_message),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.error,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        TextButton(
-            onClick = onBackClick,
-            colors =
-                ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.primary,
-                ),
-        ) {
-            Text("Go Back", style = MaterialTheme.typography.labelLarge)
-        }
-    }
-}
-
-@Composable
-private fun EmptyMessageDisplay() {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = "No messages yet",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-@Composable
-private fun ErrorMessageDisplay() {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = "Error loading messages",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.error,
-        )
     }
 }

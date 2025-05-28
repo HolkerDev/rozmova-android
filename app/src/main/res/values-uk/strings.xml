@@ -81,4 +81,13 @@
     <string name="privacy_data_deletion_title">Контроль даних</string>
     <string name="privacy_data_deletion_description">Ви маєте повний контроль над своїми даними. Запросіть видалення всієї вашої інформації в будь-який час через нашу підтримку.</string>
     <string name="practice_title">Практика</string>
+    <string name="filter_dialog_title">Фільтри</string>
+    <string name="filter_dialog_lang_levels">Рівень</string>
+    <string name="filter_dialog_scenario_type">Тип сценарію</string>
+    <string name="apply">Застосувати</string>
+    <string name="instructions">Інструкції</string>
+    <string name="situation">Ситуація</string>
+    <string name="answering">Відповідає...</string>
+    <string name="analysing_conversation">Аналізуємо розмову</string>
+    <string name="analyse_wait">Будь ласка почекайте на аналіз розмови...</string>
 </resources>

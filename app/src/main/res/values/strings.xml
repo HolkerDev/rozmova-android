@@ -79,4 +79,13 @@
     <string name="privacy_data_deletion_title">Data Control</string>
     <string name="privacy_data_deletion_description">You have full control over your data. Request deletion of all your information at any time through our support.</string>
     <string name="practice_title">Practice</string>
+    <string name="filter_dialog_title">Filter scenarios</string>
+    <string name="filter_dialog_lang_levels">Language level</string>
+    <string name="filter_dialog_scenario_type">Scenario type</string>
+    <string name="apply">Apply</string>
+    <string name="instructions">Instructions</string>
+    <string name="situation">Situation</string>
+    <string name="answering">Answering...</string>
+    <string name="analysing_conversation">Analysing conversation</string>
+    <string name="analyse_wait">Please wait while we analyze your conversation...</string>
 </resources>
