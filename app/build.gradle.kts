@@ -32,8 +32,8 @@ android {
         applicationId = "eu.rozmova.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.0.3"
+        versionCode = 5
+        versionName = "0.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -64,15 +64,7 @@ android {
         resourceConfigurations += listOf("en", "uk", "ru")
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
-        }
-    }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -85,19 +77,22 @@ android {
     }
 
     signingConfigs {
-        signingConfigs {
-            create("release") {
-                storeFile = file("release.keystore")
-                storePassword = System.getenv("KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("KEY_ALIAS")
-                keyPassword = System.getenv("KEY_PASSWORD")
-            }
+        create("release") {
+            storeFile = file("keystore.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
         }
+    }
 
-        buildTypes {
-            getByName("release") {
-                signingConfig = signingConfigs.getByName("release")
-            }
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 

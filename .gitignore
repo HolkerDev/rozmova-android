@@ -41,5 +41,5 @@ amplifytools.xcconfig
 **.sample
 #amplify-do-not-edit-end
 
-app/release
+app/keystore.jks
 fastlane/
