@@ -91,8 +91,9 @@
     <string name="analysing_conversation">Анализируем разговор</string>
     <string name="analyse_wait">Пожалуйста ожидайте, пока мы анализируем Ваш разговор...</string>
     <string name="propose_idea">Предложить идею</string>
-    <string name="salutation_mr">Господин</string>
-    <string name="salutation_ms">Госпожа</string>
+    <string name="pronoun_he">Он</string>
+    <string name="pronoun_she">Она</string>
     <string name="onboarding_salutation_title">Выберете обращение</string>
     <string name="onboarding_salutation_description">Пожалуйста укажите как к Вам обращаться во время сценариев. Это повысит погружение в ситуацию.</string>
+    <string name="pronoun_they">Они</string>
 </resources>

@@ -89,8 +89,9 @@
     <string name="analysing_conversation">Analysing conversation</string>
     <string name="analyse_wait">Please wait while we analyze your conversation...</string>
     <string name="propose_idea">Propose an idea</string>
-    <string name="salutation_mr">Mr.</string>
-    <string name="salutation_ms">Ms.</string>
-    <string name="onboarding_salutation_title">Select salutation</string>
-    <string name="onboarding_salutation_description">Please provide your salutation. It will improve your immersion during scenarios.</string>
+    <string name="pronoun_he">he/him</string>
+    <string name="pronoun_she">she/her</string>
+    <string name="onboarding_salutation_title">Select pronoun</string>
+    <string name="onboarding_salutation_description">Please provide your pronoun. It will improve your immersion during scenarios.</string>
+    <string name="pronoun_they">they/them</string>
 </resources>

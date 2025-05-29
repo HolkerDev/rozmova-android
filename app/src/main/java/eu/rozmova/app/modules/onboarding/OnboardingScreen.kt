@@ -44,7 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.modules.onboarding.components.PrivacyNoticeOnboarding
 import eu.rozmova.app.modules.onboarding.components.SelectLanguageOnboarding
 import eu.rozmova.app.modules.onboarding.components.SelectLearningLangOnboarding
-import eu.rozmova.app.modules.onboarding.components.SelectSalutationOnboarding
+import eu.rozmova.app.modules.onboarding.components.SelectPronounOnboarding
 import eu.rozmova.app.utils.LocaleManager
 import kotlinx.coroutines.launch
 
@@ -55,18 +55,18 @@ fun OnboardingScreen(
     viewModel: OnboardingScreenViewModel = hiltViewModel(),
 ) {
     val lang = viewModel.getCurrentLanguage()
-    viewModel.saveSalutation("mr") // Default salutation
+    viewModel.savePronoun("he") // Default salutation
 
     Content(
         startLanguage = lang,
         setInterfaceLang = { langCode -> viewModel.selectLanguage(langCode) },
-        setLearnLang = { learningLang ->
+        onLearnLangSelect = { learningLang ->
             viewModel.saveLearningLanguage(learningLang)
         },
         onOnboardingComplete = { onLearn() },
-        onSalutationSelect = { salutationCode ->
+        onPronounSelect = { salutationCode ->
             Log.i("Onboarding", "Selected salutation: $salutationCode")
-            viewModel.saveSalutation(salutationCode)
+            viewModel.savePronoun(salutationCode)
         },
         modifier = modifier,
     )
@@ -76,8 +76,8 @@ fun OnboardingScreen(
 private fun Content(
     startLanguage: String,
     setInterfaceLang: (String) -> Unit,
-    setLearnLang: (String) -> Unit,
-    onSalutationSelect: (String) -> Unit,
+    onLearnLangSelect: (String) -> Unit,
+    onPronounSelect: (String) -> Unit,
     onOnboardingComplete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -86,8 +86,7 @@ private fun Content(
     var learningLang by remember { mutableStateOf<String>("de") }
 
     LaunchedEffect(learningLang) {
-        Log.i("Onboarding", "Selected learning language: $learningLang")
-        setLearnLang(learningLang)
+        onLearnLangSelect(learningLang)
     }
 
     Box(
@@ -114,9 +113,9 @@ private fun Content(
                         selectedLang = learningLang,
                     )
                 2 ->
-                    SelectSalutationOnboarding(
-                        onSalutationSelect = { salutationCode ->
-                            onSalutationSelect(salutationCode)
+                    SelectPronounOnboarding(
+                        onPronounSelect = { pronounCode ->
+                            onPronounSelect(pronounCode)
                         },
                     )
                 3 -> PrivacyNoticeOnboarding()
@@ -221,8 +220,8 @@ private fun OnboardingScreenPreview() {
             startLanguage = localeManager.getCurrentLocale().language,
             setInterfaceLang = { lang -> localeManager.setLocale(lang) },
             onOnboardingComplete = {},
-            onSalutationSelect = {},
-            setLearnLang = {},
+            onPronounSelect = {},
+            onLearnLangSelect = {},
         )
     }
 }

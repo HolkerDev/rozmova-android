@@ -31,9 +31,9 @@ class OnboardingScreenViewModel
 
         fun getCurrentLanguage(): String = localeManager.getCurrentLocale().language
 
-        fun saveSalutation(salutationCode: String) =
+        fun savePronoun(salutationCode: String) =
             intent {
-                settingsRepository.setSalutation(salutationCode)
+                settingsRepository.setPronounCode(salutationCode)
             }
 
         fun saveLearningLanguage(learningLang: String) =

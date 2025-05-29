@@ -1,6 +1,5 @@
 package eu.rozmova.app.screens.learn
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ChatDto
@@ -54,9 +53,8 @@ class LearnScreenViewModel
         private fun fetchLearningLanguage() =
             intent {
                 val learnLang = settingsRepository.getLearningLang()
-                val salutation = settingsRepository.getSalutation()
-                if (learnLang == null || salutation == null) {
-                    Log.i("LearnScreenViewModel", "No learning language set, starting onboarding")
+                val pronoun = settingsRepository.getPronounCode()
+                if (learnLang == null || pronoun == null) {
                     postSideEffect(
                         LearnEvent.StartOnboarding,
                     )

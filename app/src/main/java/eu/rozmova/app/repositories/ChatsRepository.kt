@@ -12,7 +12,6 @@ import eu.rozmova.app.clients.backend.SendAudioReq
 import eu.rozmova.app.clients.backend.SendMessageReq
 import eu.rozmova.app.clients.s3.S3Client
 import eu.rozmova.app.domain.ChatDto
-import io.ktor.client.call.body
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -41,6 +40,7 @@ class ChatsRepository
         private val chatClient: ChatClient,
         private val messageClient: MessageClient,
         private val s3Client: S3Client,
+        private val settingsRepository: SettingsRepository,
     ) {
         private val tag = this::class.simpleName
 
@@ -178,11 +178,13 @@ class ChatsRepository
 
                     s3Client.uploadFile(signedUrl, messageAudioFile)
 
+                    val pronounCode = settingsRepository.getPronounCodeOrDefault()
                     val response =
                         messageClient.sendAudioMessage(
                             SendAudioReq(
                                 chatId = chatId,
                                 audioId = messageAudioFile.name.substringBefore("."),
+                                pronounCode = pronounCode,
                             ),
                         )
 
@@ -209,7 +211,8 @@ class ChatsRepository
         ): Either<InfraErrors, ChatUpdate> =
             Either
                 .catch {
-                    messageClient.sendTextMessage(SendMessageReq(chatId = chatId, content = message)).let { res ->
+                    val pronounCode = settingsRepository.getPronounCodeOrDefault()
+                    messageClient.sendTextMessage(SendMessageReq(chatId = chatId, content = message, pronounCode = pronounCode)).let { res ->
                         if (res.isSuccessful) {
                             val responseBody =
                                 res.body()

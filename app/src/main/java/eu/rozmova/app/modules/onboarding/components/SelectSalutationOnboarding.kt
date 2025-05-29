@@ -37,23 +37,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.R
 
-private data class Salutation(
+private data class Pronoun(
     val code: String,
     val id: Int,
 )
 
 @Composable
-fun SelectSalutationOnboarding(
-    onSalutationSelect: (String) -> Unit,
+fun SelectPronounOnboarding(
+    onPronounSelect: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val salutations =
+    val pronouns =
         listOf(
-            Salutation("mr", R.string.salutation_mr),
-            Salutation("ms", R.string.salutation_ms),
+            Pronoun("he", R.string.pronoun_he),
+            Pronoun("she", R.string.pronoun_she),
+            Pronoun("they", R.string.pronoun_they),
         )
 
-    var selectedSalutation by remember { mutableStateOf(salutations.first().code) }
+    var selectedSalutation by remember { mutableStateOf(pronouns.first().code) }
     Scaffold(
         modifier = modifier,
     ) { paddingValues ->
@@ -101,13 +102,13 @@ fun SelectSalutationOnboarding(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                items(salutations) { salutation ->
+                items(pronouns) { salutation ->
                     SalutationListItem(
                         salutation = salutation,
                         isSelected = selectedSalutation == salutation.code,
                         onSalutationSelect = {
                             selectedSalutation = salutation.code
-                            onSalutationSelect(salutation.code)
+                            onPronounSelect(salutation.code)
                         },
                     )
                 }
@@ -118,7 +119,7 @@ fun SelectSalutationOnboarding(
 
 @Composable
 private fun SalutationListItem(
-    salutation: Salutation,
+    salutation: Pronoun,
     isSelected: Boolean,
     onSalutationSelect: () -> Unit,
     modifier: Modifier = Modifier,

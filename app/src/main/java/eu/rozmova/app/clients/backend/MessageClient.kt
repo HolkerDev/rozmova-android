@@ -25,6 +25,7 @@ interface MessageClient {
 data class SendMessageReq(
     val chatId: String,
     val content: String,
+    val pronounCode: String,
 )
 
 data class SendMessageRes(
@@ -35,6 +36,7 @@ data class SendMessageRes(
 data class SendAudioReq(
     val chatId: String,
     val audioId: String,
+    val pronounCode: String,
 )
 
 data class SendAudioRes(
