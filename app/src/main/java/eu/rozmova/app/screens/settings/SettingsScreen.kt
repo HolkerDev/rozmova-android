@@ -10,6 +10,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,6 +41,7 @@ import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
 fun SettingsScreen(
+    onNavigateToSubscription: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: SettingsScreenViewModel = hiltViewModel(),
 ) {
@@ -84,6 +86,7 @@ fun SettingsScreen(
             showBugReportDialog = showBugReportDialog,
             onBugReportClick = { showBugReportDialog = true },
             onBugReportDismiss = { showBugReportDialog = false },
+            onNavigateToSubscription = onNavigateToSubscription,
             modifier = modifier,
         )
     }
@@ -105,6 +108,7 @@ fun SettingsContent(
     showBugReportDialog: Boolean,
     onBugReportClick: () -> Unit,
     onBugReportDismiss: () -> Unit,
+    onNavigateToSubscription: () -> Unit,
     learnLanguage: Language,
     interfaceLanguage: Language,
     modifier: Modifier = Modifier,
@@ -161,6 +165,25 @@ fun SettingsContent(
             text = stringResource(R.string.settings_account),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(16.dp),
+        )
+
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.subscription_premium)) },
+            supportingContent = { Text(stringResource(R.string.subscription_unlock_features)) },
+            leadingContent = {
+                Icon(
+                    Icons.Default.Star,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            },
+            trailingContent = {
+                Icon(
+                    Icons.AutoMirrored.Default.KeyboardArrowRight,
+                    contentDescription = null,
+                )
+            },
+            modifier = Modifier.clickable(onClick = onNavigateToSubscription),
         )
 
         ListItem(

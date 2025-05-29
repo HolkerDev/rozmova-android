@@ -20,6 +20,7 @@ import eu.rozmova.app.screens.library.LibraryScreen
 import eu.rozmova.app.screens.login.LoginScreen
 import eu.rozmova.app.screens.main.MainScreen
 import eu.rozmova.app.screens.settings.SettingsScreen
+import eu.rozmova.app.screens.subscription.SubscriptionScreen
 
 @Composable
 fun NavigationHost(
@@ -60,7 +61,15 @@ fun NavigationHost(
             MainScreen()
         }
         composable(route = NavRoutes.Settings.route) {
-            SettingsScreen()
+            SettingsScreen(
+                onNavigateToSubscription = { navController.navigate(NavRoutes.Subscription.route) }
+            )
+        }
+
+        composable(route = NavRoutes.Subscription.route) {
+            SubscriptionScreen(
+                onNavigateBack = { navController.navigateUp() }
+            )
         }
 
         composable(route = NavRoutes.Login.route) {

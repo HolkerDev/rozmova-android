@@ -34,6 +34,7 @@ import eu.rozmova.app.repositories.AuthState
 import eu.rozmova.app.repositories.UserRepository
 import eu.rozmova.app.services.FeatureService
 import eu.rozmova.app.ui.theme.RozmovaTheme
+import eu.rozmova.app.utils.SubscriptionManager
 import io.github.jan.supabase.auth.user.UserSession
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -56,11 +57,14 @@ class AppViewModel
         private val authRepository: AuthRepository,
         private val userRepository: UserRepository,
         private val featureService: FeatureService,
+        private val subscriptionManager: SubscriptionManager,
     ) : ViewModel() {
         init {
             viewModelScope.launch {
                 authRepository.observeAuthState()
             }
+            // Initialize billing connection
+            subscriptionManager.initializeBilling()
         }
 
         private fun initializeFeatureService(userSession: UserSession) =
@@ -91,6 +95,11 @@ class AppViewModel
                     started = SharingStarted.Eagerly,
                     initialValue = AppState.Loading,
                 )
+
+        override fun onCleared() {
+            super.onCleared()
+            subscriptionManager.cleanupBilling()
+        }
     }
 
 @Composable
