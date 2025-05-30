@@ -25,8 +25,10 @@ interface ChatClient {
         @Body body: FetchAllReq,
     ): Response<List<ChatDto>>
 
-    @GET("chats/latest")
-    suspend fun fetchLatestChat(): Response<ChatDto?>
+    @POST("chats/latest")
+    suspend fun fetchLatestChat(
+        @Body body: FetchLatestReq,
+    ): Response<ChatDto?>
 
     @DELETE("chats/{chatId}")
     suspend fun deleteById(
@@ -38,6 +40,11 @@ interface ChatClient {
         @Path("chatId") chatId: String,
     ): Response<FinishChatRes>
 }
+
+data class FetchLatestReq(
+    val userLang: String,
+    val scenarioLang: String,
+)
 
 data class FetchAllReq(
     val userLang: String,

@@ -73,7 +73,9 @@ class LearnScreenViewModel
 
         private fun fetchLatestChat() =
             intent {
-                chatsRepository.fetchLatest().map {
+                val learnLang = settingsRepository.getLearningLangOrDefault()
+                val userLang = localeManager.getCurrentLocale().language
+                chatsRepository.fetchLatest(learnLang, userLang).map {
                     reduce { state.copy(latestChat = it) }
                 }
             }

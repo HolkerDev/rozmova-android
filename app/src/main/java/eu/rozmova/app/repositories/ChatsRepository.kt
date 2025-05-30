@@ -5,6 +5,7 @@ import arrow.core.Either
 import eu.rozmova.app.clients.backend.ChatClient
 import eu.rozmova.app.clients.backend.ChatCreateReq
 import eu.rozmova.app.clients.backend.FetchAllReq
+import eu.rozmova.app.clients.backend.FetchLatestReq
 import eu.rozmova.app.clients.backend.FinishChatRes
 import eu.rozmova.app.clients.backend.GenSignedUrlReq
 import eu.rozmova.app.clients.backend.MessageClient
@@ -44,18 +45,27 @@ class ChatsRepository
     ) {
         private val tag = this::class.simpleName
 
-        suspend fun fetchLatest(): Either<InfraErrors, ChatDto?> =
+        suspend fun fetchLatest(
+            scenarioLang: String,
+            userLang: String,
+        ): Either<InfraErrors, ChatDto?> =
             Either
                 .catch {
-                    chatClient.fetchLatestChat().let { res ->
-                        if (res.isSuccessful) {
-                            res.body()
-                        } else if (res.code() == 404) {
-                            null
-                        } else {
-                            throw IllegalStateException("Latest chat failed to fetch: ${res.message()}")
+                    chatClient
+                        .fetchLatestChat(
+                            FetchLatestReq(
+                                userLang = userLang,
+                                scenarioLang = scenarioLang,
+                            ),
+                        ).let { res ->
+                            if (res.isSuccessful) {
+                                res.body()
+                            } else if (res.code() == 404) {
+                                null
+                            } else {
+                                throw IllegalStateException("Latest chat failed to fetch: ${res.message()}")
+                            }
                         }
-                    }
                 }.mapLeft { e ->
                     Log.e(tag, "Failed to fetch latest chat", e)
                     InfraErrors.DatabaseError("Failed to fetch latest chat")
