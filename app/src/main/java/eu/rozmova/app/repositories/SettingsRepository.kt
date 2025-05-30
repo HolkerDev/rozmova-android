@@ -17,6 +17,7 @@ import javax.inject.Singleton
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 val learnLangKey = stringPreferencesKey("learn_lang")
 val pronounKey = stringPreferencesKey("pronoun")
+val onboardingKey = stringPreferencesKey("onboarding_complete_v1")
 
 @Singleton
 class SettingsRepository
@@ -44,6 +45,19 @@ class SettingsRepository
         suspend fun setPronounCode(pronounCode: String) {
             dataStore.edit { preferences ->
                 preferences[pronounKey] = pronounCode
+            }
+        }
+
+        suspend fun isOnboardingComplete(): Boolean =
+            dataStore.data
+                .map { preferences ->
+                    preferences[onboardingKey] ?: "false"
+                }.first()
+                .toBoolean()
+
+        suspend fun setOnboardingComplete() {
+            dataStore.edit { preferences ->
+                preferences[onboardingKey] = "true"
             }
         }
 

@@ -29,6 +29,11 @@ class OnboardingScreenViewModel
             }
         }
 
+        fun completeOnboarding() =
+            intent {
+                settingsRepository.setOnboardingComplete()
+            }
+
         fun getCurrentLanguage(): String = localeManager.getCurrentLocale().language
 
         fun savePronoun(salutationCode: String) =

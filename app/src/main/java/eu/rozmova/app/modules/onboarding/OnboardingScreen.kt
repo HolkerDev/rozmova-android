@@ -63,7 +63,10 @@ fun OnboardingScreen(
         onLearnLangSelect = { learningLang ->
             viewModel.saveLearningLanguage(learningLang)
         },
-        onOnboardingComplete = { onLearn() },
+        onOnboardingComplete = {
+            viewModel.completeOnboarding()
+            onLearn()
+        },
         onPronounSelect = { salutationCode ->
             Log.i("Onboarding", "Selected salutation: $salutationCode")
             viewModel.savePronoun(salutationCode)

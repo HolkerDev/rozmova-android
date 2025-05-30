@@ -54,7 +54,8 @@ class LearnScreenViewModel
             intent {
                 val learnLang = settingsRepository.getLearningLang()
                 val pronoun = settingsRepository.getPronounCode()
-                if (learnLang == null || pronoun == null) {
+                val onboardingComplete = settingsRepository.isOnboardingComplete()
+                if (learnLang == null || pronoun == null || !onboardingComplete) {
                     postSideEffect(
                         LearnEvent.StartOnboarding,
                     )
