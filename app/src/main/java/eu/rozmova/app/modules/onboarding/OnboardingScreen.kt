@@ -81,7 +81,7 @@ private fun Content(
     onOnboardingComplete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val pagerState = rememberPagerState(pageCount = { 3 })
+    val pagerState = rememberPagerState(pageCount = { 4 })
     val coroutineScope = rememberCoroutineScope()
     var learningLang by remember { mutableStateOf<String>("de") }
 
@@ -136,7 +136,7 @@ private fun Content(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(bottom = 32.dp),
             ) {
-                repeat(3) { index ->
+                repeat(4) { index ->
                     PageIndicator(
                         isSelected = index == pagerState.currentPage,
 //                        color = onboardingPages[pagerState.currentPage].backgroundColor,
@@ -154,7 +154,7 @@ private fun Content(
                 // Next/Get Started button
                 FloatingActionButton(
                     onClick = {
-                        if (pagerState.currentPage < 2) {
+                        if (pagerState.currentPage < 3) {
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
                             }
@@ -169,13 +169,13 @@ private fun Content(
                 ) {
                     Icon(
                         imageVector =
-                            if (pagerState.currentPage < 2) {
+                            if (pagerState.currentPage < 3) {
                                 Icons.Default.ArrowForward
                             } else {
                                 Icons.Default.Check
                             },
                         contentDescription =
-                            if (pagerState.currentPage < 2) {
+                            if (pagerState.currentPage < 3) {
                                 "Next"
                             } else {
                                 "Get Started"
