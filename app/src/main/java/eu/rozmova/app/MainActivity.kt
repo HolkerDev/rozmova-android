@@ -98,7 +98,6 @@ class AppViewModel
 
         override fun onCleared() {
             super.onCleared()
-            subscriptionManager.cleanupBilling()
         }
     }
 

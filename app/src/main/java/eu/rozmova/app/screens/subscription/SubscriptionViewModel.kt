@@ -138,6 +138,5 @@ class SubscriptionViewModel
 
         override fun onCleared() {
             super.onCleared()
-            subscriptionRepository.endBillingConnection()
         }
     }

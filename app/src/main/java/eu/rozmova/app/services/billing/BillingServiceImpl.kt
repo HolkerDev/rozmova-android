@@ -85,7 +85,7 @@ class BillingServiceImpl @Inject constructor(
                     val products = productDetailsList.mapNotNull { productDetails ->
                         val subscriptionOfferDetails = productDetails.subscriptionOfferDetails?.firstOrNull()
                         val pricingPhase = subscriptionOfferDetails?.pricingPhases?.pricingPhaseList?.firstOrNull()
-                        
+
                         if (subscriptionOfferDetails != null && pricingPhase != null) {
                             SubscriptionProduct(
                                 productId = productDetails.productId,
@@ -143,7 +143,7 @@ class BillingServiceImpl @Inject constructor(
                 .build()
 
             val billingResult = billingClient.launchBillingFlow(activity, billingFlowParams)
-            
+
             when (billingResult.responseCode) {
                 BillingClient.BillingResponseCode.OK -> {
                     // Flow launched successfully, result will come in onPurchasesUpdated
@@ -213,7 +213,7 @@ class BillingServiceImpl @Inject constructor(
             if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
                 if (purchase.products.contains(PREMIUM_SUBSCRIPTION_ID)) {
                     updateSubscriptionStatus(purchase)
-                    
+
                     // Acknowledge the purchase if not already acknowledged
                     if (!purchase.isAcknowledged) {
                         // Launch coroutine to acknowledge purchase
