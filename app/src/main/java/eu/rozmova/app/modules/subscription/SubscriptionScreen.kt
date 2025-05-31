@@ -1,4 +1,4 @@
-package eu.rozmova.app.screens.subscription
+package eu.rozmova.app.modules.subscription
 
 import android.app.Activity
 import androidx.compose.foundation.layout.Arrangement
@@ -11,13 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -43,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.domain.billing.SubscriptionState
+import eu.rozmova.app.domain.billing.SubscriptionStatus
+import eu.rozmova.app.modules.subscription.components.PremiumOfferContent
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -50,6 +50,7 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 @Composable
 fun SubscriptionScreen(
     onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: SubscriptionViewModel = hiltViewModel(),
 ) {
     val state by viewModel.collectAsState()
@@ -75,7 +76,10 @@ fun SubscriptionScreen(
                 title = { Text(stringResource(R.string.subscription_premium)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.close_content_description))
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = stringResource(R.string.close_content_description),
+                        )
                     }
                 },
             )
@@ -83,18 +87,18 @@ fun SubscriptionScreen(
     ) { paddingValues ->
         Column(
             modifier =
-                Modifier
+                Modifier.Companion
                     .fillMaxSize()
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.Companion.CenterHorizontally,
         ) {
             when (val subscriptionState = state.subscriptionState) {
                 is SubscriptionState.Loading -> {
                     Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.Companion.fillMaxSize(),
+                        contentAlignment = Alignment.Companion.Center,
                     ) {
                         CircularProgressIndicator()
                     }
@@ -102,10 +106,10 @@ fun SubscriptionScreen(
 
                 is SubscriptionState.Available -> {
                     PremiumOfferContent(
-                        product = subscriptionState.product,
                         isLoading = state.isLoading,
-                        onPurchaseClick = { product ->
-                            viewModel.purchaseSubscription(context as Activity, product)
+                        formattedPrice = subscriptionState.product.formattedPrice,
+                        onPurchaseClick = {
+                            viewModel.purchaseSubscription(context as Activity, subscriptionState.product)
                         },
                     )
                 }
@@ -134,13 +138,11 @@ fun SubscriptionScreen(
 
             if (state.error != null) {
                 LaunchedEffect(state.error) {
-                    // Show error snackbar or dialog
                 }
             }
 
             if (state.showSuccessMessage) {
                 LaunchedEffect(state.showSuccessMessage) {
-                    // Show success message
                     viewModel.clearSuccessMessage()
                 }
             }
@@ -149,182 +151,64 @@ fun SubscriptionScreen(
 }
 
 @Composable
-private fun PremiumOfferContent(
-    product: eu.rozmova.app.domain.billing.SubscriptionProduct,
-    isLoading: Boolean,
-    onPurchaseClick: (eu.rozmova.app.domain.billing.SubscriptionProduct) -> Unit,
-) {
-    Card(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-    ) {
-        Column(
-            modifier = Modifier.padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Icon(
-                imageVector = Icons.Default.Star,
-                contentDescription = null,
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.primary,
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = stringResource(R.string.subscription_premium),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = product.formattedPrice,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-            )
-
-            Text(
-                text = stringResource(R.string.subscription_per_month),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            PremiumFeaturesList()
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = { onPurchaseClick(product) },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading,
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                    )
-                } else {
-                    Text(stringResource(R.string.subscription_subscribe_now))
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = stringResource(R.string.subscription_cancel_anytime),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-        }
-    }
-}
-
-@Composable
-private fun PremiumFeaturesList() {
-    val features =
-        listOf(
-            stringResource(R.string.premium_feature_unlimited_conversations),
-            stringResource(R.string.premium_feature_advanced_models),
-            stringResource(R.string.premium_feature_priority_support),
-            stringResource(R.string.premium_feature_ad_free),
-            stringResource(R.string.premium_feature_offline_mode),
-            stringResource(R.string.premium_feature_custom_settings),
-        )
-
-    Column {
-        features.forEach { feature ->
-            Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = feature,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun SubscribedContent(
-    status: eu.rozmova.app.domain.billing.SubscriptionStatus,
+    status: SubscriptionStatus,
     onRefreshClick: () -> Unit,
 ) {
     Card(
         modifier =
-            Modifier
+            Modifier.Companion
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Column(
-            modifier = Modifier.padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.Companion.padding(24.dp),
+            horizontalAlignment = Alignment.Companion.CenterHorizontally,
         ) {
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
-                modifier = Modifier.size(64.dp),
+                modifier = Modifier.Companion.size(64.dp),
                 tint = MaterialTheme.colorScheme.primary,
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.Companion.height(16.dp))
 
             Text(
                 text = stringResource(R.string.subscription_youre_premium),
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Companion.Bold,
+                textAlign = TextAlign.Companion.Center,
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.Companion.height(8.dp))
 
             Text(
                 text = stringResource(R.string.subscription_thank_you),
                 style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Companion.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.Companion.height(16.dp))
 
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.Companion.fillMaxWidth(),
                 colors =
                     CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     ),
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.Companion.padding(16.dp),
                 ) {
                     Text(
                         text = stringResource(R.string.subscription_status),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Companion.Bold,
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.Companion.height(8.dp))
 
                     StatusRow(
                         stringResource(R.string.subscription_status),
@@ -338,7 +222,13 @@ private fun SubscribedContent(
                     )
                     StatusRow(
                         stringResource(R.string.subscription_auto_renewing),
-                        if (status.autoRenewing) stringResource(R.string.confirm) else stringResource(R.string.cancel),
+                        if (status.autoRenewing) {
+                            stringResource(R.string.confirm)
+                        } else {
+                            stringResource(
+                                R.string.cancel,
+                            )
+                        },
                     )
                     StatusRow(
                         stringResource(R.string.subscription_product_id),
@@ -347,11 +237,11 @@ private fun SubscribedContent(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.Companion.height(16.dp))
 
             OutlinedButton(
                 onClick = onRefreshClick,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.Companion.fillMaxWidth(),
             ) {
                 Text(stringResource(R.string.subscription_refresh_status))
             }
@@ -366,7 +256,7 @@ private fun StatusRow(
 ) {
     Row(
         modifier =
-            Modifier
+            Modifier.Companion
                 .fillMaxWidth()
                 .padding(vertical = 2.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -379,7 +269,7 @@ private fun StatusRow(
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium,
+            fontWeight = FontWeight.Companion.Medium,
         )
     }
 }
@@ -390,25 +280,25 @@ private fun ErrorContent(
     onRetryClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.Companion.fillMaxWidth(),
+        horizontalAlignment = Alignment.Companion.CenterHorizontally,
     ) {
         Text(
             text = stringResource(R.string.subscription_oops),
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Companion.Bold,
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.Companion.height(8.dp))
 
         Text(
             text = message,
             style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Companion.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.Companion.height(16.dp))
 
         Button(onClick = onRetryClick) {
             Text(stringResource(R.string.subscription_retry))

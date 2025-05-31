@@ -1,4 +1,4 @@
-package eu.rozmova.app.screens.subscription
+package eu.rozmova.app.modules.subscription
 
 import android.app.Activity
 import androidx.lifecycle.ViewModel

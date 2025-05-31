@@ -96,11 +96,11 @@
     <string name="pronoun_they">they/them</string>
     
     <!-- Subscription related strings -->
-    <string name="subscription_premium">Premium Subscription</string>
+    <string name="subscription_premium">Premium subscription</string>
     <string name="subscription_unlock_features">Unlock premium features</string>
     <string name="subscription_monthly">Monthly</string>
     <string name="subscription_per_month">per month</string>
-    <string name="subscription_subscribe_now">Subscribe Now</string>
+    <string name="subscription_subscribe_now">Subscribe</string>
     <string name="subscription_cancel_anytime">Cancel anytime • No commitment</string>
     <string name="subscription_youre_premium">You\'re Premium!</string>
     <string name="subscription_thank_you">Thank you for subscribing to Rozmova Premium</string>
@@ -117,10 +117,10 @@
     <string name="subscription_oops">Oops!</string>
     
     <!-- Premium features -->
-    <string name="premium_feature_unlimited_conversations">Unlimited conversations</string>
-    <string name="premium_feature_advanced_models">Advanced language models</string>
-    <string name="premium_feature_priority_support">Priority support</string>
-    <string name="premium_feature_ad_free">Ad-free experience</string>
-    <string name="premium_feature_offline_mode">Offline mode</string>
-    <string name="premium_feature_custom_settings">Custom conversation settings</string>
+    <string name="premium_feature_unlimited_conversations">Unlimited speaking convesations</string>
+    <string name="premium_feature_dictionary_access">Access to scenario dictionary</string>
+    <string name="premium_feature_transcription_access">Access to audio transcriptions</string>
+    <string name="premium_feature_custom_scenario_generation">Custom scenario generator</string>
+    <string name="premium_feature_unlimited_respect">Unlimited respect</string>
+    <string name="premium_feature_integrated_translator_access">Acess to integrated translator</string>
 </resources>

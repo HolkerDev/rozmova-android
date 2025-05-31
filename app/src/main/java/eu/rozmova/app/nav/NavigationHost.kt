@@ -12,6 +12,7 @@ import androidx.navigation.navArgument
 import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.toScenarioType
 import eu.rozmova.app.modules.onboarding.OnboardingScreen
+import eu.rozmova.app.modules.subscription.SubscriptionScreen
 import eu.rozmova.app.screens.chat.ChatScreen
 import eu.rozmova.app.screens.chats.ChatsListScreen
 import eu.rozmova.app.screens.createchat.CreateChatScreen
@@ -20,7 +21,6 @@ import eu.rozmova.app.screens.library.LibraryScreen
 import eu.rozmova.app.screens.login.LoginScreen
 import eu.rozmova.app.screens.main.MainScreen
 import eu.rozmova.app.screens.settings.SettingsScreen
-import eu.rozmova.app.screens.subscription.SubscriptionScreen
 
 @Composable
 fun NavigationHost(
@@ -62,13 +62,13 @@ fun NavigationHost(
         }
         composable(route = NavRoutes.Settings.route) {
             SettingsScreen(
-                onNavigateToSubscription = { navController.navigate(NavRoutes.Subscription.route) }
+                onNavigateToSubscription = { navController.navigate(NavRoutes.Subscription.route) },
             )
         }
 
         composable(route = NavRoutes.Subscription.route) {
             SubscriptionScreen(
-                onNavigateBack = { navController.navigateUp() }
+                onNavigateBack = { navController.navigateUp() },
             )
         }
 
