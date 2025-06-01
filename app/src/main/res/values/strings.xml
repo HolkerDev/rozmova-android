@@ -104,12 +104,6 @@
     <string name="subscription_cancel_anytime">Cancel anytime • No commitment</string>
     <string name="subscription_youre_premium">You\'re Premium!</string>
     <string name="subscription_thank_you">Thank you for subscribing to Rozmova Premium</string>
-    <string name="subscription_status">Subscription Status</string>
-    <string name="subscription_status_active">Active</string>
-    <string name="subscription_status_inactive">Inactive</string>
-    <string name="subscription_auto_renewing">Auto-renewing</string>
-    <string name="subscription_product_id">Product ID</string>
-    <string name="subscription_refresh_status">Refresh Status</string>
     <string name="subscription_error_unavailable">Subscription not available</string>
     <string name="subscription_error_network">Network error. Please check your connection.</string>
     <string name="subscription_error_service_unavailable">Google Play services unavailable. Please try again later.</string>

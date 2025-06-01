@@ -107,5 +107,7 @@
     <string name="subscription_monthly">Місячна</string>
     <string name="subscription_per_month">на місяць</string>
     <string name="subscription_subscribe_now">Підписатись</string>
-    <string name="subscription_cancel_anytime">Відміна в будь-який час • Без обовʼязків</string>
+    <string name="subscription_cancel_anytime">Можна відмінити в будь-який момент</string>
+    <string name="subscription_youre_premium">В вас є Преміум підписка!</string>
+    <string name="subscription_thank_you">Дякую за підписку на Розмова Преміум</string>
 </resources>

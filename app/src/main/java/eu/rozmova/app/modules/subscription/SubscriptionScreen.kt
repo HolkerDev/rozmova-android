@@ -24,7 +24,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -37,11 +36,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.domain.billing.SubscriptionState
-import eu.rozmova.app.domain.billing.SubscriptionStatus
 import eu.rozmova.app.modules.subscription.components.PremiumOfferContent
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -93,6 +92,7 @@ fun SubscriptionScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
             horizontalAlignment = Alignment.Companion.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
             when (val subscriptionState = state.subscriptionState) {
                 is SubscriptionState.Loading -> {
@@ -115,10 +115,7 @@ fun SubscriptionScreen(
                 }
 
                 is SubscriptionState.Subscribed -> {
-                    SubscribedContent(
-                        status = subscriptionState.status,
-                        onRefreshClick = { viewModel.refreshSubscriptions() },
-                    )
+                    SubscribedContent()
                 }
 
                 is SubscriptionState.Error -> {
@@ -151,100 +148,43 @@ fun SubscriptionScreen(
 }
 
 @Composable
-private fun SubscribedContent(
-    status: SubscriptionStatus,
-    onRefreshClick: () -> Unit,
-) {
+private fun SubscribedContent() {
     Card(
         modifier =
-            Modifier.Companion
-                .fillMaxWidth()
+            Modifier
+                .fillMaxSize()
                 .padding(vertical = 8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Column(
-            modifier = Modifier.Companion.padding(24.dp),
-            horizontalAlignment = Alignment.Companion.CenterHorizontally,
+            modifier = Modifier.fillMaxSize().padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
-                modifier = Modifier.Companion.size(64.dp),
+                modifier = Modifier.size(64.dp),
                 tint = MaterialTheme.colorScheme.primary,
             )
 
-            Spacer(modifier = Modifier.Companion.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = stringResource(R.string.subscription_youre_premium),
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Companion.Bold,
-                textAlign = TextAlign.Companion.Center,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
             )
 
-            Spacer(modifier = Modifier.Companion.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = stringResource(R.string.subscription_thank_you),
                 style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Companion.Center,
+                textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-
-            Spacer(modifier = Modifier.Companion.height(16.dp))
-
-            Card(
-                modifier = Modifier.Companion.fillMaxWidth(),
-                colors =
-                    CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    ),
-            ) {
-                Column(
-                    modifier = Modifier.Companion.padding(16.dp),
-                ) {
-                    Text(
-                        text = stringResource(R.string.subscription_status),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Companion.Bold,
-                    )
-                    Spacer(modifier = Modifier.Companion.height(8.dp))
-
-                    StatusRow(
-                        stringResource(R.string.subscription_status),
-                        if (status.isSubscribed) {
-                            stringResource(
-                                R.string.subscription_status_active,
-                            )
-                        } else {
-                            stringResource(R.string.subscription_status_inactive)
-                        },
-                    )
-                    StatusRow(
-                        stringResource(R.string.subscription_auto_renewing),
-                        if (status.autoRenewing) {
-                            stringResource(R.string.confirm)
-                        } else {
-                            stringResource(
-                                R.string.cancel,
-                            )
-                        },
-                    )
-                    StatusRow(
-                        stringResource(R.string.subscription_product_id),
-                        status.productId ?: "N/A",
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.Companion.height(16.dp))
-
-            OutlinedButton(
-                onClick = onRefreshClick,
-                modifier = Modifier.Companion.fillMaxWidth(),
-            ) {
-                Text(stringResource(R.string.subscription_refresh_status))
-            }
         }
     }
 }
@@ -304,4 +244,10 @@ private fun ErrorContent(
             Text(stringResource(R.string.subscription_retry))
         }
     }
+}
+
+@Preview
+@Composable
+private fun PreviewSubscribedState() {
+    SubscribedContent()
 }
