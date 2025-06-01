@@ -16,9 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,9 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.CollectionsBookmark
-import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -39,7 +35,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -63,13 +58,13 @@ import eu.rozmova.app.components.AudioRecorderButton
 import eu.rozmova.app.components.ChatAnalysisDialog
 import eu.rozmova.app.components.InstructionsButton
 import eu.rozmova.app.components.SituationButton
-import eu.rozmova.app.components.WordItem
 import eu.rozmova.app.components.messagechat.FinishChat
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.WordDto
 import eu.rozmova.app.modules.convochat.components.shouldfinishdialog.ShouldFinishAudioDialog
+import eu.rozmova.app.modules.shared.HelperWords
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -204,6 +199,7 @@ fun ConversationChat(
                         isMessageLoading = state.isMessageLoading,
                         messageListState = messageListState,
                         onChatFinish = { viewModel.finishChat(chat.id) },
+                        isSubscribed = state.isSubscribed,
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -232,6 +228,7 @@ fun ScenarioInfoCard(
     onChatFinish: () -> Unit,
     isMessageLoading: Boolean,
     messageListState: LazyListState,
+    isSubscribed: Boolean,
     modifier: Modifier = Modifier,
 ) {
     var showWordsBottomSheet by remember { mutableStateOf(false) }
@@ -335,9 +332,10 @@ fun ScenarioInfoCard(
     }
 
     if (showWordsBottomSheet) {
-        HelperWordsBottomSheet(
+        HelperWords(
             words = words,
             onDismiss = { showWordsBottomSheet = false },
+            isSubscribed = isSubscribed,
         )
     }
 
@@ -440,44 +438,6 @@ fun ScenarioInfoCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HelperWordsBottomSheet(
-    words: List<WordDto>,
-    onDismiss: () -> Unit,
-) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        dragHandle = { BottomSheetDefaults.DragHandle() },
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-    ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 32.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.helper_words),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
-            )
-
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(words) { word ->
-                    WordItem(word = word)
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
 private fun LoadingComponent(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -509,50 +469,5 @@ private fun LoadingComponent(
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ErrorComponent(onBackClick: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        TopAppBar(
-            title = { Text(text = stringResource(R.string.error)) },
-            navigationIcon = {
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                    )
-                }
-            },
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Icon(
-            imageVector = Icons.Rounded.Description,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(48.dp),
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = stringResource(R.string.error_message),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.error,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        TextButton(
-            onClick = onBackClick,
-            colors =
-                ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.primary,
-                ),
-        ) {
-            Text("Go Back", style = MaterialTheme.typography.labelLarge)
-        }
     }
 }

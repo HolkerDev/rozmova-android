@@ -6,6 +6,8 @@ import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.domain.ReviewDto
 import eu.rozmova.app.repositories.ChatsRepository
+import eu.rozmova.app.repositories.billing.SubscriptionRepository
+import kotlinx.coroutines.flow.first
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
@@ -15,6 +17,7 @@ data class MessageChatState(
     val isLoadingMessage: Boolean = false,
     val isLoadingReview: Boolean = false,
     val review: ReviewDto? = null,
+    val isSubscribed: Boolean = false,
 )
 
 sealed class MessageChatEvent {
@@ -33,9 +36,26 @@ class MessageChatViewModel
     @Inject
     constructor(
         private val chatsRepository: ChatsRepository,
+        private val subscriptionRepository: SubscriptionRepository,
     ) : ViewModel(),
         ContainerHost<MessageChatState, MessageChatEvent> {
         override val container = container<MessageChatState, MessageChatEvent>(MessageChatState())
+
+        init {
+            loadSubscriptionInfo()
+        }
+
+        private fun loadSubscriptionInfo() =
+            intent {
+                val isSubscribed =
+                    subscriptionRepository
+                        .isSubscribed()
+                        .first()
+
+                reduce {
+                    state.copy(isSubscribed = isSubscribed)
+                }
+            }
 
         fun loadChat(chatId: String) =
             intent {

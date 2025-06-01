@@ -17,7 +17,9 @@ import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.domain.ReviewDto
 import eu.rozmova.app.repositories.ChatsRepository
+import eu.rozmova.app.repositories.billing.SubscriptionRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
@@ -33,6 +35,7 @@ data class ConvoChatState(
     val isReviewLoading: Boolean = false,
     val isMessageLoading: Boolean = false,
     val review: ReviewDto? = null,
+    val isSubscribed: Boolean = false,
 )
 
 data class AudioChatMessage(
@@ -59,6 +62,7 @@ class ChatDetailsViewModel
     constructor(
         private val expoPlayer: ExoPlayer,
         private val chatsRepository: ChatsRepository,
+        private val subscriptionRepository: SubscriptionRepository,
         application: Application,
     ) : AndroidViewModel(application),
         ContainerHost<ConvoChatState, ConvoChatEvents> {
@@ -76,6 +80,7 @@ class ChatDetailsViewModel
             }
 
         init {
+            fetchIsSubscribed()
             expoPlayer.addListener(
                 object : Player.Listener {
                     override fun onPlaybackStateChanged(playbackState: Int) {
@@ -86,6 +91,16 @@ class ChatDetailsViewModel
                 },
             )
         }
+
+        private fun fetchIsSubscribed() =
+            intent {
+                subscriptionRepository
+                    .isSubscribed()
+                    .first()
+                    .let {
+                        reduce { state.copy(isSubscribed = it) }
+                    }
+            }
 
         fun finishChat(chatId: String) =
             intent {

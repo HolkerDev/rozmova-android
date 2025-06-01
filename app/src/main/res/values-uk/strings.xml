@@ -110,4 +110,5 @@
     <string name="subscription_cancel_anytime">Можна відмінити в будь-який момент</string>
     <string name="subscription_youre_premium">В вас є Преміум підписка!</string>
     <string name="subscription_thank_you">Дякую за підписку на Розмова Преміум</string>
+    <string name="sub_required_helper_words">Допоміжні слова доступні тільки в Преміум підписці.</string>
 </resources>

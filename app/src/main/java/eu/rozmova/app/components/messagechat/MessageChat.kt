@@ -28,7 +28,6 @@ import androidx.compose.material.icons.rounded.CollectionsBookmark
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Task
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -39,7 +38,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -64,11 +62,10 @@ import eu.rozmova.app.components.MessageInput
 import eu.rozmova.app.components.MessageItem
 import eu.rozmova.app.components.ShouldFinishChatDialog
 import eu.rozmova.app.components.StopChatButton
-import eu.rozmova.app.components.WordItem
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.MessageDto
-import eu.rozmova.app.domain.WordDto
+import eu.rozmova.app.modules.shared.HelperWords
 import eu.rozmova.app.screens.createchat.ChatId
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -192,6 +189,7 @@ fun MessageChat(
                     onChatFinish = { viewModel.finishChat(chat.id) },
                     isMessageLoading = state.isLoadingMessage,
                     messageListState = messageListState,
+                    isSubscribed = state.isSubscribed,
                     modifier = Modifier.weight(1f),
                 )
                 MessageInput(
@@ -211,6 +209,7 @@ private fun ScenarioInfoCard(
     onChatFinish: () -> Unit,
     isMessageLoading: Boolean,
     messageListState: LazyListState,
+    isSubscribed: Boolean,
     modifier: Modifier = Modifier,
 ) {
     var showWordsBottomSheet by remember { mutableStateOf(false) }
@@ -366,9 +365,10 @@ private fun ScenarioInfoCard(
     }
 
     if (showWordsBottomSheet) {
-        HelperWordsBottomSheet(
+        HelperWords(
             words = chat.scenario.helperWords,
             onDismiss = { showWordsBottomSheet = false },
+            isSubscribed = isSubscribed,
         )
     }
 
@@ -514,44 +514,6 @@ fun MessageList(
                 StopChatButton(
                     onClick = onChatFinish,
                 )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HelperWordsBottomSheet(
-    words: List<WordDto>,
-    onDismiss: () -> Unit,
-) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        dragHandle = { BottomSheetDefaults.DragHandle() },
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-    ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 32.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.helper_words),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
-            )
-
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(words) { word ->
-                    WordItem(word = word)
-                }
             }
         }
     }
