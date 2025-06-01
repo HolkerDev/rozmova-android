@@ -96,4 +96,18 @@
     <string name="onboarding_salutation_title">Виберіть звернення</string>
     <string name="onboarding_salutation_description">Будь ласка вкажіть як до вас звертатися. Це покращить занурення підчас розмов в сценарії.</string>
     <string name="pronoun_they">Вони</string>
+    <string name="premium_feature_unlimited_conversations">Безлімітні розмовні сценарії</string>
+    <string name="premium_feature_dictionary_access">Доступ до словника в сценаріях</string>
+    <string name="premium_feature_transcription_access">Доступ до аудіо транскріпцій</string>
+    <string name="premium_feature_custom_scenario_generation">Можливість створювати свої сценарії</string>
+    <string name="premium_feature_unlimited_respect">Безмежний респект</string>
+    <string name="premium_feature_integrated_translator_access">Доступ до інтегрованого перекладача</string>
+    <string name="subscription_premium">Преміум підписка</string>
+    <string name="subscription_unlock_features">Відкрити преміум функціонал</string>
+    <string name="subscription_monthly">Місячна</string>
+    <string name="subscription_per_month">на місяць</string>
+    <string name="subscription_subscribe_now">Підписатись</string>
+    <string name="subscription_cancel_anytime">Можна відмінити в будь-який момент</string>
+    <string name="subscription_youre_premium">В вас є Преміум підписка!</string>
+    <string name="subscription_thank_you">Дякую за підписку на Розмова Преміум</string>
 </resources>

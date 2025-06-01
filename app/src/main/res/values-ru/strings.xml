@@ -96,4 +96,18 @@
     <string name="onboarding_salutation_title">Выберете обращение</string>
     <string name="onboarding_salutation_description">Пожалуйста укажите как к Вам обращаться во время сценариев. Это повысит погружение в ситуацию.</string>
     <string name="pronoun_they">Они</string>
+    <string name="subscription_premium">Премиальная подписка</string>
+    <string name="subscription_unlock_features">Открыть премиум функционал</string>
+    <string name="subscription_monthly">Месячная</string>
+    <string name="subscription_per_month">в месяц</string>
+    <string name="subscription_subscribe_now">Подписаться</string>
+    <string name="subscription_cancel_anytime">Можно отменить в любое время</string>
+    <string name="premium_feature_unlimited_conversations">Безлимитные разговорные сценарии</string>
+    <string name="premium_feature_dictionary_access">Доступ к словарю в сценариях</string>
+    <string name="premium_feature_transcription_access">Доступ к аудио транскрипциям</string>
+    <string name="premium_feature_custom_scenario_generation">Возможность создавать свои сценарии</string>
+    <string name="premium_feature_unlimited_respect">Безграничный респект</string>
+    <string name="premium_feature_integrated_translator_access">Доступ к интегрированному переводчику</string>
+    <string name="subscription_youre_premium">У вас есть Премиум подписка!</string>
+    <string name="subscription_thank_you">Спасибо за Вашу подписку на Розмова Премиум</string>
 </resources>
