@@ -163,7 +163,7 @@ fun AudioMessageItem(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            text = stringResource(R.string.sub_required_helper_words),
+                            text = stringResource(R.string.sub_required_transcription),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,

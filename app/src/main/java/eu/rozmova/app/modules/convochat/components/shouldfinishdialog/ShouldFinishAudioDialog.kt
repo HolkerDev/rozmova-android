@@ -23,6 +23,7 @@ import eu.rozmova.app.components.AudioMessageItem
 import eu.rozmova.app.components.conversationchat.toAudioMessage
 import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.MessageDto
+import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
@@ -36,6 +37,7 @@ fun ShouldFinishAudioDialog(
 ) {
     var botMsg by remember { mutableStateOf(lastBotMsg.toAudioMessage()) }
     var userMsg by remember { mutableStateOf(lastUserMsg.toAudioMessage()) }
+    val state by viewModel.collectAsState()
 
     viewModel.collectSideEffect { event ->
         when (event) {
@@ -80,7 +82,7 @@ fun ShouldFinishAudioDialog(
                         botMsg = botMsg.copy(isPlaying = false)
                         viewModel.stopAudio()
                     },
-                    isSubscribed = false,
+                    isSubscribed = state.isSubscribed,
                 )
             }
         },

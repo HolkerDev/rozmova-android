@@ -324,6 +324,7 @@ fun ScenarioInfoCard(
                     onChatFinish = onChatFinish,
                     messageListState = messageListState,
                     isLoadingMessage = isMessageLoading,
+                    isSubscribed = isSubscribed,
                     showFinishButton = messages.isNotEmpty() && chatModel.status == ChatStatus.IN_PROGRESS,
                     modifier = Modifier.weight(1f),
                 )

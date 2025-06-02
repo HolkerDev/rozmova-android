@@ -118,4 +118,5 @@
     <string name="premium_feature_unlimited_respect">Unlimited respect</string>
     <string name="premium_feature_integrated_translator_access">Acess to integrated translator</string>
     <string name="sub_required_helper_words">Helper words are available with Premium subscription.</string>
+    <string name="sub_required_transcription">Transcription is available with Premium subscription.</string>
 </resources>

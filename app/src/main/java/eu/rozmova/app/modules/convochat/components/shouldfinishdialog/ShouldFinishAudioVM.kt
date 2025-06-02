@@ -12,13 +12,19 @@ import dagger.hilt.android.internal.Contexts.getApplication
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.MessageDto
+import eu.rozmova.app.repositories.billing.SubscriptionRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import java.io.File
 import javax.inject.Inject
+
+data class ShouldFinishUiState(
+    val isSubscribed: Boolean = false,
+)
 
 sealed interface ShouldFinishAudioEvents {
     data object StopAll : ShouldFinishAudioEvents
@@ -29,10 +35,12 @@ class ShouldFinishAudioVM
     @Inject
     constructor(
         private val exoPlayer: ExoPlayer,
+        private val subscriptionRepository: SubscriptionRepository,
         application: Application,
     ) : AndroidViewModel(application),
-        ContainerHost<Unit, ShouldFinishAudioEvents> {
-        override val container: Container<Unit, ShouldFinishAudioEvents> = container(Unit)
+        ContainerHost<ShouldFinishUiState, ShouldFinishAudioEvents> {
+        override val container: Container<ShouldFinishUiState, ShouldFinishAudioEvents> =
+            container(ShouldFinishUiState())
 
         init {
             exoPlayer.addListener(
@@ -46,7 +54,15 @@ class ShouldFinishAudioVM
                     }
                 },
             )
+
+            fetchSubscription()
         }
+
+        private fun fetchSubscription() =
+            intent {
+                val isSubscribed = subscriptionRepository.isSubscribed().first()
+                reduce { state.copy(isSubscribed = isSubscribed) }
+            }
 
         fun playAudio(message: MessageDto) =
             intent {
