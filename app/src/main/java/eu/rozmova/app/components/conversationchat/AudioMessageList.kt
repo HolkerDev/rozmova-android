@@ -54,6 +54,7 @@ fun AudioMessageList(
                 message = message,
                 onPlayMessage = onPlayMessage,
                 onStopMessage = onStopMessage,
+                isSubscribed = false,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

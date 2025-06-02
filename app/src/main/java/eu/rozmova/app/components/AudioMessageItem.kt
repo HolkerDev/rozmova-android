@@ -19,6 +19,7 @@ import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -33,14 +34,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import eu.rozmova.app.R
 import eu.rozmova.app.components.conversationchat.AudioChatMessage
 import eu.rozmova.app.domain.Author
 
 @Composable
 fun AudioMessageItem(
     message: AudioChatMessage,
+    isSubscribed: Boolean,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
     modifier: Modifier = Modifier,
@@ -145,11 +150,34 @@ fun AudioMessageItem(
                     enter = expandVertically() + fadeIn(),
                     exit = shrinkVertically() + fadeOut(),
                 ) {
-                    Text(
-                        text = message.body,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                    )
+                    if (isSubscribed) {
+                        Text(
+                            text = message.body,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                        )
+                        return@AnimatedVisibility
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.sub_required_helper_words),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        )
+                        Button(
+                            onClick = {},
+                            shape = MaterialTheme.shapes.medium,
+                        ) {
+                            Text(
+                                text = stringResource(R.string.subscription_subscribe_now),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -167,6 +195,7 @@ private fun AudioMessageItemPreview() {
                 body = "Hello, how are you?",
                 isPlaying = false,
             ),
+        isSubscribed = false,
         onPlayMessage = {},
         onStopMessage = {},
     )

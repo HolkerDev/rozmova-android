@@ -67,6 +67,7 @@ fun ShouldFinishAudioDialog(
                         userMsg = userMsg.copy(isPlaying = false)
                         viewModel.stopAudio()
                     },
+                    isSubscribed = false,
                 )
                 AudioMessageItem(
                     botMsg,
@@ -79,6 +80,7 @@ fun ShouldFinishAudioDialog(
                         botMsg = botMsg.copy(isPlaying = false)
                         viewModel.stopAudio()
                     },
+                    isSubscribed = false,
                 )
             }
         },
