@@ -45,6 +45,7 @@ import eu.rozmova.app.domain.WordDto
 fun HelperWords(
     words: List<WordDto>,
     isSubscribed: Boolean,
+    navigateToSubscription: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(
@@ -86,7 +87,11 @@ fun HelperWords(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
                 )
-                Button(onClick = {}, shape = MaterialTheme.shapes.medium, modifier = Modifier.padding(top = 8.dp)) {
+                Button(
+                    onClick = { navigateToSubscription() },
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.padding(top = 8.dp),
+                ) {
                     Text(stringResource(R.string.subscription_subscribe_now))
                 }
                 return@Column
@@ -175,6 +180,7 @@ private fun HelperWordsPreview() {
                 WordDto("Please", "Prosím"),
             ),
         isSubscribed = false,
+        navigateToSubscription = {},
         onDismiss = {},
     )
 }

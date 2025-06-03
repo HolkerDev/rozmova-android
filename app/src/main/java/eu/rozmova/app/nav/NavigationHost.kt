@@ -15,7 +15,6 @@ import eu.rozmova.app.modules.onboarding.OnboardingScreen
 import eu.rozmova.app.modules.subscription.SubscriptionScreen
 import eu.rozmova.app.screens.chat.ChatScreen
 import eu.rozmova.app.screens.chats.ChatsListScreen
-import eu.rozmova.app.screens.createchat.CreateChatScreen
 import eu.rozmova.app.screens.learn.LearnScreen
 import eu.rozmova.app.screens.library.LibraryScreen
 import eu.rozmova.app.screens.login.LoginScreen
@@ -84,14 +83,6 @@ fun NavigationHost(
             })
         }
 
-        composable(route = NavRoutes.CreateChat.route) {
-            CreateChatScreen(onChatReady = { chatId, scenarioType ->
-                navController.navigate(NavRoutes.Chat.routeWith(chatId, scenarioType)) {
-                    popUpTo(NavRoutes.Chats.route)
-                }
-            }, onBack = { navController.navigateUp() })
-        }
-
         // Side Screens
         composable(
             route = NavRoutes.Chat.route,
@@ -109,6 +100,9 @@ fun NavigationHost(
                 scenarioType = scenarioType,
                 onBack = { navController.navigateUp() },
                 onMain = { navController.navigate(NavRoutes.Learn.route) },
+                onNavigateToSubscription = {
+                    navController.navigate(NavRoutes.Subscription.route)
+                },
             )
         }
     }

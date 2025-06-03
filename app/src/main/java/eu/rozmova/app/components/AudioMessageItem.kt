@@ -48,6 +48,7 @@ fun AudioMessageItem(
     isSubscribed: Boolean,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
+    navigateToSubscription: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showTranscription by remember { mutableStateOf(false) }
@@ -169,7 +170,7 @@ fun AudioMessageItem(
                             textAlign = TextAlign.Center,
                         )
                         Button(
-                            onClick = {},
+                            onClick = { navigateToSubscription() },
                             shape = MaterialTheme.shapes.medium,
                         ) {
                             Text(
@@ -198,5 +199,6 @@ private fun AudioMessageItemPreview() {
         isSubscribed = false,
         onPlayMessage = {},
         onStopMessage = {},
+        navigateToSubscription = {},
     )
 }

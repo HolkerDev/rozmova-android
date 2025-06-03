@@ -80,6 +80,7 @@ fun MessageChat(
     chatId: ChatId,
     onReviewAccept: () -> Unit,
     onBackClick: () -> Unit,
+    navigateToSubscription: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MessageChatViewModel = hiltViewModel(),
 ) {
@@ -190,6 +191,7 @@ fun MessageChat(
                     isMessageLoading = state.isLoadingMessage,
                     messageListState = messageListState,
                     isSubscribed = state.isSubscribed,
+                    navigateToSubscription = navigateToSubscription,
                     modifier = Modifier.weight(1f),
                 )
                 MessageInput(
@@ -210,6 +212,7 @@ private fun ScenarioInfoCard(
     isMessageLoading: Boolean,
     messageListState: LazyListState,
     isSubscribed: Boolean,
+    navigateToSubscription: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showWordsBottomSheet by remember { mutableStateOf(false) }
@@ -369,6 +372,10 @@ private fun ScenarioInfoCard(
             words = chat.scenario.helperWords,
             onDismiss = { showWordsBottomSheet = false },
             isSubscribed = isSubscribed,
+            navigateToSubscription = {
+                showWordsBottomSheet = false
+                navigateToSubscription()
+            },
         )
     }
 

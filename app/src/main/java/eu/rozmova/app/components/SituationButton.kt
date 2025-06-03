@@ -22,7 +22,7 @@ import eu.rozmova.app.R
 @Composable
 fun SituationButton(modifier: Modifier = Modifier) {
     Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant,
+        color = MaterialTheme.colorScheme.primaryContainer,
         shape = RoundedCornerShape(8.dp),
         modifier = modifier,
     ) {

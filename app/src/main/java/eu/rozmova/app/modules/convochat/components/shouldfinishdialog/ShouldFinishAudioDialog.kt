@@ -33,6 +33,7 @@ fun ShouldFinishAudioDialog(
     onYesClick: () -> Unit,
     onNoClick: () -> Unit,
     onDismiss: () -> Unit,
+    navigateToSubscription: () -> Unit,
     viewModel: ShouldFinishAudioVM = hiltViewModel(),
 ) {
     var botMsg by remember { mutableStateOf(lastBotMsg.toAudioMessage()) }
@@ -70,6 +71,7 @@ fun ShouldFinishAudioDialog(
                         viewModel.stopAudio()
                     },
                     isSubscribed = false,
+                    navigateToSubscription = navigateToSubscription,
                 )
                 AudioMessageItem(
                     botMsg,
@@ -82,6 +84,7 @@ fun ShouldFinishAudioDialog(
                         botMsg = botMsg.copy(isPlaying = false)
                         viewModel.stopAudio()
                     },
+                    navigateToSubscription = navigateToSubscription,
                     isSubscribed = state.isSubscribed,
                 )
             }
@@ -139,5 +142,6 @@ private fun Preview() {
         onYesClick = {},
         onNoClick = {},
         onDismiss = {},
+        navigateToSubscription = {},
     )
 }

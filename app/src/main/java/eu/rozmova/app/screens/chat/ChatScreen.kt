@@ -12,6 +12,7 @@ fun ChatScreen(
     scenarioType: ScenarioType,
     onBack: () -> Unit,
     onMain: () -> Unit,
+    onNavigateToSubscription: () -> Unit,
 ) {
     Log.i("ChatScreen", "ChatScreen: $chatId, $scenarioType")
     when (scenarioType) {
@@ -20,6 +21,7 @@ fun ChatScreen(
                 chatId = chatId,
                 onReviewAccept = onMain,
                 onBackClick = onBack,
+                navigateToSubscription = onNavigateToSubscription,
             )
         }
         ScenarioType.CONVERSATION -> {
@@ -28,6 +30,7 @@ fun ChatScreen(
                 onBackClick = onBack,
                 onReviewAccept = onMain,
                 onChatArchive = onMain,
+                onNavigateToSubscription = onNavigateToSubscription,
             )
         }
     }

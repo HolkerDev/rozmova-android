@@ -42,6 +42,7 @@ fun AudioMessageList(
     isLoadingMessage: Boolean,
     showFinishButton: Boolean,
     isSubscribed: Boolean,
+    navigateToSubscription: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -56,6 +57,7 @@ fun AudioMessageList(
                 onPlayMessage = onPlayMessage,
                 onStopMessage = onStopMessage,
                 isSubscribed = isSubscribed,
+                navigateToSubscription = navigateToSubscription,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

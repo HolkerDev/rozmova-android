@@ -74,6 +74,7 @@ fun ConversationChat(
     onBackClick: () -> Unit,
     onChatArchive: () -> Unit,
     onReviewAccept: () -> Unit,
+    onNavigateToSubscription: () -> Unit,
     chatId: String,
     modifier: Modifier = Modifier,
     viewModel: ChatDetailsViewModel = hiltViewModel(),
@@ -121,6 +122,7 @@ fun ConversationChat(
                 viewModel.stopAudio()
                 finishChat = null
             },
+            navigateToSubscription = onNavigateToSubscription,
         )
     }
 
@@ -192,6 +194,7 @@ fun ConversationChat(
                     ScenarioInfoCard(
                         onPlayMessage = { messageId -> viewModel.playAudio(messageId) },
                         onStopMessage = { viewModel.stopAudio() },
+                        navigateToSubscription = onNavigateToSubscription,
                         scenario = chat.scenario,
                         messages = state.messages,
                         chatModel = chat,
@@ -206,7 +209,7 @@ fun ConversationChat(
                 AudioRecorderButton(
                     onRecordStart = { viewModel.startRecording() },
                     onRecordStop = { viewModel.stopRecording() },
-                    isDisabled = false,
+                    isDisabled = state.isMessageLoading,
                     onChatAnalyticsRequest = onChatArchive,
                     isRecording = state.isAudioRecording,
                     modifier = Modifier.padding(bottom = 16.dp),
@@ -226,6 +229,7 @@ fun ScenarioInfoCard(
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
     onChatFinish: () -> Unit,
+    navigateToSubscription: () -> Unit,
     isMessageLoading: Boolean,
     messageListState: LazyListState,
     isSubscribed: Boolean,
@@ -325,6 +329,7 @@ fun ScenarioInfoCard(
                     messageListState = messageListState,
                     isLoadingMessage = isMessageLoading,
                     isSubscribed = isSubscribed,
+                    navigateToSubscription = navigateToSubscription,
                     showFinishButton = messages.isNotEmpty() && chatModel.status == ChatStatus.IN_PROGRESS,
                     modifier = Modifier.weight(1f),
                 )
@@ -336,6 +341,10 @@ fun ScenarioInfoCard(
         HelperWords(
             words = words,
             onDismiss = { showWordsBottomSheet = false },
+            navigateToSubscription = {
+                showWordsBottomSheet = false
+                navigateToSubscription()
+            },
             isSubscribed = isSubscribed,
         )
     }
