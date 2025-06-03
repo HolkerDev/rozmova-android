@@ -43,3 +43,4 @@ amplifytools.xcconfig
 
 app/keystore.jks
 fastlane/
+app/release
