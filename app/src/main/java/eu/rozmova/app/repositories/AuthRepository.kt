@@ -1,6 +1,7 @@
 package eu.rozmova.app.repositories
 
 import android.util.Log
+import arrow.core.Either
 import eu.rozmova.app.di.GoogleAuthProvider
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -75,21 +76,49 @@ class AuthRepository
             }
         }
 
-        suspend fun signInWithGoogle() =
-            try {
-                val rawNonce = UUID.randomUUID().toString()
-                val hashedNonce = createNonce(rawNonce)
-                val googleCredential = googleAuthProvider.getGoogleCredential(hashedNonce).getOrThrow()
+        suspend fun signInWithGoogle(): Either<String, Unit> =
+            Either
+                .catch {
+                    _authState.value = AuthState.Loading
 
-                supabaseClient.auth.signInWith(IDToken) {
-                    idToken = googleCredential
-                    provider = Google
-                    nonce = rawNonce
+                    val rawNonce = UUID.randomUUID().toString()
+                    val hashedNonce = createNonce(rawNonce)
+
+                    val googleCredentialResult = googleAuthProvider.getGoogleCredential(hashedNonce)
+                    val googleCredential =
+                        googleCredentialResult.getOrElse { error ->
+                            Log.e(tag, "Failed to get Google credential", error)
+                            _authState.value = AuthState.Unauthenticated
+                            throw Exception("Google authentication failed: ${error.message}", error)
+                        }
+
+                    supabaseClient.auth.signInWith(IDToken) {
+                        idToken = googleCredential
+                        provider = Google
+                        nonce = rawNonce
+                    }
+
+                    Log.i(tag, "Successfully signed in with Google")
+                    Unit
+                }.mapLeft { e ->
+                    Log.e(tag, "Sign in with Google failed", e)
+                    _authState.value = AuthState.Unauthenticated
+
+                    when {
+                        e.message?.contains("network", ignoreCase = true) == true ||
+                            e.message?.contains("connection", ignoreCase = true) == true -> {
+                            "Network connection issue. Please check your internet and try again."
+                        }
+
+                        e.message?.contains("google", ignoreCase = true) == true -> {
+                            "Google sign-in failed. Please try again."
+                        }
+
+                        else -> {
+                            "Sign-in failed. Please try again."
+                        }
+                    }
                 }
-            } catch (e: Exception) {
-                Log.e(tag, "Sign in with Google failed", e)
-                _authState.value = AuthState.Unauthenticated
-            }
     }
 
 fun createNonce(rawNonce: String): String {

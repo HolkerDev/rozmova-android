@@ -121,12 +121,12 @@ private fun App(viewModel: AppViewModel = hiltViewModel()) {
             NavigationHost(navController, innerPadding)
 
             LaunchedEffect(appState) {
+                val currentDestination = navController.currentDestination?.route
                 when (appState) {
                     AppState.Loading -> {
                     }
 
                     AppState.Authenticated -> {
-                        val currentDestination = navController.currentDestination?.route
                         if (currentDestination == null ||
                             currentDestination == NavRoutes.Main.route ||
                             currentDestination == NavRoutes.Login.route
@@ -139,6 +139,9 @@ private fun App(viewModel: AppViewModel = hiltViewModel()) {
                     }
 
                     AppState.Unauthenticated -> {
+                        if (currentDestination == NavRoutes.Login.route) {
+                            return@LaunchedEffect
+                        }
                         navController.navigate(NavRoutes.Login.route) {
                             popUpTo(0) { inclusive = true }
                             launchSingleTop = true
