@@ -78,25 +78,25 @@ platform :android do
       path: "app/build.gradle.kts",
       message: "Bump version to #{version_name} (#{version_code})"
     )
-    
-    # Create a tag for this release
-    add_git_tag(
-      tag: "v#{version_name}",
-      message: "Release version #{version_name}"
-    )
-    
-    # Push the commit and tag
-    push_to_git_remote(
-      tags: true
-    )
-    
+
     # Upload to Play Store
     upload_to_play_store(
       track: 'internal',
       aab: './app/build/outputs/bundle/release/app-release.aab',
       release_status: 'draft'
     )
-    
+
+    # Create a tag for this release
+    add_git_tag(
+      tag: "v#{version_name}",
+      message: "Release version #{version_name}"
+    )
+
+    # Push the commit and tag
+    push_to_git_remote(
+      tags: true
+    )
+
     UI.success("🚀 Successfully released version #{version_name} to internal track!")
   end
 
