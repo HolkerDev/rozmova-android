@@ -45,4 +45,4 @@ app/keystore.jks
 fastlane/
 app/release
 
-.idea
+.idea/
