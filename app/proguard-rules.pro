@@ -48,23 +48,9 @@
 -keep class androidx.credentials.playservices.** {
   *;
 }
-# OkHttp platform used only on JVM and when Conscrypt dependency is available.
--dontwarn okhttp3.internal.platform.ConscryptPlatform
--dontwarn org.conscrypt.ConscryptHostnameVerifier
--dontwarn org.conscrypt.Conscrypt$Version
--dontwarn org.conscrypt.Conscrypt
 
-# BouncyCastle is not available on Android
--dontwarn okhttp3.internal.platform.BouncyCastlePlatform
--dontwarn org.bouncycastle.jsse.BCSSLParameters
--dontwarn org.bouncycastle.jsse.BCSSLSocket
--dontwarn org.bouncycastle.jsse.provider.BouncyCastleJsseProvider
-
-# OpenJSSE is not available on Android
--dontwarn okhttp3.internal.platform.OpenJSSEPlatform
--dontwarn org.openjsse.javax.net.ssl.SSLParameters
--dontwarn org.openjsse.javax.net.ssl.SSLSocket
--dontwarn org.openjsse.net.ssl.OpenJSSE
-
-# Animal Sniffer compileOnly dependency to ensure APIs are compatible with older versions of Java.
--dontwarn org.codehaus.mojo.animal_sniffer.*
+# OkHttp platform used only on JVM and when Conscrypt/BouncyCastle/OpenJSSE dependency is available.
+-dontwarn okhttp3.internal.platform.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
