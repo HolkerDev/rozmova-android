@@ -54,3 +54,72 @@
 -dontwarn org.conscrypt.**
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
+
+# Retrofit
+-keepattributes Signature, InnerClasses, EnclosingMethod
+-keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
+-keepattributes AnnotationDefault
+
+-keepclassmembers,allowshrinking,allowobfuscation interface * {
+    @retrofit2.http.* <methods>;
+}
+
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+-dontwarn javax.annotation.**
+-dontwarn kotlin.Unit
+-dontwarn retrofit2.KotlinExtensions
+-dontwarn retrofit2.KotlinExtensions$*
+
+# Gson
+-keepattributes Signature
+-keepattributes *Annotation*
+-dontwarn sun.misc.**
+-keep class com.google.gson.** { *; }
+-keep class * extends com.google.gson.TypeAdapter
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
+
+# Keep API client interfaces and their methods
+-keep interface eu.rozmova.app.clients.** { *; }
+
+# Keep all data classes used for API requests/responses
+-keep class eu.rozmova.app.clients.backend.**$*Req { *; }
+-keep class eu.rozmova.app.clients.backend.**$*Res { *; }
+-keep class eu.rozmova.app.clients.backend.**$*Response { *; }
+-keep class eu.rozmova.app.clients.backend.**$*Request { *; }
+-keep class eu.rozmova.app.clients.backend.**$*Dto { *; }
+-keep class eu.rozmova.app.clients.backend.**$*Body { *; }
+
+# Keep domain model classes
+-keep class eu.rozmova.app.domain.** { *; }
+
+# Kotlinx Serialization
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+-keepclassmembers class kotlinx.serialization.json.** { *; }
+-keep,includedescriptorclasses class eu.rozmova.app.**$$serializer { *; }
+-keepclassmembers class eu.rozmova.app.** {
+    *** Companion;
+}
+-keepclasseswithmembers class eu.rozmova.app.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+# Supabase
+-keep class io.github.jan.supabase.** { *; }
+-keep class io.ktor.** { *; }
+-dontwarn io.ktor.**
+
+# Keep classes annotated with @Serializable
+-keep @kotlinx.serialization.Serializable class * { *; }
+
+# OkHttp
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+
+# Arrow
+-keep class arrow.** { *; }
+-dontwarn arrow.**
