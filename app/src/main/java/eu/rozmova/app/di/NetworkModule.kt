@@ -21,6 +21,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.time.Instant
 import java.util.concurrent.TimeUnit
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -59,6 +60,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    @Named("backend")
     fun provideRetrofit(
         okHttpClient: OkHttpClient,
         gson: Gson,
@@ -66,6 +68,20 @@ object NetworkModule {
         Retrofit
             .Builder()
             .baseUrl(BuildConfig.API_BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+
+    @Provides
+    @Singleton
+    @Named("mega")
+    fun provideMegaApiRetrofit(
+        okHttpClient: OkHttpClient,
+        gson: Gson,
+    ): Retrofit =
+        Retrofit
+            .Builder()
+            .baseUrl(BuildConfig.API_MEGA_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
@@ -82,17 +98,27 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideServiceClient(retrofit: Retrofit): ScenarioClient = retrofit.create(ScenarioClient::class.java)
+    fun provideServiceClient(
+        @Named("backend") retrofit: Retrofit,
+    ): ScenarioClient = retrofit.create(ScenarioClient::class.java)
 
     @Provides
     @Singleton
-    fun provideChatClient(retrofit: Retrofit): ChatClient = retrofit.create(ChatClient::class.java)
+    fun provideChatClient(
+        @Named("backend") retrofit: Retrofit,
+    ): ChatClient = retrofit.create(ChatClient::class.java)
 
     @Provides
     @Singleton
-    fun provideMessageClient(retrofit: Retrofit): MessageClient = retrofit.create(MessageClient::class.java)
+    fun provideMessageClient(
+        @Named("backend")
+        retrofit: Retrofit,
+    ): MessageClient = retrofit.create(MessageClient::class.java)
 
     @Provides
     @Singleton
-    fun provideBugReportClient(retrofit: Retrofit): BugReportClient = retrofit.create(BugReportClient::class.java)
+    fun provideBugReportClient(
+        @Named("backend")
+        retrofit: Retrofit,
+    ): BugReportClient = retrofit.create(BugReportClient::class.java)
 }

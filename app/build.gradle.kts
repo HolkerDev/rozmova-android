@@ -61,6 +61,12 @@ android {
             "\"${secrets.getProperty("supabase.key", "")}\"",
         )
 
+        buildConfigField(
+            "String",
+            "API_MEGA_BASE_URL",
+            "\"${secrets.getProperty("api.mega.base.url", "")}\"",
+        )
+
         resourceConfigurations += listOf("en", "uk", "ru")
     }
 
