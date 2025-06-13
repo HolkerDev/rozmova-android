@@ -1,6 +1,5 @@
 package eu.rozmova.app.modules.shared.translationproposal
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,12 +11,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -52,7 +54,6 @@ fun TranslationProposalModal(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f))
                     .clickable { onDismiss() },
         )
 
@@ -100,50 +101,107 @@ fun TranslationProposalModal(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                var message by remember { mutableStateOf("") }
+
+                if (state.translatedTexts.isNotEmpty()) {
+                    Text(
+                        text = "Translations",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+
+                    LazyColumn(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        items(state.translatedTexts) { translation ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors =
+                                    CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceBright,
+                                    ),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                            ) {
+                                Row(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        text = translation,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.weight(1f),
+                                    )
+
+                                    IconButton(
+                                        onClick = { /* TODO: Add copy logic */ },
+                                        modifier = Modifier.padding(start = 8.dp),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.ContentCopy,
+                                            contentDescription = "Copy translation",
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
                 Column(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .verticalScroll(rememberScrollState()),
+                            .padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    var message by remember { mutableStateOf("") }
+                    OutlinedTextField(
+                        value = message,
+                        onValueChange = { message = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !state.isLoading,
+                        shape = RoundedCornerShape(8.dp),
+                        placeholder = { Text("Type a phrase...") },
+                        singleLine = true,
+                    )
 
-                    Column(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = {
+                            if (state.isLoading) return@Button
+                            viewModel.translatePhrase(message)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.medium,
                     ) {
-                        OutlinedTextField(
-                            value = message,
-                            onValueChange = { message = it },
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = !state.isLoading,
-                            shape = RoundedCornerShape(8.dp),
-                            placeholder = { Text("Type a phrase...") },
-                            singleLine = true,
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Button(
-                            onClick = {
-                                if (state.isLoading) return@Button
-                                viewModel.translatePhrase(message)
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.medium,
-                        ) {
-                            if (state.isLoading) {
-                                CircularProgressIndicator()
-                                return@Button
-                            }
-                            Text(
-                                text = "Translate",
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
+                        if (state.isLoading) {
+                            CircularProgressIndicator()
+                            return@Button
                         }
+                        Text(
+                            text = "Translate",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
                     }
                 }
             }

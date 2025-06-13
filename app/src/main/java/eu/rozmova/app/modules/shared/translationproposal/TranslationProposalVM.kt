@@ -26,7 +26,7 @@ class TranslationProposalVM
         fun translatePhrase(phrase: String) =
             intent {
                 reduce { state.copy(isLoading = true) }
-                val currentTranslations = state.translatedTexts as ArrayList<String>
+                val currentTranslations = state.translatedTexts.toMutableList()
                 currentTranslations.add("translated phrase")
                 reduce { state.copy(translatedTexts = currentTranslations, isLoading = false) }
             }
