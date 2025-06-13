@@ -116,6 +116,12 @@ class ChatDetailsViewModel
                 }
             }
 
+        fun generateTranslationProposal(
+            chatId: String,
+            phrase: String,
+            targetLanguage: String,
+        ) = intent {}
+
         fun onAudioSaved() =
             intent {
                 reduce { state.copy(isMessageLoading = true) }

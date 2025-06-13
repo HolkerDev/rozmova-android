@@ -11,6 +11,7 @@ import eu.rozmova.app.clients.backend.BugReportClient
 import eu.rozmova.app.clients.backend.ChatClient
 import eu.rozmova.app.clients.backend.MessageClient
 import eu.rozmova.app.clients.backend.ScenarioClient
+import eu.rozmova.app.clients.backend.TranslationClient
 import eu.rozmova.app.clients.backend.network.AuthInterceptor
 import eu.rozmova.app.utils.instantDeserializer
 import eu.rozmova.app.utils.instantSerializer
@@ -121,4 +122,11 @@ object NetworkModule {
         @Named("backend")
         retrofit: Retrofit,
     ): BugReportClient = retrofit.create(BugReportClient::class.java)
+
+    @Provides
+    @Singleton
+    fun provideTranslationClient(
+        @Named("mega")
+        retrofit: Retrofit,
+    ): TranslationClient = retrofit.create(TranslationClient::class.java)
 }
