@@ -1,5 +1,10 @@
 package eu.rozmova.app.components.conversationchat
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +28,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.CollectionsBookmark
+import androidx.compose.material.icons.rounded.HelpOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,6 +42,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -81,6 +89,7 @@ fun ConversationChat(
 ) {
     val messageListState = rememberLazyListState()
     var finishChat: FinishChat? by remember { mutableStateOf(null) }
+    var showHelpModal by remember { mutableStateOf(false) }
     val state by viewModel.collectAsState()
 
     LaunchedEffect(chatId) {
@@ -169,53 +178,83 @@ fun ConversationChat(
         )
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        state.chat?.let { chat ->
-            Column(
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                TopAppBar(
-                    title = { Text(text = stringResource(R.string.chat_details_title)) },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                            )
-                        }
-                    },
-                )
-                Box(
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .fillMaxWidth(),
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            state.chat?.let { chat ->
+                Column(
+                    modifier = Modifier.fillMaxSize(),
                 ) {
-                    ScenarioInfoCard(
-                        onPlayMessage = { messageId -> viewModel.playAudio(messageId) },
-                        onStopMessage = { viewModel.stopAudio() },
-                        navigateToSubscription = onNavigateToSubscription,
-                        scenario = chat.scenario,
-                        messages = state.messages,
-                        chatModel = chat,
-                        words = chat.scenario.helperWords,
-                        isMessageLoading = state.isMessageLoading,
-                        messageListState = messageListState,
-                        onChatFinish = { viewModel.finishChat(chat.id) },
-                        isSubscribed = state.isSubscribed,
+                    TopAppBar(
+                        title = { Text(text = stringResource(R.string.chat_details_title)) },
+                        navigationIcon = {
+                            IconButton(onClick = onBackClick) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back",
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(onClick = { showHelpModal = true }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.HelpOutline,
+                                    contentDescription = "Language Help",
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+                        },
+                    )
+                    Box(
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                    ) {
+                        ScenarioInfoCard(
+                            onPlayMessage = { messageId -> viewModel.playAudio(messageId) },
+                            onStopMessage = { viewModel.stopAudio() },
+                            navigateToSubscription = onNavigateToSubscription,
+                            scenario = chat.scenario,
+                            messages = state.messages,
+                            chatModel = chat,
+                            words = chat.scenario.helperWords,
+                            isMessageLoading = state.isMessageLoading,
+                            messageListState = messageListState,
+                            onChatFinish = { viewModel.finishChat(chat.id) },
+                            isSubscribed = state.isSubscribed,
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AudioRecorderButton(
+                        onRecordStart = { viewModel.startRecording() },
+                        onRecordStop = { viewModel.stopRecording() },
+                        isDisabled = state.isMessageLoading,
+                        onChatAnalyticsRequest = onChatArchive,
+                        isRecording = state.isAudioRecording,
+                        modifier = Modifier.padding(bottom = 16.dp),
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                AudioRecorderButton(
-                    onRecordStart = { viewModel.startRecording() },
-                    onRecordStop = { viewModel.stopRecording() },
-                    isDisabled = state.isMessageLoading,
-                    onChatAnalyticsRequest = onChatArchive,
-                    isRecording = state.isAudioRecording,
-                    modifier = Modifier.padding(bottom = 16.dp),
-                )
-            }
-        } ?: LoadingComponent(onBackClick = { onBackClick() }, modifier = Modifier.fillMaxSize())
+            } ?: LoadingComponent(onBackClick = { onBackClick() }, modifier = Modifier.fillMaxSize())
+        }
+
+        // Side modal overlay
+        AnimatedVisibility(
+            visible = showHelpModal,
+            enter =
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(300),
+                ),
+            exit =
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(300),
+                ),
+        ) {
+            HelpSideModal(
+                onDismiss = { showHelpModal = false },
+            )
+        }
     }
 }
 
@@ -442,6 +481,172 @@ fun ScenarioInfoCard(
                     .wrapContentHeight()
                     .heightIn(max = screenHeight * 0.8f),
             shape = RoundedCornerShape(16.dp),
+        )
+    }
+}
+
+@Composable
+private fun HelpSideModal(
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+    ) {
+        // Semi-transparent background overlay
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f))
+                    .clickable { onDismiss() },
+        )
+
+        // Side modal content
+        Surface(
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.9f)
+                    .align(Alignment.CenterEnd),
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 8.dp,
+            shape = RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp),
+        ) {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+            ) {
+                // Header with close button
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "Language Help",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = "Close",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Divider
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Content area
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState()),
+                ) {
+                    Text(
+                        text = "Common Phrases",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+
+                    Card(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                        colors =
+                            CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            ),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                        ) {
+                            HelpPhraseItem("How do you say...?", "¿Cómo se dice...?")
+                            HelpPhraseItem("I don't understand", "No entiendo")
+                            HelpPhraseItem("Can you repeat that?", "¿Puedes repetir eso?")
+                            HelpPhraseItem("What does that mean?", "¿Qué significa eso?")
+                        }
+                    }
+
+                    Text(
+                        text = "Tips",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors =
+                            CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            ),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                        ) {
+                            Text(
+                                text = "• Don't worry about making mistakes - practice makes perfect!",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(bottom = 8.dp),
+                            )
+                            Text(
+                                text = "• Try to use the helper words provided in the conversation",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(bottom = 8.dp),
+                            )
+                            Text(
+                                text = "• Listen carefully to pronunciation and try to mimic it",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HelpPhraseItem(
+    english: String,
+    translation: String,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+    ) {
+        Text(
+            text = english,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = translation,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(top = 2.dp),
         )
     }
 }
