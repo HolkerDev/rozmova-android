@@ -250,6 +250,7 @@ fun ConversationChat(
                 ),
         ) {
             TranslationProposalModal(
+                chatId = chatId,
                 onDismiss = { showHelpModal = false },
             )
         }

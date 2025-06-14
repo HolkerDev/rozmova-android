@@ -42,6 +42,7 @@ import org.orbitmvi.orbit.compose.collectAsState
 @Composable
 fun TranslationProposalModal(
     onDismiss: () -> Unit,
+    chatId: String,
     modifier: Modifier = Modifier,
     viewModel: TranslationProposalVM = hiltViewModel(),
 ) {
@@ -118,7 +119,7 @@ fun TranslationProposalModal(
                                 .weight(1f),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        items(state.translatedTexts) { translation ->
+                        items(state.translatedTexts) { proposal ->
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
                                 colors =
@@ -136,7 +137,7 @@ fun TranslationProposalModal(
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     Text(
-                                        text = translation,
+                                        text = proposal.translation,
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.weight(1f),
@@ -189,7 +190,7 @@ fun TranslationProposalModal(
                     Button(
                         onClick = {
                             if (state.isLoading) return@Button
-                            viewModel.translatePhrase(message)
+                            viewModel.translatePhrase(message, chatId)
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = MaterialTheme.shapes.medium,

@@ -13,10 +13,12 @@ interface TranslationClient {
 
 data class TranslationProposalReq(
     val targetLang: String,
+    val sourceLang: String,
     val phrase: String,
     val chatId: String,
 )
 
 data class TranslationProposalResp(
     val phrase: String,
+    val notes: List<String>,
 )
