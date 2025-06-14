@@ -94,7 +94,6 @@ fun MessageChat(
     val state by viewModel.collectAsState()
 
     val messageListState = rememberLazyListState()
-    var contextualTransltorShow by remember { mutableStateOf(false) }
     var finishChat: FinishChat? by remember { mutableStateOf(null) }
 
     LaunchedEffect(chatId) {
@@ -138,26 +137,6 @@ fun MessageChat(
             onDismiss = {
                 finishChat = null
             },
-        )
-    }
-
-    // How do I say that? side modal
-    AnimatedVisibility(
-        visible = contextualTransltorShow,
-        enter =
-            slideInHorizontally(
-                initialOffsetX = { it },
-                animationSpec = tween(300),
-            ),
-        exit =
-            slideOutHorizontally(
-                targetOffsetX = { it },
-                animationSpec = tween(300),
-            ),
-    ) {
-        TranslationProposalModal(
-            chatId = chatId,
-            onDismiss = { contextualTransltorShow = false },
         )
     }
 
@@ -212,26 +191,6 @@ fun MessageChat(
                         .fillMaxSize()
                         .padding(bottom = 16.dp),
             ) {
-                TopAppBar(
-                    title = { Text(stringResource(R.string.message_chat_title)) },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { contextualTransltorShow = true }) {
-                            Icon(
-                                imageVector = Icons.Rounded.Translate,
-                                contentDescription = "How do I say that?",
-                                tint = MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
-                    },
-                )
                 ScenarioInfoCard(
                     chat = chat,
                     onBackClick = onBackClick,
@@ -263,11 +222,32 @@ private fun ScenarioInfoCard(
     navigateToSubscription: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var contextualTransltorShow by remember { mutableStateOf(false) }
     var showWordsBottomSheet by remember { mutableStateOf(false) }
     var showSituationDialog by remember { mutableStateOf(false) }
     var showInstructionsDialog by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
+        TopAppBar(
+            title = { Text(stringResource(R.string.message_chat_title)) },
+            navigationIcon = {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                    )
+                }
+            },
+            actions = {
+                IconButton(onClick = { contextualTransltorShow = true }) {
+                    Icon(
+                        imageVector = Icons.Rounded.Translate,
+                        contentDescription = "How do I say that?",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            },
+        )
         Card(
             modifier =
                 Modifier
@@ -400,6 +380,26 @@ private fun ScenarioInfoCard(
                     showFinishButton = chat.messages.isNotEmpty() && chat.status == ChatStatus.IN_PROGRESS,
                     isLoadingMessage = isMessageLoading,
                 )
+
+                // How do I say that? side modal
+                AnimatedVisibility(
+                    visible = contextualTransltorShow,
+                    enter =
+                        slideInHorizontally(
+                            initialOffsetX = { it },
+                            animationSpec = tween(300),
+                        ),
+                    exit =
+                        slideOutHorizontally(
+                            targetOffsetX = { it },
+                            animationSpec = tween(300),
+                        ),
+                ) {
+                    TranslationProposalModal(
+                        chatId = chat.id,
+                        onDismiss = { contextualTransltorShow = false },
+                    )
+                }
             }
         }
     }
