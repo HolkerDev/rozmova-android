@@ -95,6 +95,7 @@ fun MessageChat(
 
     val messageListState = rememberLazyListState()
     var finishChat: FinishChat? by remember { mutableStateOf(null) }
+    var contextualTranslatorShow by remember { mutableStateOf(false) }
 
     LaunchedEffect(chatId) {
         viewModel.loadChat(chatId)
@@ -140,72 +141,96 @@ fun MessageChat(
         )
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        state.review?.let {
-            ChatAnalysisDialog(
-                review = it,
-                onConfirm = { onReviewAccept() },
-                isLoading = false,
-            )
-        }
-
-        if (state.isLoadingReview) {
-            AlertDialog(
-                onDismissRequest = { },
-                title = {
-                    Text(
-                        stringResource(R.string.analysing_conversation),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                },
-                text = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                            strokeWidth = 2.dp,
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            stringResource(R.string.analyse_wait),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                },
-                confirmButton = { },
-                containerColor = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(16.dp),
-            )
-        }
-
-        state.chat?.let { chat ->
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 16.dp),
-            ) {
-                ScenarioInfoCard(
-                    chat = chat,
-                    onBackClick = onBackClick,
-                    onChatFinish = { viewModel.finishChat(chat.id) },
-                    isMessageLoading = state.isLoadingMessage,
-                    messageListState = messageListState,
-                    isSubscribed = state.isSubscribed,
-                    navigateToSubscription = navigateToSubscription,
-                    modifier = Modifier.weight(1f),
-                )
-                MessageInput(
-                    onSendMessage = ::onMessageSend,
-                    isDisabled = state.isLoadingMessage || chat.status != ChatStatus.IN_PROGRESS,
+    Box(modifier = modifier.fillMaxSize()) {
+        // Main content
+        Column(modifier = Modifier.fillMaxSize()) {
+            state.review?.let {
+                ChatAnalysisDialog(
+                    review = it,
+                    onConfirm = { onReviewAccept() },
+                    isLoading = false,
                 )
             }
+
+            if (state.isLoadingReview) {
+                AlertDialog(
+                    onDismissRequest = { },
+                    title = {
+                        Text(
+                            stringResource(R.string.analysing_conversation),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    },
+                    text = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.primary,
+                                strokeWidth = 2.dp,
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                stringResource(R.string.analyse_wait),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    },
+                    confirmButton = { },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(16.dp),
+                )
+            }
+
+            state.chat?.let { chat ->
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(bottom = 16.dp),
+                ) {
+                    ScenarioInfoCard(
+                        chat = chat,
+                        onBackClick = onBackClick,
+                        onChatFinish = { viewModel.finishChat(chat.id) },
+                        isMessageLoading = state.isLoadingMessage,
+                        messageListState = messageListState,
+                        isSubscribed = state.isSubscribed,
+                        navigateToSubscription = navigateToSubscription,
+                        onTranslateClick = { contextualTranslatorShow = true },
+                        modifier = Modifier.weight(1f),
+                    )
+                    MessageInput(
+                        onSendMessage = ::onMessageSend,
+                        isDisabled = state.isLoadingMessage || chat.status != ChatStatus.IN_PROGRESS,
+                    )
+                }
+            }
+        }
+
+        // Translation modal overlay - moved outside the main Column
+        AnimatedVisibility(
+            visible = contextualTranslatorShow,
+            enter =
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(300),
+                ),
+            exit =
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(300),
+                ),
+        ) {
+            TranslationProposalModal(
+                chatId = chatId,
+                onDismiss = { contextualTranslatorShow = false },
+            )
         }
     }
 }
@@ -220,9 +245,9 @@ private fun ScenarioInfoCard(
     messageListState: LazyListState,
     isSubscribed: Boolean,
     navigateToSubscription: () -> Unit,
+    onTranslateClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var contextualTransltorShow by remember { mutableStateOf(false) }
     var showWordsBottomSheet by remember { mutableStateOf(false) }
     var showSituationDialog by remember { mutableStateOf(false) }
     var showInstructionsDialog by remember { mutableStateOf(false) }
@@ -239,7 +264,7 @@ private fun ScenarioInfoCard(
                 }
             },
             actions = {
-                IconButton(onClick = { contextualTransltorShow = true }) {
+                IconButton(onClick = onTranslateClick) {
                     Icon(
                         imageVector = Icons.Rounded.Translate,
                         contentDescription = "How do I say that?",
@@ -380,26 +405,6 @@ private fun ScenarioInfoCard(
                     showFinishButton = chat.messages.isNotEmpty() && chat.status == ChatStatus.IN_PROGRESS,
                     isLoadingMessage = isMessageLoading,
                 )
-
-                // How do I say that? side modal
-                AnimatedVisibility(
-                    visible = contextualTransltorShow,
-                    enter =
-                        slideInHorizontally(
-                            initialOffsetX = { it },
-                            animationSpec = tween(300),
-                        ),
-                    exit =
-                        slideOutHorizontally(
-                            targetOffsetX = { it },
-                            animationSpec = tween(300),
-                        ),
-                ) {
-                    TranslationProposalModal(
-                        chatId = chat.id,
-                        onDismiss = { contextualTransltorShow = false },
-                    )
-                }
             }
         }
     }
