@@ -1,5 +1,9 @@
 package eu.rozmova.app.components.messagechat
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +31,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.CollectionsBookmark
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Task
+import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -66,6 +71,7 @@ import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.modules.shared.HelperWords
+import eu.rozmova.app.modules.shared.translationproposal.TranslationProposalModal
 import eu.rozmova.app.screens.createchat.ChatId
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -75,6 +81,7 @@ data class FinishChat(
     val lastUserMsg: MessageDto,
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessageChat(
     chatId: ChatId,
@@ -87,6 +94,7 @@ fun MessageChat(
     val state by viewModel.collectAsState()
 
     val messageListState = rememberLazyListState()
+    var contextualTransltorShow by remember { mutableStateOf(false) }
     var finishChat: FinishChat? by remember { mutableStateOf(null) }
 
     LaunchedEffect(chatId) {
@@ -130,6 +138,26 @@ fun MessageChat(
             onDismiss = {
                 finishChat = null
             },
+        )
+    }
+
+    // How do I say that? side modal
+    AnimatedVisibility(
+        visible = contextualTransltorShow,
+        enter =
+            slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(300),
+            ),
+        exit =
+            slideOutHorizontally(
+                targetOffsetX = { it },
+                animationSpec = tween(300),
+            ),
+    ) {
+        TranslationProposalModal(
+            chatId = chatId,
+            onDismiss = { contextualTransltorShow = false },
         )
     }
 
@@ -184,6 +212,26 @@ fun MessageChat(
                         .fillMaxSize()
                         .padding(bottom = 16.dp),
             ) {
+                TopAppBar(
+                    title = { Text(stringResource(R.string.message_chat_title)) },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { contextualTransltorShow = true }) {
+                            Icon(
+                                imageVector = Icons.Rounded.Translate,
+                                contentDescription = "How do I say that?",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+                    },
+                )
                 ScenarioInfoCard(
                     chat = chat,
                     onBackClick = onBackClick,
@@ -220,17 +268,6 @@ private fun ScenarioInfoCard(
     var showInstructionsDialog by remember { mutableStateOf(false) }
 
     Column(modifier = modifier) {
-        TopAppBar(
-            title = { Text(stringResource(R.string.message_chat_title)) },
-            navigationIcon = {
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                    )
-                }
-            },
-        )
         Card(
             modifier =
                 Modifier
