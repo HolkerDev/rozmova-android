@@ -112,4 +112,9 @@
     <string name="subscription_thank_you">Дякую за підписку на Розмова Преміум</string>
     <string name="sub_required_helper_words">Допоміжні слова доступні тільки в Преміум підписці.</string>
     <string name="sub_required_transcription">Транскрипція доступна тільки в Преміум підписці.</string>
+    <string name="words_to_learn">Корисні слова</string>
+    <string name="contextual_translator">Перекласти з контекстом</string>
+    <string name="type_phrase">Напишіть фразу...</string>
+    <string name="translate">Перекласти</string>
+    <string name="translating">Перекладаємо...</string>
 </resources>

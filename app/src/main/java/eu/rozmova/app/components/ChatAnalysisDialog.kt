@@ -55,6 +55,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -185,7 +186,7 @@ fun ChatAnalysisDialog(
                         // Topics to Review Section
                         if (review.wordsToLearn.isNotEmpty()) {
                             Text(
-                                text = "Words to learn",
+                                text = stringResource(R.string.words_to_learn),
                                 style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.padding(bottom = 8.dp),
                             )
@@ -559,7 +560,7 @@ private fun MistakesSection(mistakes: List<MistakeDto>) {
                             text = parseAsteriskText(mistake.wrong),
                             style =
                                 MaterialTheme.typography.bodyLarge.copy(
-                                    textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough,
+                                    textDecoration = TextDecoration.LineThrough,
                                 ),
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.weight(1f),

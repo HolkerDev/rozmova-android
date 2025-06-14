@@ -119,4 +119,9 @@
     <string name="premium_feature_integrated_translator_access">Acess to integrated translator</string>
     <string name="sub_required_helper_words">Helper words are available with Premium subscription.</string>
     <string name="sub_required_transcription">Transcription is available with Premium subscription.</string>
+    <string name="words_to_learn">Words to learn</string>
+    <string name="contextual_translator">Contextual translator</string>
+    <string name="type_phrase">Type a phrase...</string>
+    <string name="translate">Translate</string>
+    <string name="translating">Translating...</string>
 </resources>

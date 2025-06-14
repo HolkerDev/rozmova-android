@@ -1,5 +1,8 @@
 package eu.rozmova.app.modules.shared.translationproposal
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +23,6 @@ import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,8 +37,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import eu.rozmova.app.R
 import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
@@ -47,6 +52,14 @@ fun TranslationProposalModal(
     viewModel: TranslationProposalVM = hiltViewModel(),
 ) {
     val state by viewModel.collectAsState()
+    val context = LocalContext.current
+    val clipboardManager =
+        remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+
+    fun copyToClipboard(text: String) {
+        val clip = ClipData.newPlainText("translation", text)
+        clipboardManager.setPrimaryClip(clip)
+    }
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -75,12 +88,12 @@ fun TranslationProposalModal(
                         .padding(16.dp),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "'How do I say that?'",
+                        text = stringResource(R.string.contextual_translator),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -104,37 +117,32 @@ fun TranslationProposalModal(
 
                 var message by remember { mutableStateOf("") }
 
-                if (state.translatedTexts.isNotEmpty()) {
-                    Text(
-                        text = "Translations",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 8.dp),
-                    )
-
-                    LazyColumn(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        items(state.translatedTexts) { proposal ->
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                colors =
-                                    CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceBright,
-                                    ),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                LazyColumn(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(state.translatedTexts) { proposal ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors =
+                                CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceBright,
+                                ),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        ) {
+                            Column(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
                             ) {
                                 Row(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                                    modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically,
+                                    verticalAlignment = Alignment.Top,
                                 ) {
                                     Text(
                                         text = proposal.translation,
@@ -144,7 +152,7 @@ fun TranslationProposalModal(
                                     )
 
                                     IconButton(
-                                        onClick = { /* TODO: Add copy logic */ },
+                                        onClick = { copyToClipboard(proposal.translation) },
                                         modifier = Modifier.padding(start = 8.dp),
                                     ) {
                                         Icon(
@@ -154,19 +162,32 @@ fun TranslationProposalModal(
                                         )
                                     }
                                 }
+
+                                if (proposal.notes.isNotEmpty()) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    proposal.notes.forEach { note ->
+                                        Text(
+                                            text = "• $note",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                            modifier = Modifier.padding(top = 2.dp),
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant,
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Column(
                     modifier =
@@ -181,7 +202,7 @@ fun TranslationProposalModal(
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !state.isLoading,
                         shape = RoundedCornerShape(8.dp),
-                        placeholder = { Text("Type a phrase...") },
+                        placeholder = { Text(text = stringResource(R.string.type_phrase)) },
                         singleLine = true,
                     )
 
@@ -194,15 +215,19 @@ fun TranslationProposalModal(
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = MaterialTheme.shapes.medium,
+                        enabled = !state.isLoading,
                     ) {
                         if (state.isLoading) {
-                            CircularProgressIndicator()
-                            return@Button
+                            Text(
+                                text = stringResource(R.string.translating),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(R.string.translate),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
                         }
-                        Text(
-                            text = "Translate",
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
                     }
                 }
             }
