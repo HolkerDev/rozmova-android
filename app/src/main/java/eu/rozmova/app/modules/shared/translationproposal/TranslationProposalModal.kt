@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun TranslationProposalModal(
@@ -55,6 +56,16 @@ fun TranslationProposalModal(
     val context = LocalContext.current
     val clipboardManager =
         remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+
+    var message by remember { mutableStateOf("") }
+
+    viewModel.collectSideEffect { event ->
+        when (event) {
+            is TranslationEvents.ClearInput -> {
+                message = ""
+            }
+        }
+    }
 
     fun copyToClipboard(text: String) {
         val clip = ClipData.newPlainText("translation", text)
@@ -114,8 +125,6 @@ fun TranslationProposalModal(
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                var message by remember { mutableStateOf("") }
 
                 LazyColumn(
                     modifier =

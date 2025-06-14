@@ -16,6 +16,10 @@ data class TranslationProposalState(
     val isLoading: Boolean = false,
 )
 
+sealed class TranslationEvents {
+    data object ClearInput : TranslationEvents()
+}
+
 @HiltViewModel
 class TranslationProposalVM
     @Inject
@@ -23,8 +27,8 @@ class TranslationProposalVM
         private val translationRepository: TranslationRepository,
         private val settingsRepository: SettingsRepository,
     ) : ViewModel(),
-        ContainerHost<TranslationProposalState, Unit> {
-        override val container: Container<TranslationProposalState, Unit> =
+        ContainerHost<TranslationProposalState, TranslationEvents> {
+        override val container: Container<TranslationProposalState, TranslationEvents> =
             container(
                 TranslationProposalState(),
             )
@@ -43,8 +47,10 @@ class TranslationProposalVM
                     val currentTranslations = state.translatedTexts.toMutableList()
                     currentTranslations.add(translationProposal)
                     reduce { state.copy(translatedTexts = currentTranslations, isLoading = false) }
+                    postSideEffect(TranslationEvents.ClearInput)
                 }.mapLeft {
                     Log.e(tag, "Error generating translation proposal: $it")
+                    reduce { state.copy(isLoading = false) }
                 }
         }
     }
