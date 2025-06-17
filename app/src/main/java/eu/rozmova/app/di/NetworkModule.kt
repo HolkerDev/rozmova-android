@@ -12,6 +12,7 @@ import eu.rozmova.app.clients.backend.ChatClient
 import eu.rozmova.app.clients.backend.MessageClient
 import eu.rozmova.app.clients.backend.ScenarioClient
 import eu.rozmova.app.clients.backend.TranslationClient
+import eu.rozmova.app.clients.backend.VerificationClient
 import eu.rozmova.app.clients.backend.network.AuthInterceptor
 import eu.rozmova.app.utils.instantDeserializer
 import eu.rozmova.app.utils.instantSerializer
@@ -129,4 +130,11 @@ object NetworkModule {
         @Named("mega")
         retrofit: Retrofit,
     ): TranslationClient = retrofit.create(TranslationClient::class.java)
+
+    @Provides
+    @Singleton
+    fun provideVerificationClient(
+        @Named("mega")
+        retrofit: Retrofit,
+    ): VerificationClient = retrofit.create(VerificationClient::class.java)
 }
