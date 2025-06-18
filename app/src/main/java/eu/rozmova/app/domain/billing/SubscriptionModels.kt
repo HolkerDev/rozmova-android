@@ -20,7 +20,9 @@ data class SubscriptionStatus(
     val purchaseToken: String?,
     val isAcknowledged: Boolean,
     val autoRenewing: Boolean,
-    val expiryTimeMillis: Long?
+    val expiryTimeMillis: Long?,
+    val isVerifiedWithBackend: Boolean = false,
+    val verificationPending: Boolean = false
 )
 
 sealed class BillingResult {
@@ -29,12 +31,15 @@ sealed class BillingResult {
     object UserCanceled : BillingResult()
     object NetworkError : BillingResult()
     object ServiceUnavailable : BillingResult()
+    object VerificationSuccess : BillingResult()
+    object VerificationFailed : BillingResult()
 }
 
 sealed class SubscriptionState {
     object Loading : SubscriptionState()
     data class Available(val product: SubscriptionProduct) : SubscriptionState()
     data class Subscribed(val status: SubscriptionStatus) : SubscriptionState()
+    data class VerifyingSubscription(val status: SubscriptionStatus) : SubscriptionState()
     data class Error(val message: String) : SubscriptionState()
     object NotAvailable : SubscriptionState()
 }

@@ -131,6 +131,15 @@ fun SubscriptionScreen(
                         onRetryClick = { viewModel.refreshSubscriptions() },
                     )
                 }
+
+                is SubscriptionState.VerifyingSubscription -> {
+                    Box(
+                        modifier = Modifier.Companion.fillMaxSize(),
+                        contentAlignment = Alignment.Companion.Center,
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
             }
 
             if (state.error != null) {

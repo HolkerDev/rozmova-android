@@ -10,6 +10,7 @@ import eu.rozmova.app.services.billing.BillingService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,10 +35,21 @@ class SubscriptionRepository
                     val product = products.first() // We only have one subscription
 
                     billingService.getSubscriptionStatus().collect { status ->
-                        if (status.isSubscribed) {
-                            emit(SubscriptionState.Subscribed(status))
-                        } else {
-                            emit(SubscriptionState.Available(product))
+                        when {
+                            status.isSubscribed && status.isVerifiedWithBackend -> {
+                                emit(SubscriptionState.Subscribed(status))
+                            }
+                            status.isSubscribed && status.verificationPending -> {
+                                emit(SubscriptionState.VerifyingSubscription(status))
+                            }
+                            status.isSubscribed && !status.isVerifiedWithBackend -> {
+                                // Local subscription exists but backend verification failed
+                                // Still show as available to allow re-verification
+                                emit(SubscriptionState.Available(product))
+                            }
+                            else -> {
+                                emit(SubscriptionState.Available(product))
+                            }
                         }
                     }
                 } catch (e: Exception) {
@@ -60,10 +72,8 @@ class SubscriptionRepository
         fun getSubscriptionStatus(): Flow<SubscriptionStatus> = billingService.getSubscriptionStatus()
 
         fun isSubscribed(): Flow<Boolean> =
-            billingService.getSubscriptionStatus().combine(
-                flow { emit(Unit) },
-            ) { status, _ ->
-                status.isSubscribed
+            billingService.getSubscriptionStatus().map { status ->
+                status.isSubscribed && status.isVerifiedWithBackend
             }
 
         suspend fun refreshPurchases() {
@@ -73,6 +83,8 @@ class SubscriptionRepository
                     if (!purchase.isAcknowledged) {
                         billingService.acknowledgePurchase(purchase)
                     }
+                    // Verify each purchase with backend
+                    billingService.verifyPurchaseWithBackend(purchase.purchaseToken)
                 }
             } catch (e: Exception) {
                 // Handle error silently or log
@@ -85,5 +97,9 @@ class SubscriptionRepository
 
         fun endBillingConnection() {
             billingService.endConnection()
+        }
+
+        suspend fun verifySubscriptionWithBackend(purchaseToken: String): BillingResult {
+            return billingService.verifyPurchaseWithBackend(purchaseToken)
         }
     }

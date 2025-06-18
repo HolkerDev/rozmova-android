@@ -2,6 +2,7 @@ package eu.rozmova.app.services.billing
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClientStateListener
@@ -11,6 +12,8 @@ import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
 import dagger.hilt.android.qualifiers.ApplicationContext
+import eu.rozmova.app.clients.backend.VerificationClient
+import eu.rozmova.app.clients.backend.VerifySubscriptionReq
 import eu.rozmova.app.domain.billing.BillingResult
 import eu.rozmova.app.domain.billing.SubscriptionProduct
 import eu.rozmova.app.domain.billing.SubscriptionStatus
@@ -31,6 +34,7 @@ class BillingServiceImpl
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
+        private val verificationClient: VerificationClient,
     ) : BillingService,
         PurchasesUpdatedListener {
         private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -55,6 +59,8 @@ class BillingServiceImpl
                     isAcknowledged = false,
                     autoRenewing = false,
                     expiryTimeMillis = null,
+                    isVerifiedWithBackend = false,
+                    verificationPending = false,
                 ),
             )
 
@@ -220,6 +226,48 @@ class BillingServiceImpl
 
         override fun isConnected(): Boolean = billingClient.isReady
 
+        override suspend fun verifyPurchaseWithBackend(purchaseToken: String): BillingResult {
+            return try {
+                Log.d("BillingServiceImpl", "Verifying purchase with backend: $purchaseToken")
+
+                // Update status to show verification is pending
+                _subscriptionStatus.value = _subscriptionStatus.value.copy(verificationPending = true)
+
+                val response = verificationClient.fetchTranslationProposal(
+                    VerifySubscriptionReq(purchaseToken = purchaseToken)
+                )
+
+                if (response.isSuccessful) {
+                    val verificationResult = response.body()
+                    if (verificationResult?.isSubscribed == true) {
+                        Log.d("BillingServiceImpl", "Backend verification successful")
+                        // Update subscription status with verification success
+                        _subscriptionStatus.value = _subscriptionStatus.value.copy(
+                            isVerifiedWithBackend = true,
+                            verificationPending = false
+                        )
+                        BillingResult.VerificationSuccess
+                    } else {
+                        Log.w("BillingServiceImpl", "Backend verification failed - subscription not valid")
+                        _subscriptionStatus.value = _subscriptionStatus.value.copy(
+                            isSubscribed = false,
+                            isVerifiedWithBackend = false,
+                            verificationPending = false
+                        )
+                        BillingResult.VerificationFailed
+                    }
+                } else {
+                    Log.e("BillingServiceImpl", "Backend verification request failed: ${response.code()}")
+                    _subscriptionStatus.value = _subscriptionStatus.value.copy(verificationPending = false)
+                    BillingResult.Error("Verification failed", response.code())
+                }
+            } catch (e: Exception) {
+                Log.e("BillingServiceImpl", "Backend verification error", e)
+                _subscriptionStatus.value = _subscriptionStatus.value.copy(verificationPending = false)
+                BillingResult.Error(e.message ?: "Unknown verification error", -1)
+            }
+        }
+
         override fun onPurchasesUpdated(
             billingResult: com.android.billingclient.api.BillingResult,
             purchases: MutableList<Purchase>?,
@@ -250,6 +298,11 @@ class BillingServiceImpl
                                 acknowledgePurchase(purchase)
                             }
                         }
+
+                        // Verify purchase with backend
+                        serviceScope.launch {
+                            verifyPurchaseWithBackend(purchase.purchaseToken)
+                        }
                     }
                 }
             }
@@ -264,6 +317,8 @@ class BillingServiceImpl
                     isAcknowledged = purchase.isAcknowledged,
                     autoRenewing = purchase.isAutoRenewing,
                     expiryTimeMillis = null, // For subscriptions, you might need to implement server-side validation
+                    isVerifiedWithBackend = false, // Will be updated after backend verification
+                    verificationPending = false,
                 )
         }
 

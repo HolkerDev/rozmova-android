@@ -8,6 +8,7 @@ import eu.rozmova.app.domain.billing.BillingResult
 import eu.rozmova.app.domain.billing.SubscriptionProduct
 import eu.rozmova.app.domain.billing.SubscriptionState
 import eu.rozmova.app.repositories.billing.SubscriptionRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -112,6 +113,22 @@ class SubscriptionViewModel
                             )
                         }
                     }
+                    is BillingResult.VerificationSuccess -> {
+                        reduce {
+                            state.copy(
+                                isLoading = false,
+                                showSuccessMessage = true,
+                            )
+                        }
+                    }
+                    is BillingResult.VerificationFailed -> {
+                        reduce {
+                            state.copy(
+                                isLoading = false,
+                                error = "Purchase verification failed. Please contact support.",
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -134,6 +151,59 @@ class SubscriptionViewModel
         fun clearSuccessMessage() =
             intent {
                 reduce { state.copy(showSuccessMessage = false) }
+            }
+
+        fun retryVerification() =
+            intent {
+                reduce { state.copy(isLoading = true, error = null) }
+
+                viewModelScope.launch {
+                    // Get current subscription status to get purchase token
+                    val currentStatus = subscriptionRepository.getSubscriptionStatus().first()
+                    currentStatus.purchaseToken?.let { token ->
+                        when (val result = subscriptionRepository.verifySubscriptionWithBackend(token)) {
+                            is BillingResult.VerificationSuccess -> {
+                                reduce {
+                                    state.copy(
+                                        isLoading = false,
+                                        showSuccessMessage = true,
+                                    )
+                                }
+                            }
+                            is BillingResult.VerificationFailed -> {
+                                reduce {
+                                    state.copy(
+                                        isLoading = false,
+                                        error = "Verification failed. Please contact support.",
+                                    )
+                                }
+                            }
+                            is BillingResult.Error -> {
+                                reduce {
+                                    state.copy(
+                                        isLoading = false,
+                                        error = result.message,
+                                    )
+                                }
+                            }
+                            else -> {
+                                reduce {
+                                    state.copy(
+                                        isLoading = false,
+                                        error = "Unexpected verification result.",
+                                    )
+                                }
+                            }
+                        }
+                    } ?: run {
+                        reduce {
+                            state.copy(
+                                isLoading = false,
+                                error = "No purchase token found.",
+                            )
+                        }
+                    }
+                }
             }
 
         override fun onCleared() {
