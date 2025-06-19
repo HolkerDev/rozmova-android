@@ -2,16 +2,12 @@ package eu.rozmova.app.modules.subscription
 
 import android.app.Activity
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import eu.rozmova.app.domain.billing.BillingResult
 import eu.rozmova.app.domain.billing.SubscriptionProduct
 import eu.rozmova.app.domain.billing.SubscriptionState
 import eu.rozmova.app.repositories.billing.SubscriptionRepository
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import eu.rozmova.app.services.billing.BillingEvents
+import eu.rozmova.app.services.billing.BillingService
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -38,6 +34,7 @@ sealed class SubscriptionSideEffect {
 class SubscriptionViewModel
     @Inject
     constructor(
+        private val billingService: BillingService,
         private val subscriptionRepository: SubscriptionRepository,
     ) : ViewModel(),
         ContainerHost<SubscriptionUiState, SubscriptionSideEffect> {
@@ -45,168 +42,35 @@ class SubscriptionViewModel
             container(SubscriptionUiState())
 
         init {
-            observeSubscriptionState()
-            startBillingConnection()
-        }
-
-        private fun observeSubscriptionState() {
-            subscriptionRepository
-                .getSubscriptionState()
-                .onEach { subscriptionState ->
-                    intent {
-                        reduce {
-                            state.copy(
-                                subscriptionState = subscriptionState,
-                                isLoading = false,
-                            )
-                        }
-                    }
-                }.launchIn(viewModelScope)
-        }
-
-        private fun startBillingConnection() =
+            fetchSubscriptionState()
             intent {
-                subscriptionRepository.startBillingConnection()
+                billingService.billingState.collect { events ->
+                    when (events) {
+                        is BillingEvents.PurchaseFound -> {
+                            reduce { state.copy(isLoading = false, showSuccessMessage = true) }
+                        }
+                        else -> {}
+                    }
+                }
             }
+        }
 
         fun purchaseSubscription(
             activity: Activity,
             product: SubscriptionProduct,
         ) = intent {
             reduce { state.copy(isLoading = true, error = null) }
-
-            viewModelScope.launch {
-                when (val result = subscriptionRepository.purchaseSubscription(activity, product)) {
-                    is BillingResult.Success -> {
-                        reduce {
-                            state.copy(
-                                isLoading = false,
-                                showSuccessMessage = true,
-                            )
-                        }
-                        // The subscription state will be updated automatically through the observer
-                    }
-                    is BillingResult.Error -> {
-                        reduce {
-                            state.copy(
-                                isLoading = false,
-                                error = result.message,
-                            )
-                        }
-                    }
-                    is BillingResult.UserCanceled -> {
-                        reduce { state.copy(isLoading = false) }
-                    }
-                    is BillingResult.NetworkError -> {
-                        reduce {
-                            state.copy(
-                                isLoading = false,
-                                error = "Network error. Please check your connection.",
-                            )
-                        }
-                    }
-                    is BillingResult.ServiceUnavailable -> {
-                        reduce {
-                            state.copy(
-                                isLoading = false,
-                                error = "Google Play services unavailable. Please try again later.",
-                            )
-                        }
-                    }
-                    is BillingResult.VerificationSuccess -> {
-                        reduce {
-                            state.copy(
-                                isLoading = false,
-                                showSuccessMessage = true,
-                            )
-                        }
-                    }
-                    is BillingResult.VerificationFailed -> {
-                        reduce {
-                            state.copy(
-                                isLoading = false,
-                                error = "Purchase verification failed. Please contact support.",
-                            )
-                        }
-                    }
-                }
-            }
+            billingService.purchaseSubscription(activity, product.productId)
         }
 
-        fun refreshSubscriptions() =
+        fun fetchSubscriptionState() =
             intent {
-                reduce { state.copy(isLoading = true, error = null) }
-
-                viewModelScope.launch {
-                    subscriptionRepository.refreshPurchases()
-                    reduce { state.copy(isLoading = false) }
+                val isSubscribed = subscriptionRepository.getIsSubscribed()
+                if (isSubscribed) {
+                    reduce { state.copy(subscriptionState = SubscriptionState.Subscribed) }
+                } else {
+                    val availableSubscription = billingService.getAvailableSubscriptions().first()
+                    reduce { state.copy(subscriptionState = SubscriptionState.Available(availableSubscription)) }
                 }
             }
-
-        fun clearError() =
-            intent {
-                reduce { state.copy(error = null) }
-            }
-
-        fun clearSuccessMessage() =
-            intent {
-                reduce { state.copy(showSuccessMessage = false) }
-            }
-
-        fun retryVerification() =
-            intent {
-                reduce { state.copy(isLoading = true, error = null) }
-
-                viewModelScope.launch {
-                    // Get current subscription status to get purchase token
-                    val currentStatus = subscriptionRepository.getSubscriptionStatus().first()
-                    currentStatus.purchaseToken?.let { token ->
-                        when (val result = subscriptionRepository.verifySubscriptionWithBackend(token)) {
-                            is BillingResult.VerificationSuccess -> {
-                                reduce {
-                                    state.copy(
-                                        isLoading = false,
-                                        showSuccessMessage = true,
-                                    )
-                                }
-                            }
-                            is BillingResult.VerificationFailed -> {
-                                reduce {
-                                    state.copy(
-                                        isLoading = false,
-                                        error = "Verification failed. Please contact support.",
-                                    )
-                                }
-                            }
-                            is BillingResult.Error -> {
-                                reduce {
-                                    state.copy(
-                                        isLoading = false,
-                                        error = result.message,
-                                    )
-                                }
-                            }
-                            else -> {
-                                reduce {
-                                    state.copy(
-                                        isLoading = false,
-                                        error = "Unexpected verification result.",
-                                    )
-                                }
-                            }
-                        }
-                    } ?: run {
-                        reduce {
-                            state.copy(
-                                isLoading = false,
-                                error = "No purchase token found.",
-                            )
-                        }
-                    }
-                }
-            }
-
-        override fun onCleared() {
-            super.onCleared()
-        }
     }

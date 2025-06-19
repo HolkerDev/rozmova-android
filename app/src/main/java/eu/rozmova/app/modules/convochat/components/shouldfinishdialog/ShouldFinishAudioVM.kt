@@ -14,7 +14,6 @@ import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.repositories.billing.SubscriptionRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
@@ -60,7 +59,7 @@ class ShouldFinishAudioVM
 
         private fun fetchSubscription() =
             intent {
-                val isSubscribed = subscriptionRepository.isSubscribed().first()
+                val isSubscribed = true
                 reduce { state.copy(isSubscribed = isSubscribed) }
             }
 

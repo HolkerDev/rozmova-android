@@ -1,105 +1,37 @@
 package eu.rozmova.app.repositories.billing
 
-import android.app.Activity
-import android.util.Log
-import eu.rozmova.app.domain.billing.BillingResult
-import eu.rozmova.app.domain.billing.SubscriptionProduct
-import eu.rozmova.app.domain.billing.SubscriptionState
-import eu.rozmova.app.domain.billing.SubscriptionStatus
-import eu.rozmova.app.services.billing.BillingService
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "subscription")
+val isSubscribedKey = stringPreferencesKey("is_subscribed")
 
 @Singleton
 class SubscriptionRepository
     @Inject
     constructor(
-        private val billingService: BillingService,
+        @ApplicationContext private val context: Context,
     ) {
-        fun getSubscriptionState(): Flow<SubscriptionState> =
-            flow {
-                emit(SubscriptionState.Loading)
+        private val dataStore: DataStore<Preferences> = context.dataStore
 
-                try {
-                    val products = billingService.querySubscriptionProducts()
-                    Log.i("SubscriptionRepository", "Available products: ${products.size}")
-                    if (products.isEmpty()) {
-                        emit(SubscriptionState.NotAvailable)
-                        return@flow
-                    }
+        suspend fun getIsSubscribed(): Boolean =
+            dataStore.data
+                .map { preferences ->
+                    preferences[isSubscribedKey] == "true"
+                }.first()
 
-                    val product = products.first() // We only have one subscription
-
-                    billingService.getSubscriptionStatus().collect { status ->
-                        when {
-                            status.isSubscribed && status.isVerifiedWithBackend -> {
-                                emit(SubscriptionState.Subscribed(status))
-                            }
-                            status.isSubscribed && status.verificationPending -> {
-                                emit(SubscriptionState.VerifyingSubscription(status))
-                            }
-                            status.isSubscribed && !status.isVerifiedWithBackend -> {
-                                // Local subscription exists but backend verification failed
-                                // Still show as available to allow re-verification
-                                emit(SubscriptionState.Available(product))
-                            }
-                            else -> {
-                                emit(SubscriptionState.Available(product))
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    emit(SubscriptionState.Error(e.message ?: "Unknown error"))
-                }
+        suspend fun setIsSubscribed(isSubscribed: Boolean) {
+            dataStore.edit { preferences ->
+                preferences[isSubscribedKey] = isSubscribed.toString()
             }
-
-        suspend fun getAvailableSubscriptions(): List<SubscriptionProduct> =
-            try {
-                billingService.querySubscriptionProducts()
-            } catch (e: Exception) {
-                emptyList()
-            }
-
-        suspend fun purchaseSubscription(
-            activity: Activity,
-            product: SubscriptionProduct,
-        ): BillingResult = billingService.launchBillingFlow(activity, product)
-
-        fun getSubscriptionStatus(): Flow<SubscriptionStatus> = billingService.getSubscriptionStatus()
-
-        fun isSubscribed(): Flow<Boolean> =
-            billingService.getSubscriptionStatus().map { status ->
-                status.isSubscribed && status.isVerifiedWithBackend
-            }
-
-        suspend fun refreshPurchases() {
-            try {
-                val purchases = billingService.queryPurchases()
-                purchases.forEach { purchase ->
-                    if (!purchase.isAcknowledged) {
-                        billingService.acknowledgePurchase(purchase)
-                    }
-                    // Verify each purchase with backend
-                    billingService.verifyPurchaseWithBackend(purchase.purchaseToken)
-                }
-            } catch (e: Exception) {
-                // Handle error silently or log
-            }
-        }
-
-        fun startBillingConnection() {
-            billingService.startConnection()
-        }
-
-        fun endBillingConnection() {
-            billingService.endConnection()
-        }
-
-        suspend fun verifySubscriptionWithBackend(purchaseToken: String): BillingResult {
-            return billingService.verifyPurchaseWithBackend(purchaseToken)
         }
     }

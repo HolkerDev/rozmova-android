@@ -6,7 +6,7 @@ import retrofit2.http.POST
 
 interface VerificationClient {
     @POST("v1/verification/subscription")
-    suspend fun fetchTranslationProposal(
+    suspend fun verifyToken(
         @Body body: VerifySubscriptionReq,
     ): Response<VerifySubscriptionResp>
 }

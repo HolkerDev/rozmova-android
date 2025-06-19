@@ -49,8 +49,9 @@ class AuthRepository
                         Log.i(tag, "Session status: $sessionStatus")
                         _authState.value =
                             when (sessionStatus) {
-                                is SessionStatus.Authenticated ->
+                                is SessionStatus.Authenticated -> {
                                     AuthState.Authenticated(sessionStatus.session)
+                                }
 
                                 SessionStatus.Initializing ->
                                     AuthState.Loading

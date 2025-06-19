@@ -121,24 +121,15 @@ fun SubscriptionScreen(
                 is SubscriptionState.Error -> {
                     ErrorContent(
                         message = subscriptionState.message,
-                        onRetryClick = { viewModel.refreshSubscriptions() },
+                        onRetryClick = { },
                     )
                 }
 
                 is SubscriptionState.NotAvailable -> {
                     ErrorContent(
                         message = "Subscription not available",
-                        onRetryClick = { viewModel.refreshSubscriptions() },
+                        onRetryClick = { },
                     )
-                }
-
-                is SubscriptionState.VerifyingSubscription -> {
-                    Box(
-                        modifier = Modifier.Companion.fillMaxSize(),
-                        contentAlignment = Alignment.Companion.Center,
-                    ) {
-                        CircularProgressIndicator()
-                    }
                 }
             }
 
@@ -149,7 +140,6 @@ fun SubscriptionScreen(
 
             if (state.showSuccessMessage) {
                 LaunchedEffect(state.showSuccessMessage) {
-                    viewModel.clearSuccessMessage()
                 }
             }
         }

@@ -19,7 +19,6 @@ import eu.rozmova.app.domain.ReviewDto
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.billing.SubscriptionRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
@@ -94,12 +93,7 @@ class ChatDetailsViewModel
 
         private fun fetchIsSubscribed() =
             intent {
-                subscriptionRepository
-                    .isSubscribed()
-                    .first()
-                    .let {
-                        reduce { state.copy(isSubscribed = it) }
-                    }
+                reduce { state.copy(isSubscribed = true) }
             }
 
         fun finishChat(chatId: String) =

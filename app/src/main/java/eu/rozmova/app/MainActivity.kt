@@ -1,6 +1,7 @@
 package eu.rozmova.app
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.WindowInsets
@@ -24,17 +25,22 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import arrow.core.getOrElse
+import com.android.billingclient.api.Purchase
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
+import eu.rozmova.app.clients.backend.VerificationClient
+import eu.rozmova.app.clients.backend.VerifySubscriptionReq
 import eu.rozmova.app.nav.NavRoutes
 import eu.rozmova.app.nav.NavigationHost
 import eu.rozmova.app.nav.bottomNavigationItems
 import eu.rozmova.app.repositories.AuthRepository
 import eu.rozmova.app.repositories.AuthState
 import eu.rozmova.app.repositories.UserRepository
+import eu.rozmova.app.repositories.billing.SubscriptionRepository
 import eu.rozmova.app.services.FeatureService
+import eu.rozmova.app.services.billing.BillingEvents
+import eu.rozmova.app.services.billing.BillingService
 import eu.rozmova.app.ui.theme.RozmovaTheme
-import eu.rozmova.app.utils.SubscriptionManager
 import io.github.jan.supabase.auth.user.UserSession
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -57,14 +63,48 @@ class AppViewModel
         private val authRepository: AuthRepository,
         private val userRepository: UserRepository,
         private val featureService: FeatureService,
-        private val subscriptionManager: SubscriptionManager,
+        private val billingService: BillingService,
+        private val subscriptionRepository: SubscriptionRepository,
+        private val verificationClient: VerificationClient,
     ) : ViewModel() {
         init {
             viewModelScope.launch {
                 authRepository.observeAuthState()
             }
-            // Initialize billing connection
-            subscriptionManager.initializeBilling()
+
+            viewModelScope.launch {
+                billingService.billingState.collect { billingEvent ->
+                    when (billingEvent) {
+                        BillingEvents.Loading -> {
+                            Log.d("AppViewModel", "Billing service is loading")
+                        }
+                        is BillingEvents.PurchaseFound -> {
+                            Log.d("AppViewModel", "Purchase found: ${billingEvent.purchase}")
+                            handlePurchaseFound(billingEvent.purchase)
+                        }
+                    }
+                }
+            }
+        }
+
+        private suspend fun handlePurchaseFound(purchase: Purchase) {
+            val response = verificationClient.verifyToken(VerifySubscriptionReq(purchase.purchaseToken))
+            if (!response.isSuccessful) {
+                Log.e("AppViewModel", "Failed to verify subscription: ${response.body()}")
+                return
+            }
+            val isSubscribed = response.body()?.isSubscribed == true
+            if (isSubscribed) {
+                if (purchase.isAcknowledged.not()) {
+                    Log.i("AppViewModel", "Acknowledging purchase: ${purchase.orderId}")
+                    billingService.acknowledgePurchase(purchase)
+                }
+                subscriptionRepository.setIsSubscribed(true)
+                Log.i("AppViewModel", "User is subscribed")
+            } else {
+                subscriptionRepository.setIsSubscribed(false)
+                Log.i("AppViewModel", "User is not subscribed")
+            }
         }
 
         private fun initializeFeatureService(userSession: UserSession) =
@@ -85,6 +125,7 @@ class AppViewModel
                         is AuthState.Loading -> AppState.Loading
                         is AuthState.Authenticated -> {
                             initializeFeatureService(authState.userSession)
+                            billingService.initialize()
                             AppState.Authenticated
                         }
 
@@ -95,10 +136,6 @@ class AppViewModel
                     started = SharingStarted.Eagerly,
                     initialValue = AppState.Loading,
                 )
-
-        override fun onCleared() {
-            super.onCleared()
-        }
     }
 
 @Composable
