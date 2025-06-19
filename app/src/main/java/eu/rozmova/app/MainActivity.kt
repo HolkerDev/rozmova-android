@@ -82,6 +82,10 @@ class AppViewModel
                             Log.d("AppViewModel", "Purchase found: ${billingEvent.purchase}")
                             handlePurchaseFound(billingEvent.purchase)
                         }
+                        BillingEvents.NoPurchaseFound -> {
+                            Log.d("AppViewModel", "No purchase found")
+                            subscriptionRepository.setIsSubscribed(false)
+                        }
                     }
                 }
             }

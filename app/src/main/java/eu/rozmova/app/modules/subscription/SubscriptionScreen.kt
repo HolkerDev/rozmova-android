@@ -137,11 +137,6 @@ fun SubscriptionScreen(
                 LaunchedEffect(state.error) {
                 }
             }
-
-            if (state.showSuccessMessage) {
-                LaunchedEffect(state.showSuccessMessage) {
-                }
-            }
         }
     }
 }

@@ -25,6 +25,8 @@ sealed interface BillingEvents {
         val purchase: Purchase,
     ) : BillingEvents
 
+    data object NoPurchaseFound : BillingEvents
+
     data object Loading : BillingEvents
 }
 
@@ -75,9 +77,15 @@ class BillingService
                             Log.e(tag, "Billing setup failed: ${billingResult.debugMessage}")
                             return
                         }
-                        queryExistingPurchases(onPurchaseFound = {
-                            _billingState.value = BillingEvents.PurchaseFound(it)
-                        })
+                        queryExistingPurchases(
+                            onPurchaseFound = {
+                                _billingState.value = BillingEvents.PurchaseFound(it)
+                            },
+                            noPurchaseNotFound = {
+                                Log.i(tag, "No existing subscription purchases found")
+                                _billingState.value = BillingEvents.NoPurchaseFound
+                            },
+                        )
                     }
 
                     override fun onBillingServiceDisconnected() {}
@@ -86,7 +94,10 @@ class BillingService
             isInitialized = true
         }
 
-        private fun queryExistingPurchases(onPurchaseFound: (Purchase) -> Unit) {
+        private fun queryExistingPurchases(
+            onPurchaseFound: (Purchase) -> Unit,
+            noPurchaseNotFound: () -> Unit,
+        ) {
             val query =
                 QueryPurchasesParams
                     .newBuilder()
@@ -97,8 +108,11 @@ class BillingService
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                     Log.i(tag, "Found ${purchasesList.size} existing subscription purchases")
                     val purchaseToAcknowledge = findPurchase(purchasesList)
-                    purchaseToAcknowledge?.let {
-                        onPurchaseFound(it)
+                    if (purchaseToAcknowledge != null) {
+                        onPurchaseFound(purchaseToAcknowledge)
+                    } else {
+                        Log.i(tag, "No existing subscription purchases found")
+                        noPurchaseNotFound()
                     }
                 } else {
                     Log.e(tag, "Failed to query existing purchases: ${billingResult.debugMessage}")
@@ -128,7 +142,7 @@ class BillingService
         }
 
         private fun findPurchase(purchases: List<Purchase>): Purchase? =
-            purchases.first { purchase -> purchase.purchaseState == Purchase.PurchaseState.PURCHASED }
+            purchases.firstOrNull { purchase -> purchase.purchaseState == Purchase.PurchaseState.PURCHASED }
 
         suspend fun getAvailableSubscriptions(): List<SubscriptionProduct> =
             suspendCancellableCoroutine { continuation ->

@@ -47,7 +47,7 @@ class SubscriptionViewModel
                 billingService.billingState.collect { events ->
                     when (events) {
                         is BillingEvents.PurchaseFound -> {
-                            reduce { state.copy(isLoading = false, showSuccessMessage = true) }
+                            reduce { state.copy(isLoading = false, subscriptionState = SubscriptionState.Subscribed) }
                         }
                         else -> {}
                     }
@@ -61,6 +61,7 @@ class SubscriptionViewModel
         ) = intent {
             reduce { state.copy(isLoading = true, error = null) }
             billingService.purchaseSubscription(activity, product.productId)
+            reduce { state.copy(isLoading = false, subscriptionState = SubscriptionState.Subscribed) }
         }
 
         fun fetchSubscriptionState() =
