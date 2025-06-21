@@ -84,7 +84,18 @@ class AppViewModel
                         }
                         BillingEvents.NoPurchaseFound -> {
                             Log.d("AppViewModel", "No purchase found")
-                            subscriptionRepository.setIsSubscribed(false)
+                            val isVIPResp = verificationClient.verifyVIP()
+                            if (!isVIPResp.isSuccessful) {
+                                Log.e("AppViewModel", "Failed to verify VIP status: ${isVIPResp.body()}")
+                                return@collect
+                            }
+                            if (isVIPResp.body()?.isVIP == true) {
+                                Log.i("AppViewModel", "User is VIP")
+                                subscriptionRepository.setIsSubscribed(true)
+                            } else {
+                                Log.i("AppViewModel", "User is not VIP")
+                                subscriptionRepository.setIsSubscribed(false)
+                            }
                         }
                     }
                 }
