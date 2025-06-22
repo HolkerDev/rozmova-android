@@ -117,4 +117,5 @@
     <string name="type_phrase">Напишите фразу...</string>
     <string name="translate">Перевести</string>
     <string name="translating">Переводим...</string>
+    <string name="user_has_premium_description">У вас Премиум</string>
 </resources>

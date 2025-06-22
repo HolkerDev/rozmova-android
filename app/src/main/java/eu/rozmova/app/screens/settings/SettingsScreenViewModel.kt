@@ -8,6 +8,7 @@ import eu.rozmova.app.domain.Language
 import eu.rozmova.app.domain.getLanguageByCode
 import eu.rozmova.app.repositories.AuthRepository
 import eu.rozmova.app.repositories.SettingsRepository
+import eu.rozmova.app.repositories.billing.SubscriptionRepository
 import eu.rozmova.app.utils.LocaleManager
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
@@ -23,6 +24,7 @@ data class LangSettings(
 data class SettingsState(
     val isLoading: Boolean = true,
     val langSettings: LangSettings? = null,
+    val isSubscribed: Boolean = false,
 )
 
 @HiltViewModel
@@ -32,13 +34,21 @@ class SettingsScreenViewModel
         private val authRepository: AuthRepository,
         private val settingsRepository: SettingsRepository,
         private val localeManager: LocaleManager,
+        private val subscriptionRepository: SubscriptionRepository,
     ) : ViewModel(),
         ContainerHost<SettingsState, Unit> {
         override val container: Container<SettingsState, Unit> = container(SettingsState())
 
         init {
             fetchCurrentLangPreferences()
+            fetchSubscription()
         }
+
+        private fun fetchSubscription() =
+            intent {
+                val isSubscribed = subscriptionRepository.getIsSubscribed()
+                reduce { state.copy(isSubscribed = isSubscribed) }
+            }
 
         private fun fetchCurrentLangPreferences() =
             intent {

@@ -41,7 +41,7 @@ import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
 fun SettingsScreen(
-    onNavigateToSubscription: () -> Unit = {},
+    onNavigateToSubscription: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsScreenViewModel = hiltViewModel(),
 ) {
@@ -87,6 +87,7 @@ fun SettingsScreen(
             onBugReportClick = { showBugReportDialog = true },
             onBugReportDismiss = { showBugReportDialog = false },
             onNavigateToSubscription = onNavigateToSubscription,
+            isSubscribed = state.isSubscribed,
             modifier = modifier,
         )
     }
@@ -111,6 +112,7 @@ fun SettingsContent(
     onNavigateToSubscription: () -> Unit,
     learnLanguage: Language,
     interfaceLanguage: Language,
+    isSubscribed: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxSize()) {
@@ -169,7 +171,9 @@ fun SettingsContent(
 
         ListItem(
             headlineContent = { Text(stringResource(R.string.subscription_premium)) },
-            supportingContent = { Text(stringResource(R.string.subscription_unlock_features)) },
+            supportingContent = {
+                Text(stringResource(if (!isSubscribed) R.string.subscription_unlock_features else R.string.user_has_premium_description))
+            },
             leadingContent = {
                 Icon(
                     Icons.Default.Star,

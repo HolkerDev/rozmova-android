@@ -124,4 +124,5 @@
     <string name="type_phrase">Type a phrase...</string>
     <string name="translate">Translate</string>
     <string name="translating">Translating...</string>
+    <string name="user_has_premium_description">You already have a Premium</string>
 </resources>
