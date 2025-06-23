@@ -122,4 +122,12 @@
     <string name="level_medium_description">Складна лексика та складні речення</string>
     <string name="level_hard_description">Просунута лексика та локальні вирази</string>
     <string name="difficulty">Складність</string>
+    <string name="generate_chat_title">Генерація унікального сценарія</string>
+    <string name="description">Опис</string>
+    <string name="describe_scenario">Опишіть сценарій, який хочете сгенерувати</string>
+    <string name="scenario_type_messages_description">Текстове листування</string>
+    <string name="scenario_type_conversation_description">Аудіо розмова</string>
+    <string name="scenario_type">Тип сценарію</string>
+    <string name="generate_scenario">Сгенерувати чат</string>
+    <string name="generate_scenario_loading">Генеруємо...</string>
 </resources>

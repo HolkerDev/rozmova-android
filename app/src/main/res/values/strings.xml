@@ -125,4 +125,12 @@
     <string name="level_medium_description">Intermediate vocabulary and complex structures</string>
     <string name="level_hard_description">Advanced vocabulary and native-like expressions</string>
     <string name="difficulty">Difficulty</string>
+    <string name="generate_chat_title">Generate custom scenario</string>
+    <string name="description">Description</string>
+    <string name="describe_scenario">Describe the scenario you would like to practice...</string>
+    <string name="scenario_type_messages_description">Text message exchanges</string>
+    <string name="scenario_type_conversation_description">Audio conversation</string>
+    <string name="scenario_type">Scenario type</string>
+    <string name="generate_scenario">Generate Chat</string>
+    <string name="generate_scenario_loading">Generating...</string>
 </resources>

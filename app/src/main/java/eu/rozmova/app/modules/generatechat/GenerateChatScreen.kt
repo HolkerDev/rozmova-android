@@ -17,7 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
-import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.ScenarioTypeDto
 import org.orbitmvi.orbit.compose.collectAsState
 
@@ -42,7 +41,7 @@ fun GenerateChatScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Generate Chat",
+                        text = stringResource(R.string.generate_chat_title),
                         style = MaterialTheme.typography.titleLarge,
                     )
                 },
@@ -77,7 +76,7 @@ fun GenerateChatScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
-                        text = "Description",
+                        text = stringResource(R.string.description),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                     )
@@ -89,7 +88,7 @@ fun GenerateChatScreen(
                                 .fillMaxWidth()
                                 .heightIn(min = 120.dp),
                         placeholder = {
-                            Text("Describe the chat scenario you want to generate...")
+                            Text(stringResource(R.string.describe_scenario))
                         },
                         maxLines = 6,
                         enabled = !state.isLoading,
@@ -107,7 +106,7 @@ fun GenerateChatScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text(
-                        text = "Scenario Type",
+                        text = stringResource(R.string.scenario_type),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                     )
@@ -115,7 +114,7 @@ fun GenerateChatScreen(
                         modifier = Modifier.selectableGroup(),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        ScenarioType.values().forEach { scenarioType ->
+                        ScenarioType.entries.forEach { scenarioType ->
                             Row(
                                 modifier =
                                     Modifier
@@ -136,19 +135,11 @@ fun GenerateChatScreen(
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
                                     Text(
-                                        text =
-                                            when (scenarioType) {
-                                                ScenarioType.MESSAGES -> "Messages"
-                                                ScenarioType.CONVERSATION -> "Conversation"
-                                            },
+                                        text = stringResource(scenarioType.displayName),
                                         style = MaterialTheme.typography.bodyLarge,
                                     )
                                     Text(
-                                        text =
-                                            when (scenarioType) {
-                                                ScenarioType.MESSAGES -> "Short message exchanges"
-                                                ScenarioType.CONVERSATION -> "Longer conversational practice"
-                                            },
+                                        text = stringResource(scenarioType.description),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
@@ -177,7 +168,7 @@ fun GenerateChatScreen(
                         modifier = Modifier.selectableGroup(),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        Difficulty.values().forEach { difficulty ->
+                        Difficulty.entries.forEach { difficulty ->
                             Row(
                                 modifier =
                                     Modifier
@@ -236,11 +227,11 @@ fun GenerateChatScreen(
                             strokeWidth = 2.dp,
                             color = MaterialTheme.colorScheme.onPrimary,
                         )
-                        Text("Generating...")
+                        Text(stringResource(R.string.generate_scenario_loading))
                     }
                 } else {
                     Text(
-                        text = "Generate Chat",
+                        text = stringResource(R.string.generate_scenario),
                         style = MaterialTheme.typography.titleMedium,
                     )
                 }
@@ -251,11 +242,19 @@ fun GenerateChatScreen(
     }
 }
 
-enum class Difficulty(
+private enum class Difficulty(
     val displayName: Int,
     val description: Int,
 ) {
     EASY(R.string.level_easy, R.string.level_easy_description),
     MEDIUM(R.string.level_medium, R.string.level_medium_description),
     HARD(R.string.level_hard, R.string.level_hard_description),
+}
+
+private enum class ScenarioType(
+    val displayName: Int,
+    val description: Int,
+) {
+    MESSAGES(R.string.category_message, R.string.scenario_type_messages_description),
+    CONVERSATION(R.string.category_conversation, R.string.scenario_type_conversation_description),
 }
