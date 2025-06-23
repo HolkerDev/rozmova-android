@@ -48,6 +48,8 @@ sealed class NavRoutes(
 
     data object Subscription : NavRoutes(route = "subscription")
 
+    data object GenerateChat : NavRoutes(route = "generate_chat")
+
     fun getLabel(context: Context): String? = labelResourceId?.let { context.getString(it) }
 }
 

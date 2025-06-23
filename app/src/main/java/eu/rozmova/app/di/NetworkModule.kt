@@ -9,6 +9,7 @@ import dagger.hilt.components.SingletonComponent
 import eu.rozmova.app.BuildConfig
 import eu.rozmova.app.clients.backend.BugReportClient
 import eu.rozmova.app.clients.backend.ChatClient
+import eu.rozmova.app.clients.backend.MegaScenariosClient
 import eu.rozmova.app.clients.backend.MessageClient
 import eu.rozmova.app.clients.backend.ScenarioClient
 import eu.rozmova.app.clients.backend.TranslationClient
@@ -137,4 +138,11 @@ object NetworkModule {
         @Named("mega")
         retrofit: Retrofit,
     ): VerificationClient = retrofit.create(VerificationClient::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMegaScenariosClient(
+        @Named("mega")
+        retrofit: Retrofit,
+    ): MegaScenariosClient = retrofit.create(MegaScenariosClient::class.java)
 }

@@ -114,7 +114,7 @@
     <string name="sub_required_transcription">Транскрипция доступна в Премиум подписке.</string>
     <string name="words_to_learn">Полезные слова</string>
     <string name="contextual_translator">Перевести с контекстом</string>
-    <string name="type_phrase">Напишите фразу...</string>
+    <string name="type_phrase">Напишите фразу на русском...</string>
     <string name="translate">Перевести</string>
     <string name="translating">Переводим...</string>
     <string name="user_has_premium_description">У вас Премиум</string>

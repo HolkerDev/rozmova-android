@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.toScenarioType
+import eu.rozmova.app.modules.generatechat.GenerateChatScreen
 import eu.rozmova.app.modules.onboarding.OnboardingScreen
 import eu.rozmova.app.modules.subscription.SubscriptionScreen
 import eu.rozmova.app.screens.chat.ChatScreen
@@ -81,6 +82,17 @@ fun NavigationHost(
                     popUpTo(NavRoutes.Onboarding.route) { inclusive = true }
                 }
             })
+        }
+
+        composable(route = NavRoutes.GenerateChat.route) {
+            GenerateChatScreen(
+                onChatReady = { chatId, scenarioType ->
+                    navController.navigate(NavRoutes.Chat.routeWith(chatId, scenarioType.toScenarioType()))
+                },
+                onBack = {
+                    navController.navigateUp()
+                },
+            )
         }
 
         // Side Screens

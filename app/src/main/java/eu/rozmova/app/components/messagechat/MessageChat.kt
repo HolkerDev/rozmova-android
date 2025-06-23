@@ -70,9 +70,9 @@ import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.MessageDto
+import eu.rozmova.app.modules.generatechat.ChatId
 import eu.rozmova.app.modules.shared.HelperWords
 import eu.rozmova.app.modules.shared.translationproposal.TranslationProposalModal
-import eu.rozmova.app.screens.createchat.ChatId
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 

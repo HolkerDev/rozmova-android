@@ -121,7 +121,7 @@
     <string name="sub_required_transcription">Transcription is available with Premium subscription.</string>
     <string name="words_to_learn">Words to learn</string>
     <string name="contextual_translator">Contextual translator</string>
-    <string name="type_phrase">Type a phrase...</string>
+    <string name="type_phrase">Type a phrase in English...</string>
     <string name="translate">Translate</string>
     <string name="translating">Translating...</string>
     <string name="user_has_premium_description">You already have a Premium</string>
