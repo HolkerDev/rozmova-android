@@ -40,8 +40,6 @@ sealed class NavRoutes(
         labelResourceId = R.string.bottom_nav_settings,
     )
 
-    data object CreateChat : NavRoutes(route = "create_chat")
-
     data object Login : NavRoutes(route = "login")
 
     data object Onboarding : NavRoutes(route = "onboarding")

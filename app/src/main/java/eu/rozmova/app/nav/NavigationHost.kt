@@ -37,7 +37,7 @@ fun NavigationHost(
         composable(NavRoutes.Chats.route) {
             ChatsListScreen(onChatSelect = { chatId, scenarioType ->
                 navController.navigate("chat/$chatId/$scenarioType")
-            }, onChatCreateClick = { navController.navigate(NavRoutes.CreateChat.route) })
+            }, onChatCreateClick = { navController.navigate(NavRoutes.GenerateChat.route) })
         }
 
         composable(NavRoutes.Learn.route) {
