@@ -110,7 +110,16 @@ fun NavigationHost(
             ChatScreen(
                 chatId = chatId,
                 scenarioType = scenarioType,
-                onBack = { navController.navigateUp() },
+                onBack = {
+                    val previousRoute = navController.previousBackStackEntry?.destination?.route
+                    if (previousRoute == NavRoutes.GenerateChat.route) {
+                        navController.navigate(NavRoutes.Learn.route) {
+                            popUpTo(NavRoutes.GenerateChat.route) { inclusive = true }
+                        }
+                    } else {
+                        navController.navigateUp()
+                    }
+                },
                 onMain = { navController.navigate(NavRoutes.Learn.route) },
                 onNavigateToSubscription = {
                     navController.navigate(NavRoutes.Subscription.route)

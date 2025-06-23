@@ -1,14 +1,40 @@
 package eu.rozmova.app.modules.generatechat
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -17,8 +43,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
+import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.domain.ScenarioTypeDto
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 typealias ChatId = String
 
@@ -35,6 +63,18 @@ fun GenerateChatScreen(
     var selectedDifficulty by remember { mutableStateOf(Difficulty.EASY) }
 
     val state by viewModel.collectAsState()
+
+    viewModel.collectSideEffect { events ->
+        when (events) {
+            is GenerateChatEvents.ChatCreated -> {
+                onChatReady(events.chatId, events.scenarioType)
+            }
+        }
+    }
+
+    fun generateScenario() {
+        viewModel.generateScenario(selectedDifficulty.toDto(), selectedScenarioType.toDto(), description)
+    }
 
     Scaffold(
         topBar = {
@@ -207,8 +247,7 @@ fun GenerateChatScreen(
             // Generate Button
             Button(
                 onClick = {
-//                    isLoading = true
-                    // TODO: Add generation logic here
+                    generateScenario()
                 },
                 modifier =
                     Modifier
@@ -249,6 +288,14 @@ private enum class Difficulty(
     EASY(R.string.level_easy, R.string.level_easy_description),
     MEDIUM(R.string.level_medium, R.string.level_medium_description),
     HARD(R.string.level_hard, R.string.level_hard_description),
+    ;
+
+    fun toDto(): DifficultyDto =
+        when (this) {
+            EASY -> DifficultyDto.EASY
+            MEDIUM -> DifficultyDto.MEDIUM
+            HARD -> DifficultyDto.HARD
+        }
 }
 
 private enum class ScenarioType(
@@ -257,4 +304,11 @@ private enum class ScenarioType(
 ) {
     MESSAGES(R.string.category_message, R.string.scenario_type_messages_description),
     CONVERSATION(R.string.category_conversation, R.string.scenario_type_conversation_description),
+    ;
+
+    fun toDto(): ScenarioTypeDto =
+        when (this) {
+            MESSAGES -> ScenarioTypeDto.MESSAGES
+            CONVERSATION -> ScenarioTypeDto.CONVERSATION
+        }
 }

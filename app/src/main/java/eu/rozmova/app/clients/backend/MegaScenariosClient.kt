@@ -1,11 +1,14 @@
 package eu.rozmova.app.clients.backend
 
 import eu.rozmova.app.domain.ScenarioTypeDto
+import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface MegaScenariosClient {
     @POST("v1/scenarios/generate")
-    suspend fun generateScenario()
+    suspend fun generateScenario(
+        @Body body: GenerateScenarioReq,
+    ): GenerateScenarioResp
 }
 
 data class GenerateScenarioReq(

@@ -2,6 +2,8 @@ package eu.rozmova.app.repositories
 
 import android.util.Log
 import arrow.core.Either
+import eu.rozmova.app.clients.backend.GenerateScenarioReq
+import eu.rozmova.app.clients.backend.MegaScenariosClient
 import eu.rozmova.app.clients.backend.RecommendedScenariosRequest
 import eu.rozmova.app.clients.backend.ScenarioClient
 import eu.rozmova.app.clients.backend.ScenariosRequest
@@ -16,7 +18,10 @@ import io.github.jan.supabase.postgrest.postgrest
 import javax.inject.Inject
 import javax.inject.Singleton
 
-typealias LanguageCode = String
+data class ChatIdWithScenarioType(
+    val chatId: String,
+    val scenarioType: ScenarioTypeDto,
+)
 
 @Singleton
 class ScenariosRepository
@@ -24,6 +29,7 @@ class ScenariosRepository
     constructor(
         private val supabaseClient: SupabaseClient,
         private val scenarioClient: ScenarioClient,
+        private val megaScenariosClient: MegaScenariosClient,
     ) {
         suspend fun getAll(
             learningLanguage: String,
@@ -68,6 +74,36 @@ class ScenariosRepository
                 }.mapLeft { error ->
                     Log.e("ScenariosRepository", "Error trying to fetch scenarios", error)
                     InfraErrors.NetworkError("Error trying to fetch scenarios: $error")
+                }
+
+        suspend fun generateScenario(
+            userLang: String,
+            scenarioLang: String,
+            scenarioType: ScenarioTypeDto,
+            difficulty: DifficultyDto,
+            description: String,
+        ): Either<InfraErrors, ChatIdWithScenarioType> =
+            Either
+                .catch {
+                    Log.i("ScenariosRepository", "Generating scenario with description: $description")
+                    val response =
+                        megaScenariosClient.generateScenario(
+                            GenerateScenarioReq(
+                                description = description,
+                                userLang = userLang,
+                                scenarioLang = scenarioLang,
+                                scenarioType = scenarioType.name,
+                                difficulty = difficulty.name,
+                            ),
+                        )
+                    Log.i("ScenariosRepository", "Generated scenario response: $response")
+                    ChatIdWithScenarioType(
+                        chatId = response.chatId,
+                        scenarioType = response.scenarioType,
+                    )
+                }.mapLeft { error ->
+                    Log.e("ScenariosRepository", "Error trying to generate scenario", error)
+                    InfraErrors.NetworkError("Error trying to generate scenario: $error")
                 }
 
         suspend fun getTodaySelection(
