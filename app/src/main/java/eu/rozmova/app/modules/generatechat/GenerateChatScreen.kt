@@ -11,12 +11,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import eu.rozmova.app.R
 import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.ScenarioTypeDto
+import org.orbitmvi.orbit.compose.collectAsState
 
 typealias ChatId = String
 
@@ -31,7 +34,8 @@ fun GenerateChatScreen(
     var description by remember { mutableStateOf("") }
     var selectedScenarioType by remember { mutableStateOf(ScenarioType.MESSAGES) }
     var selectedDifficulty by remember { mutableStateOf(Difficulty.EASY) }
-    var isLoading by remember { mutableStateOf(false) }
+
+    val state by viewModel.collectAsState()
 
     Scaffold(
         topBar = {
@@ -88,7 +92,7 @@ fun GenerateChatScreen(
                             Text("Describe the chat scenario you want to generate...")
                         },
                         maxLines = 6,
-                        enabled = !isLoading,
+                        enabled = !state.isLoading,
                     )
                 }
             }
@@ -120,14 +124,14 @@ fun GenerateChatScreen(
                                             selected = selectedScenarioType == scenarioType,
                                             onClick = { selectedScenarioType = scenarioType },
                                             role = Role.RadioButton,
-                                            enabled = !isLoading,
+                                            enabled = !state.isLoading,
                                         ).padding(vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 RadioButton(
                                     selected = selectedScenarioType == scenarioType,
                                     onClick = null,
-                                    enabled = !isLoading,
+                                    enabled = !state.isLoading,
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
@@ -165,7 +169,7 @@ fun GenerateChatScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text(
-                        text = "Difficulty",
+                        text = stringResource(R.string.difficulty),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                     )
@@ -182,23 +186,23 @@ fun GenerateChatScreen(
                                             selected = selectedDifficulty == difficulty,
                                             onClick = { selectedDifficulty = difficulty },
                                             role = Role.RadioButton,
-                                            enabled = !isLoading,
+                                            enabled = !state.isLoading,
                                         ).padding(vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 RadioButton(
                                     selected = selectedDifficulty == difficulty,
                                     onClick = null,
-                                    enabled = !isLoading,
+                                    enabled = !state.isLoading,
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
                                     Text(
-                                        text = difficulty.displayName,
+                                        text = stringResource(difficulty.displayName),
                                         style = MaterialTheme.typography.bodyLarge,
                                     )
                                     Text(
-                                        text = difficulty.description,
+                                        text = stringResource(difficulty.description),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
@@ -212,16 +216,17 @@ fun GenerateChatScreen(
             // Generate Button
             Button(
                 onClick = {
-                    isLoading = true
+//                    isLoading = true
                     // TODO: Add generation logic here
                 },
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                enabled = !isLoading && description.isNotBlank(),
+                shape = MaterialTheme.shapes.large,
+                enabled = !state.isLoading && description.isNotBlank(),
             ) {
-                if (isLoading) {
+                if (state.isLoading) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -247,10 +252,10 @@ fun GenerateChatScreen(
 }
 
 enum class Difficulty(
-    val displayName: String,
-    val description: String,
+    val displayName: Int,
+    val description: Int,
 ) {
-    EASY("Easy", "Basic vocabulary and simple sentences"),
-    MEDIUM("Medium", "Intermediate vocabulary and complex structures"),
-    HARD("Hard", "Advanced vocabulary and native-like expressions"),
+    EASY(R.string.level_easy, R.string.level_easy_description),
+    MEDIUM(R.string.level_medium, R.string.level_medium_description),
+    HARD(R.string.level_hard, R.string.level_hard_description),
 }

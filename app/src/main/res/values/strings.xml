@@ -94,8 +94,6 @@
     <string name="onboarding_salutation_title">Select pronoun</string>
     <string name="onboarding_salutation_description">Please provide your pronoun. It will improve your immersion during scenarios.</string>
     <string name="pronoun_they">they/them</string>
-    
-    <!-- Subscription related strings -->
     <string name="subscription_premium">Premium subscription</string>
     <string name="subscription_unlock_features">Unlock premium features</string>
     <string name="subscription_monthly">Monthly</string>
@@ -109,8 +107,6 @@
     <string name="subscription_error_service_unavailable">Google Play services unavailable. Please try again later.</string>
     <string name="subscription_retry">Retry</string>
     <string name="subscription_oops">Oops!</string>
-    
-    <!-- Premium features -->
     <string name="premium_feature_unlimited_conversations">Unlimited speaking convesations</string>
     <string name="premium_feature_dictionary_access">Access to scenario dictionary</string>
     <string name="premium_feature_transcription_access">Access to audio transcriptions</string>
@@ -125,4 +121,8 @@
     <string name="translate">Translate</string>
     <string name="translating">Translating...</string>
     <string name="user_has_premium_description">You already have a Premium</string>
+    <string name="level_easy_description">Basic vocabulary and simple sentences</string>
+    <string name="level_medium_description">Intermediate vocabulary and complex structures</string>
+    <string name="level_hard_description">Advanced vocabulary and native-like expressions</string>
+    <string name="difficulty">Difficulty</string>
 </resources>

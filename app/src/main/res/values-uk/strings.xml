@@ -118,4 +118,8 @@
     <string name="translate">Перекласти</string>
     <string name="translating">Перекладаємо...</string>
     <string name="user_has_premium_description">В вас Преміум</string>
+    <string name="level_easy_description">Базова лексика та прості речення</string>
+    <string name="level_medium_description">Складна лексика та складні речення</string>
+    <string name="level_hard_description">Просунута лексика та локальні вирази</string>
+    <string name="difficulty">Складність</string>
 </resources>
