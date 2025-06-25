@@ -108,7 +108,6 @@ fun AudioRecorderButton(
     onRecordStop: () -> Unit,
     isRecording: Boolean,
     isDisabled: Boolean,
-    onChatAnalyticsRequest: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AudioRecorderViewModel = hiltViewModel(),
     context: Context = LocalContext.current,
@@ -130,9 +129,7 @@ fun AudioRecorderButton(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission(),
             onResult = { isGranted ->
-                if (isGranted) {
-                    viewModel.startRecording()
-                } else {
+                if (!isGranted) {
                     Toast
                         .makeText(
                             context,
@@ -153,11 +150,17 @@ fun AudioRecorderButton(
             onRecord = {
                 when {
                     ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
-                        == PackageManager.PERMISSION_GRANTED -> onRecordStart()
+                        == PackageManager.PERMISSION_GRANTED -> {
+                        viewModel.startRecording()
+                        onRecordStart()
+                    }
                     else -> permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                 }
             },
-            onStop = onRecordStop,
+            onStop = {
+                viewModel.stopRecording()
+                onRecordStop()
+            },
             isRecording = isRecording,
             isDisabled = isDisabled,
         )
@@ -172,6 +175,5 @@ private fun AudioRecorderButtonPreview() {
         onRecordStop = {},
         isRecording = false,
         isDisabled = false,
-        onChatAnalyticsRequest = {},
     )
 }

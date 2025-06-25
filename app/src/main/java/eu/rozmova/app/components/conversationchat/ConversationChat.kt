@@ -227,7 +227,6 @@ fun ConversationChat(
                         onRecordStart = { viewModel.startRecording() },
                         onRecordStop = { viewModel.stopRecording() },
                         isDisabled = state.isMessageLoading,
-                        onChatAnalyticsRequest = onChatArchive,
                         isRecording = state.isAudioRecording,
                         modifier = Modifier.padding(bottom = 16.dp),
                     )

@@ -17,7 +17,6 @@ import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.domain.ReviewDto
 import eu.rozmova.app.repositories.ChatsRepository
-import eu.rozmova.app.repositories.billing.SubscriptionRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.orbitmvi.orbit.Container
@@ -61,7 +60,6 @@ class ChatDetailsViewModel
     constructor(
         private val expoPlayer: ExoPlayer,
         private val chatsRepository: ChatsRepository,
-        private val subscriptionRepository: SubscriptionRepository,
         application: Application,
     ) : AndroidViewModel(application),
         ContainerHost<ConvoChatState, ConvoChatEvents> {
@@ -109,12 +107,6 @@ class ChatDetailsViewModel
                     }
                 }
             }
-
-        fun generateTranslationProposal(
-            chatId: String,
-            phrase: String,
-            targetLanguage: String,
-        ) = intent {}
 
         fun onAudioSaved() =
             intent {
