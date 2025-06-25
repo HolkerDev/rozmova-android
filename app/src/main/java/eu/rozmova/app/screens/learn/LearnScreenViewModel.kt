@@ -29,6 +29,7 @@ data class LearnScreenState(
     val weeklyScenariosLoading: Boolean = false,
     val recommendedScenarios: TodayScenarioSelection? = null,
     val latestChat: ChatDto? = null,
+    val isRefreshing: Boolean = false,
 )
 
 @HiltViewModel
@@ -60,6 +61,15 @@ class LearnScreenViewModel
                         LearnEvent.StartOnboarding,
                     )
                 }
+            }
+
+        fun refresh() =
+            intent {
+                reduce { state.copy(isRefreshing = true) }
+                fetchTodayScenarios()
+                fetchLatestChat()
+                fetchWeeklyScenarios()
+                reduce { state.copy(isRefreshing = false) }
             }
 
         private fun fetchTodayScenarios() =

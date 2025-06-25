@@ -9,8 +9,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
@@ -61,41 +61,47 @@ fun LearnScreen(
         TopAppBar(
             title = { Text(stringResource(R.string.practice_title)) },
         )
-        LazyColumn(contentPadding = PaddingValues(bottom = 8.dp)) {
-            state.recommendedScenarios?.let { recommendedScenarios ->
-                item {
-                    TodaysScenarioSelection(
-                        onScenarioClick = { scenario ->
-                            onScenarioSelect(scenario)
-                        },
-                        state = recommendedScenarios,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    )
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = { viewModel.refresh() },
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            LazyColumn(contentPadding = PaddingValues(bottom = 8.dp)) {
+                state.recommendedScenarios?.let { recommendedScenarios ->
+                    item {
+                        TodaysScenarioSelection(
+                            onScenarioClick = { scenario ->
+                                onScenarioSelect(scenario)
+                            },
+                            state = recommendedScenarios,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        )
+                    }
                 }
-            }
-            state.latestChat?.let { latestChat ->
-                item {
-                    QuickResumeCard(
-                        chat = latestChat,
-                        onContinueClick = { chatId, scenarioType ->
-                            navigateToChat(
-                                chatId,
-                                scenarioType,
-                            )
-                        },
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    )
+                state.latestChat?.let { latestChat ->
+                    item {
+                        QuickResumeCard(
+                            chat = latestChat,
+                            onContinueClick = { chatId, scenarioType ->
+                                navigateToChat(
+                                    chatId,
+                                    scenarioType,
+                                )
+                            },
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        )
+                    }
                 }
-            }
 
-            item {
-                RecentlyAdded(
-                    scenarios = state.weeklyScenarios ?: emptyList(),
-                    isLoading = state.weeklyScenariosLoading,
-                    onScenarioSelect = { scenario ->
-                        onScenarioDtoSelect(scenario)
-                    },
-                )
+                item {
+                    RecentlyAdded(
+                        scenarios = state.weeklyScenarios ?: emptyList(),
+                        isLoading = state.weeklyScenariosLoading,
+                        onScenarioSelect = { scenario ->
+                            onScenarioDtoSelect(scenario)
+                        },
+                    )
+                }
             }
         }
     }
