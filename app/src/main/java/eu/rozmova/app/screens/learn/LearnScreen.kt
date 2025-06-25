@@ -1,16 +1,17 @@
 package eu.rozmova.app.screens.learn
 
 import android.util.Log
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
@@ -55,16 +56,21 @@ fun LearnScreen(
 
     fun onScenarioDtoSelect(scenario: ScenarioDto) = viewModel.createChatFromScenario(scenarioId = scenario.id)
 
-    Column(
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.practice_title)) },
+            )
+        },
         modifier = modifier.fillMaxSize(),
-    ) {
-        TopAppBar(
-            title = { Text(stringResource(R.string.practice_title)) },
-        )
+    ) { innerPadding ->
         PullToRefreshBox(
             isRefreshing = state.isRefreshing,
             onRefresh = { viewModel.refresh() },
-            modifier = Modifier.fillMaxSize(),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
         ) {
             LazyColumn(contentPadding = PaddingValues(bottom = 8.dp)) {
                 state.recommendedScenarios?.let { recommendedScenarios ->
