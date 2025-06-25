@@ -26,12 +26,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import eu.rozmova.app.R
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -78,7 +80,7 @@ fun BugReportDialog(
             ) {
                 // Header
                 Text(
-                    text = "Report a Bug",
+                    text = stringResource(R.string.propose_idea_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                 )
@@ -89,8 +91,8 @@ fun BugReportDialog(
                 TextField(
                     value = bugTitle,
                     onValueChange = { bugTitle = it },
-                    label = { Text("Title") },
-                    placeholder = { Text("Short description of the issue") },
+                    label = { Text(stringResource(R.string.title)) },
+                    placeholder = { Text(stringResource(R.string.title_description)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                 )
@@ -98,8 +100,8 @@ fun BugReportDialog(
                 TextField(
                     value = bugDescription,
                     onValueChange = { bugDescription = it },
-                    label = { Text("Description") },
-                    placeholder = { Text("Please provide details about what happened...") },
+                    label = { Text(stringResource(R.string.description)) },
+                    placeholder = { Text(stringResource(R.string.description_description)) },
                     modifier = Modifier.fillMaxWidth().height(120.dp),
                     maxLines = 5,
                 )
@@ -113,7 +115,7 @@ fun BugReportDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     TextButton(onClick = onDismiss, modifier = Modifier.padding(end = 8.dp)) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
 
                     Button(
@@ -131,7 +133,7 @@ fun BugReportDialog(
                                 strokeWidth = 2.dp,
                             )
                         } else {
-                            Text("Send Report")
+                            Text(stringResource(R.string.send))
                         }
                     }
                 }

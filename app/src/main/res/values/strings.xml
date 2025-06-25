@@ -133,4 +133,9 @@
     <string name="scenario_type">Scenario type</string>
     <string name="generate_scenario">Generate Chat</string>
     <string name="generate_scenario_loading">Generating...</string>
+    <string name="propose_idea_title">Propose an idea</string>
+    <string name="send">Send</string>
+    <string name="title">Title</string>
+    <string name="title_description">Short topic name...</string>
+    <string name="description_description">Full description of the idea...</string>
 </resources>

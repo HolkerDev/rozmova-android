@@ -130,4 +130,9 @@
     <string name="scenario_type">Тип сценарію</string>
     <string name="generate_scenario">Сгенерувати чат</string>
     <string name="generate_scenario_loading">Генеруємо...</string>
+    <string name="propose_idea_title">Запропонувати ідею</string>
+    <string name="send">Надіслати</string>
+    <string name="title">Тема</string>
+    <string name="title_description">Коротка назва теми...</string>
+    <string name="description_description">Повний опис теми...</string>
 </resources>
