@@ -66,10 +66,29 @@ class LearnScreenViewModel
         fun refresh() =
             intent {
                 reduce { state.copy(isRefreshing = true) }
-                fetchTodayScenarios()
-                fetchLatestChat()
-                fetchWeeklyScenarios()
-                reduce { state.copy(isRefreshing = false) }
+                try {
+                    val learnLang = settingsRepository.getLearningLangOrDefault()
+                    val userLang = localeManager.getCurrentLocale().language
+
+                    // Fetch all data concurrently and wait for completion
+                    val todayScenarios = scenariosRepository.getTodaySelection(userLang, learnLang)
+                    val latestChat = chatsRepository.fetchLatest(learnLang, userLang)
+                    val weeklyScenarios = scenariosRepository.weeklyScenarios(userLang = userLang, scenarioLang = learnLang)
+
+                    todayScenarios.map { recScenarios ->
+                        reduce { state.copy(recommendedScenarios = recScenarios) }
+                    }
+
+                    latestChat.map { chat ->
+                        reduce { state.copy(latestChat = chat) }
+                    }
+
+                    weeklyScenarios.map { scenarios ->
+                        reduce { state.copy(weeklyScenarios = scenarios) }
+                    }
+                } finally {
+                    reduce { state.copy(isRefreshing = false) }
+                }
             }
 
         private fun fetchTodayScenarios() =
