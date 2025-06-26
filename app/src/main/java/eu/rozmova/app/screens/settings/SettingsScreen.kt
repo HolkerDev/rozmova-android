@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Star
@@ -51,6 +52,7 @@ fun SettingsScreen(
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showInterfaceSelectionDialog by remember { mutableStateOf(false) }
     var showBugReportDialog by remember { mutableStateOf(false) }
+    var showDeleteDataDialog by remember { mutableStateOf(false) }
 
     var learnLanguage by remember { mutableStateOf<Language>(Language.GERMAN) }
     var interfaceLanguage by remember { mutableStateOf<Language>(Language.ENGLISH) }
@@ -86,6 +88,13 @@ fun SettingsScreen(
             showBugReportDialog = showBugReportDialog,
             onBugReportClick = { showBugReportDialog = true },
             onBugReportDismiss = { showBugReportDialog = false },
+            showDeleteDataDialog = showDeleteDataDialog,
+            onDeleteDataClick = { showDeleteDataDialog = true },
+            onDeleteDataDismiss = { showDeleteDataDialog = false },
+            onDeleteDataConfirm = {
+                showDeleteDataDialog = false
+                viewModel.deleteUserData()
+            },
             onNavigateToSubscription = onNavigateToSubscription,
             isSubscribed = state.isSubscribed,
             modifier = modifier,
@@ -109,6 +118,10 @@ fun SettingsContent(
     showBugReportDialog: Boolean,
     onBugReportClick: () -> Unit,
     onBugReportDismiss: () -> Unit,
+    showDeleteDataDialog: Boolean,
+    onDeleteDataClick: () -> Unit,
+    onDeleteDataDismiss: () -> Unit,
+    onDeleteDataConfirm: () -> Unit,
     onNavigateToSubscription: () -> Unit,
     learnLanguage: Language,
     interfaceLanguage: Language,
@@ -214,8 +227,47 @@ fun SettingsContent(
             modifier = Modifier.clickable(onClick = onLogOutClick),
         )
 
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.delete_user_data)) },
+            supportingContent = { Text(stringResource(R.string.delete_user_data_description)) },
+            leadingContent = {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            },
+            modifier = Modifier.clickable(onClick = onDeleteDataClick),
+        )
+
         if (showBugReportDialog) {
             BugReportDialog(onDismiss = onBugReportDismiss)
+        }
+
+        // Delete User Data Confirmation Dialog
+        if (showDeleteDataDialog) {
+            AlertDialog(
+                onDismissRequest = onDeleteDataDismiss,
+                title = { Text(stringResource(R.string.delete_user_data_title)) },
+                text = {
+                    Text(stringResource(R.string.delete_user_data_confirmation))
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = onDeleteDataConfirm,
+                    ) {
+                        Text(
+                            stringResource(R.string.delete),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = onDeleteDataDismiss) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            )
         }
 
         // Language Selection Dialog

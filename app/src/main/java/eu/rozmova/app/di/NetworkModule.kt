@@ -13,6 +13,7 @@ import eu.rozmova.app.clients.backend.MegaScenariosClient
 import eu.rozmova.app.clients.backend.MessageClient
 import eu.rozmova.app.clients.backend.ScenarioClient
 import eu.rozmova.app.clients.backend.TranslationClient
+import eu.rozmova.app.clients.backend.UserClient
 import eu.rozmova.app.clients.backend.VerificationClient
 import eu.rozmova.app.clients.backend.network.AuthInterceptor
 import eu.rozmova.app.utils.instantDeserializer
@@ -145,4 +146,11 @@ object NetworkModule {
         @Named("mega")
         retrofit: Retrofit,
     ): MegaScenariosClient = retrofit.create(MegaScenariosClient::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMegaUserClient(
+        @Named("mega")
+        retrofit: Retrofit,
+    ): UserClient = retrofit.create(UserClient::class.java)
 }

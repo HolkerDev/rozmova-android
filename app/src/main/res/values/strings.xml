@@ -138,4 +138,9 @@
     <string name="title">Title</string>
     <string name="title_description">Short topic name...</string>
     <string name="description_description">Full description of the idea...</string>
+    <string name="delete_user_data">Delete User Data</string>
+    <string name="delete_user_data_description">Permanently delete all your data</string>
+    <string name="delete_user_data_title">Delete User Data</string>
+    <string name="delete_user_data_confirmation">Are you sure you want to delete all your user data? This action cannot be undone.</string>
+    <string name="delete">Delete</string>
 </resources>

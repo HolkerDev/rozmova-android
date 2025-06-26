@@ -8,6 +8,7 @@ import eu.rozmova.app.domain.Language
 import eu.rozmova.app.domain.getLanguageByCode
 import eu.rozmova.app.repositories.AuthRepository
 import eu.rozmova.app.repositories.SettingsRepository
+import eu.rozmova.app.repositories.UserRepository
 import eu.rozmova.app.repositories.billing.SubscriptionRepository
 import eu.rozmova.app.utils.LocaleManager
 import kotlinx.coroutines.launch
@@ -35,6 +36,7 @@ class SettingsScreenViewModel
         private val settingsRepository: SettingsRepository,
         private val localeManager: LocaleManager,
         private val subscriptionRepository: SubscriptionRepository,
+        private val userRepository: UserRepository,
     ) : ViewModel(),
         ContainerHost<SettingsState, Unit> {
         override val container: Container<SettingsState, Unit> = container(SettingsState())
@@ -100,4 +102,23 @@ class SettingsScreenViewModel
                     )
                 }
             }
+
+        fun deleteUserData() {
+            viewModelScope.launch {
+                try {
+                    // Clear all user settings
+                    settingsRepository.clearLearningLang()
+                    settingsRepository.clearSalutation()
+
+                    userRepository.deleteUser()
+
+                    // Sign out the user which should clear authentication data
+                    authRepository.signOut()
+
+                    Log.i("SettingsScreenViewModel", "User data deleted successfully")
+                } catch (e: Exception) {
+                    Log.e("SettingsScreenViewModel", "Error deleting user data", e)
+                }
+            }
+        }
     }

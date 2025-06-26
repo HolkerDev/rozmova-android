@@ -135,4 +135,9 @@
     <string name="title">Тема</string>
     <string name="title_description">Короткое название темы...</string>
     <string name="description_description">Полное описание идеи...</string>
+    <string name="delete_user_data">Удалить данные пользователя</string>
+    <string name="delete_user_data_description">Навсегда удалить все ваши данные</string>
+    <string name="delete_user_data_title">Удалить данные пользователя</string>
+    <string name="delete_user_data_confirmation">Вы уверены, что хотите удалить все данные пользователя? Это действие нельзя отменить.</string>
+    <string name="delete">Удалить</string>
 </resources>
