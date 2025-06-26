@@ -7,8 +7,6 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
 }
 
 val secretsFile = rootProject.file("secrets.properties")
@@ -119,8 +117,6 @@ dependencies {
     implementation(libs.androidx.billing.ktx)
 
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-    implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation(libs.firebase.config.ktx)
 
     implementation("org.orbit-mvi:orbit-viewmodel:9.0.0")
     implementation("org.orbit-mvi:orbit-compose:9.0.0")
@@ -130,10 +126,6 @@ dependencies {
 
     implementation("io.arrow-kt:arrow-core:2.0.1")
     implementation("io.arrow-kt:arrow-fx-coroutines:2.0.1")
-
-    implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation(libs.firebase.crashlytics)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.hilt.android)

@@ -7,7 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -26,7 +25,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import arrow.core.getOrElse
 import com.android.billingclient.api.Purchase
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,11 +37,9 @@ import eu.rozmova.app.repositories.AuthRepository
 import eu.rozmova.app.repositories.AuthState
 import eu.rozmova.app.repositories.UserRepository
 import eu.rozmova.app.repositories.billing.SubscriptionRepository
-import eu.rozmova.app.services.FeatureService
 import eu.rozmova.app.services.billing.BillingEvents
 import eu.rozmova.app.services.billing.BillingService
 import eu.rozmova.app.ui.theme.RozmovaTheme
-import io.github.jan.supabase.auth.user.UserSession
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -64,7 +60,6 @@ class AppViewModel
     constructor(
         private val authRepository: AuthRepository,
         private val userRepository: UserRepository,
-        private val featureService: FeatureService,
         private val billingService: BillingService,
         private val subscriptionRepository: SubscriptionRepository,
         private val verificationClient: VerificationClient,
@@ -124,24 +119,12 @@ class AppViewModel
             }
         }
 
-        private fun initializeFeatureService(userSession: UserSession) =
-            viewModelScope.launch {
-                val userId = userSession.user?.id ?: throw IllegalStateException("User not found")
-                userRepository
-                    .fetchUserGroups(userId)
-                    .getOrElse { emptyList() }
-                    .let { userGroups ->
-                        featureService.initialize(userGroups)
-                    }
-            }
-
         val appState =
             authRepository.authState
                 .map { authState ->
                     when (authState) {
                         is AuthState.Loading -> AppState.Loading
                         is AuthState.Authenticated -> {
-                            initializeFeatureService(authState.userSession)
                             billingService.initialize()
                             AppState.Authenticated
                         }
