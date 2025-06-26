@@ -12,9 +12,12 @@
         android:maxSdkVersion="32" />
     <uses-permission android:name="com.android.vending.BILLING" />
 
-    <!-- Remove AD_ID permission added by Firebase Analytics since we don't use ads -->
+    <!-- Remove AD_ID permissions added by Firebase Analytics since we don't use ads -->
     <uses-permission
         android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.ACCESS_ADSERVICES_AD_ID"
         tools:node="remove" />
 
     <application
