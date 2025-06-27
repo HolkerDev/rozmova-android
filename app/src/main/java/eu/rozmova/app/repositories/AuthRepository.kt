@@ -9,6 +9,7 @@ import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.auth.user.UserSession
+import io.sentry.Sentry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.security.MessageDigest
@@ -103,6 +104,7 @@ class AuthRepository
                     Unit
                 }.mapLeft { e ->
                     Log.e(tag, "Sign in with Google failed", e)
+                    Sentry.captureException(e)
                     _authState.value = AuthState.Unauthenticated
 
                     when {

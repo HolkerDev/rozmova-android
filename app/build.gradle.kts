@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
+    id("io.sentry.android.gradle") version "5.8.0"
 }
 
 val secretsFile = rootProject.file("secrets.properties")
