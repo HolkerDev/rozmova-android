@@ -1,5 +1,6 @@
 package eu.rozmova.app.repositories
 
+import android.app.Activity
 import android.util.Log
 import arrow.core.Either
 import eu.rozmova.app.di.GoogleAuthProvider
@@ -78,7 +79,7 @@ class AuthRepository
             }
         }
 
-        suspend fun signInWithGoogle(): Either<String, Unit> =
+        suspend fun signInWithGoogle(activity: Activity): Either<String, Unit> =
             Either
                 .catch {
                     _authState.value = AuthState.Loading
@@ -86,7 +87,7 @@ class AuthRepository
                     val rawNonce = UUID.randomUUID().toString()
                     val hashedNonce = createNonce(rawNonce)
 
-                    val googleCredentialResult = googleAuthProvider.getGoogleCredential(hashedNonce)
+                    val googleCredentialResult = googleAuthProvider.getGoogleCredential(activity, hashedNonce)
                     val googleCredential =
                         googleCredentialResult.getOrElse { error ->
                             Log.e(tag, "Failed to get Google credential", error)

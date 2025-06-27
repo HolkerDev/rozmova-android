@@ -1,5 +1,6 @@
 package eu.rozmova.app.screens.login
 
+import android.app.Activity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.components.GoogleSignInButton
@@ -25,9 +27,10 @@ fun LoginScreen(
     viewModel: LoginScreenViewModel = hiltViewModel(),
 ) {
     val state by viewModel.collectAsState()
+    val activity = LocalContext.current as Activity
 
     fun onSignInClick() {
-        viewModel.login()
+        viewModel.login(activity)
     }
 
     Box(

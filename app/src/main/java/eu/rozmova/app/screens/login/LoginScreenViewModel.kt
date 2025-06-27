@@ -1,5 +1,6 @@
 package eu.rozmova.app.screens.login
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.repositories.AuthRepository
@@ -22,14 +23,14 @@ class LoginScreenViewModel
         ContainerHost<LoginUiState, Unit> {
         override val container: Container<LoginUiState, Unit> = container(LoginUiState())
 
-        fun login() =
+        fun login(activity: Activity) =
             intent {
                 reduce {
                     state.copy(isLoading = true, errorMessage = null)
                 }
 
                 authRepository
-                    .signInWithGoogle()
+                    .signInWithGoogle(activity)
                     .mapLeft { errorMessage ->
                         reduce {
                             state.copy(isLoading = false, errorMessage = errorMessage)

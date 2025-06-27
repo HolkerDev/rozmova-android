@@ -1,13 +1,12 @@
 package eu.rozmova.app.di
 
-import android.content.Context
+import android.app.Activity
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
-import dagger.hilt.android.qualifiers.ApplicationContext
 import eu.rozmova.app.BuildConfig
 import javax.inject.Inject
 
@@ -15,9 +14,11 @@ class GoogleAuthProvider
     @Inject
     constructor(
         private val credentialManager: CredentialManager,
-        @ApplicationContext private val context: Context,
     ) {
-        suspend fun getGoogleCredential(hashedNonce: String): Result<String> =
+        suspend fun getGoogleCredential(
+            activity: Activity,
+            hashedNonce: String,
+        ): Result<String> =
             try {
                 println(BuildConfig.GOOGLE_CLIENT_ID)
                 val googleIdOption =
@@ -34,7 +35,7 @@ class GoogleAuthProvider
                         .addCredentialOption(googleIdOption)
                         .build()
 
-                val result = credentialManager.getCredential(context, request)
+                val result = credentialManager.getCredential(activity, request)
                 val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(result.credential.data)
 
                 Result.success(googleIdTokenCredential.idToken)

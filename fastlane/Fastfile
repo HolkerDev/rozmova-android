@@ -1,6 +1,8 @@
 default_platform(:android)
 
 platform :android do
+  dotenv
+
   desc "Runs all the tests"
   lane :test do
     gradle(task: "test")

@@ -12,19 +12,13 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AuthModule {
+    @Provides
+    @Singleton
+    fun provideCredentialManager(
+        @ApplicationContext context: Context,
+    ): CredentialManager = CredentialManager.create(context)
 
     @Provides
     @Singleton
-    fun provideCredentialManager(@ApplicationContext context: Context): CredentialManager {
-        return CredentialManager.create(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideGoogleAuthProvider(
-        credentialManager: CredentialManager,
-        @ApplicationContext context: Context
-    ): GoogleAuthProvider {
-        return GoogleAuthProvider(credentialManager, context)
-    }
+    fun provideGoogleAuthProvider(credentialManager: CredentialManager): GoogleAuthProvider = GoogleAuthProvider(credentialManager)
 }
