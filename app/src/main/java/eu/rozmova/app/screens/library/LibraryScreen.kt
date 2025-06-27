@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.AlertDialog
@@ -193,14 +192,6 @@ private fun ScenarioCard(
 
     Card(
         onClick = { onClick(scenario) },
-        modifier =
-            modifier.fillMaxWidth().then(
-                if (isPassed) {
-                    Modifier.padding(2.dp)
-                } else {
-                    Modifier
-                },
-            ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors =
             if (isPassed) {
@@ -220,17 +211,10 @@ private fun ScenarioCard(
             ) {
                 Text(
                     text = scenario.title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 2,
                     modifier = Modifier.weight(1f),
                 )
-                if (isPassed) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = "Passed",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(start = 8.dp),
-                    )
-                }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
