@@ -16,6 +16,13 @@ if (secretsFile.exists()) {
     secrets.load(secretsFile.inputStream())
 }
 
+sentry {
+    autoUploadProguardMapping.set(true)
+    org = "rozmova"
+    projectName = "rozmova-android"
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
+}
+
 android {
     namespace = "eu.rozmova.app"
     compileSdk = 35
