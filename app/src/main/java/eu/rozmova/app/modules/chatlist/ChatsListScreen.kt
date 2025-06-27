@@ -1,4 +1,4 @@
-package eu.rozmova.app.screens.chats
+package eu.rozmova.app.modules.chatlist
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,12 +25,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
-import eu.rozmova.app.components.ChatItem
 import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.toScenarioType
+import eu.rozmova.app.modules.chatlist.components.ChatItem
 import org.orbitmvi.orbit.compose.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,8 +59,8 @@ fun ChatsListScreen(
                     .padding(
                         PaddingValues(
                             top = paddingValues.calculateTopPadding(),
-                            start = paddingValues.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                            end = paddingValues.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
+                            start = paddingValues.calculateLeftPadding(LayoutDirection.Ltr),
+                            end = paddingValues.calculateRightPadding(LayoutDirection.Ltr),
                             bottom = 4.dp,
                         ),
                     ),

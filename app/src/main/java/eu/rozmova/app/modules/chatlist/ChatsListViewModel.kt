@@ -1,4 +1,4 @@
-package eu.rozmova.app.screens.chats
+package eu.rozmova.app.modules.chatlist
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

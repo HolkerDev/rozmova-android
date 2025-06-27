@@ -11,11 +11,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.toScenarioType
+import eu.rozmova.app.modules.chatlist.ChatsListScreen
 import eu.rozmova.app.modules.generatechat.GenerateChatScreen
 import eu.rozmova.app.modules.onboarding.OnboardingScreen
 import eu.rozmova.app.modules.subscription.SubscriptionScreen
 import eu.rozmova.app.screens.chat.ChatScreen
-import eu.rozmova.app.screens.chats.ChatsListScreen
 import eu.rozmova.app.screens.learn.LearnScreen
 import eu.rozmova.app.screens.library.LibraryScreen
 import eu.rozmova.app.screens.login.LoginScreen

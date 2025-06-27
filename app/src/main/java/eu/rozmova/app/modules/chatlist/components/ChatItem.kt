@@ -1,4 +1,4 @@
-package eu.rozmova.app.components
+package eu.rozmova.app.modules.chatlist.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -69,7 +70,7 @@ fun ChatItem(
                         showDeleteDialog = false
                     },
                     colors =
-                        androidx.compose.material3.ButtonDefaults.textButtonColors(
+                        ButtonDefaults.textButtonColors(
                             contentColor = MaterialTheme.colorScheme.error,
                         ),
                 ) {
@@ -128,9 +129,9 @@ fun ChatItem(
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = chat.scenario.title,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
