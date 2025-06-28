@@ -8,6 +8,7 @@ import eu.rozmova.app.clients.backend.FetchAllReq
 import eu.rozmova.app.clients.backend.FetchLatestReq
 import eu.rozmova.app.clients.backend.FinishChatRes
 import eu.rozmova.app.clients.backend.GenSignedUrlReq
+import eu.rozmova.app.clients.backend.MegaChatClient
 import eu.rozmova.app.clients.backend.MessageClient
 import eu.rozmova.app.clients.backend.SendAudioReq
 import eu.rozmova.app.clients.backend.SendMessageReq
@@ -41,6 +42,7 @@ class ChatsRepository
         private val chatClient: ChatClient,
         private val messageClient: MessageClient,
         private val s3Client: S3Client,
+        private val megaChatClient: MegaChatClient,
         private val settingsRepository: SettingsRepository,
     ) {
         private val tag = this::class.simpleName

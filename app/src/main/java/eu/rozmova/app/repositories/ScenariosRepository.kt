@@ -2,11 +2,11 @@ package eu.rozmova.app.repositories
 
 import android.util.Log
 import arrow.core.Either
+import eu.rozmova.app.clients.backend.FilterScenariosReq
 import eu.rozmova.app.clients.backend.GenerateScenarioReq
 import eu.rozmova.app.clients.backend.MegaScenariosClient
 import eu.rozmova.app.clients.backend.RecommendedScenariosRequest
 import eu.rozmova.app.clients.backend.ScenarioClient
-import eu.rozmova.app.clients.backend.ScenariosRequest
 import eu.rozmova.app.clients.backend.WeeklyScenariosBody
 import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.domain.ScenarioDto
@@ -55,8 +55,8 @@ class ScenariosRepository
             Either
                 .catch {
                     val scenarios =
-                        scenarioClient.fetchScenarios(
-                            ScenariosRequest(
+                        megaScenariosClient.filter(
+                            FilterScenariosReq(
                                 userLang = userLang,
                                 scenarioLang = scenarioLang,
                                 scenarioType = scenarioType.name,
@@ -96,10 +96,18 @@ class ScenariosRepository
                                 difficulty = difficulty.name,
                             ),
                         )
+                    if (!response.isSuccessful) {
+                        throw InfraErrors.NetworkError(
+                            "Error trying to generate scenario: ${response.errorBody()}",
+                        )
+                    }
+                    val responseBody =
+                        response.body()
+                            ?: throw IllegalStateException("Response body is null")
                     Log.i("ScenariosRepository", "Generated scenario response: $response")
                     ChatIdWithScenarioType(
-                        chatId = response.chatId,
-                        scenarioType = response.scenarioType,
+                        chatId = responseBody.chatId,
+                        scenarioType = responseBody.scenarioType,
                     )
                 }.mapLeft { error ->
                     Log.e("ScenariosRepository", "Error trying to generate scenario", error)
