@@ -11,8 +11,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -69,70 +67,55 @@ fun ChatsListScreen(
                     ),
         ) {
             Column {
-                Card(
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp, start = 8.dp, end = 8.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
-                    colors =
-                        CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
-                        ),
-                    shape = MaterialTheme.shapes.medium,
+                // Use LazyColumn for all states to ensure consistent scrollable behavior
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().weight(1f),
+                    contentPadding = PaddingValues(top = 0.dp, bottom = 4.dp),
                 ) {
-                    // Use LazyColumn for all states to ensure consistent scrollable behavior
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(vertical = 8.dp),
-                    ) {
-                        when {
-                            state.isLoading -> {
-                                item {
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .padding(24.dp),
-                                    ) {
-                                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                                    }
+                    when {
+                        state.isLoading -> {
+                            item {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(24.dp),
+                                ) {
+                                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                                 }
                             }
+                        }
 
-                            state.chats.isNotEmpty() -> {
-                                items(state.chats) { chat ->
-                                    ChatItem(
-                                        chat = chat,
-                                        onChatClick = {
-                                            onChatSelect(
-                                                chat.id,
-                                                chat.scenario.scenarioType.toScenarioType(),
-                                            )
-                                        },
-                                        onChatDelete = {
-                                            viewModel.deleteChat(chat.id)
-                                        },
-                                    )
-                                }
+                        state.chats.isNotEmpty() -> {
+                            items(state.chats) { chat ->
+                                ChatItem(
+                                    chat = chat,
+                                    onChatClick = {
+                                        onChatSelect(
+                                            chat.id,
+                                            chat.scenario.scenarioType.toScenarioType(),
+                                        )
+                                    },
+                                    onChatDelete = {
+                                        viewModel.deleteChat(chat.id)
+                                    },
+                                )
                             }
+                        }
 
-                            else -> {
-                                item {
-                                    Text(
-                                        text = stringResource(R.string.chats_screen_no_chats),
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        textAlign = TextAlign.Center,
-                                        modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .padding(24.dp),
-                                    )
-                                }
+                        else -> {
+                            item {
+                                Text(
+                                    text = stringResource(R.string.chats_screen_no_chats),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(24.dp),
+                                )
                             }
                         }
                     }

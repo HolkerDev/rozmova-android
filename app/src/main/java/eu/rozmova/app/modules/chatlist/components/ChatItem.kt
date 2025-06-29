@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -89,7 +88,7 @@ fun ChatItem(
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
                 .scale(scale)
                 .clip(MaterialTheme.shapes.medium)
                 .combinedClickable(
@@ -113,7 +112,7 @@ fun ChatItem(
         shape = MaterialTheme.shapes.medium,
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(10.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -147,20 +146,6 @@ fun ChatItem(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Tags/Labels
-            if (chat.scenario.labels.isNotEmpty()) {
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Start,
-                ) {
-                    chat.scenario.labels.forEach { label ->
-                        Chip(label)
-                    }
-                }
-            }
         }
     }
 }
@@ -189,7 +174,7 @@ private fun ChatTypeIconWithBackground(scenarioType: ScenarioTypeDto) {
         contentAlignment = Alignment.Center,
         modifier =
             Modifier
-                .size(36.dp)
+                .size(30.dp)
                 .clip(MaterialTheme.shapes.small)
                 .background(backgroundColor),
     ) {
@@ -197,7 +182,7 @@ private fun ChatTypeIconWithBackground(scenarioType: ScenarioTypeDto) {
             imageVector = icon,
             contentDescription = "Chat status: $scenarioType",
             tint = iconTint,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(18.dp),
         )
     }
 }
