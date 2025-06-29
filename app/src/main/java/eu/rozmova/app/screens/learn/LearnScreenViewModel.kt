@@ -142,7 +142,7 @@ class LearnScreenViewModel
                 val userLang = localeManager.getCurrentLocale().language
                 val learnLang = settingsRepository.getLearningLangOrDefault()
 
-                scenariosRepository.weeklyScenarios(userLang = userLang, scenarioLang = learnLang).map { scenarios ->
+                scenariosRepository.getAllWithFilter(userLang = userLang, scenarioLang = learnLang, null, null).map { scenarios ->
                     reduce { state.copy(weeklyScenarios = scenarios, weeklyScenariosLoading = false) }
                 }
             }

@@ -36,7 +36,6 @@ class AuthInterceptor
             val accessToken =
                 runBlocking {
                     try {
-                        supabaseClient.auth.refreshCurrentSession()
                         supabaseClient.auth.currentSessionOrNull()?.accessToken
                     } catch (e: Exception) {
                         Log.e(tag, "Failed to get access token", e)

@@ -70,7 +70,7 @@ fun ChatsListScreen(
                 // Use LazyColumn for all states to ensure consistent scrollable behavior
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().weight(1f),
-                    contentPadding = PaddingValues(top = 0.dp, bottom = 4.dp),
+                    contentPadding = PaddingValues(vertical = 8.dp),
                 ) {
                     when {
                         state.isLoading -> {

@@ -52,6 +52,7 @@ class AuthRepository
                         _authState.value =
                             when (sessionStatus) {
                                 is SessionStatus.Authenticated -> {
+                                    supabaseClient.auth.startAutoRefreshForCurrentSession()
                                     AuthState.Authenticated(sessionStatus.session)
                                 }
 

@@ -32,8 +32,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -80,8 +78,6 @@ fun RecentlyAdded(
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
 ) {
-    var selectedCategory by remember { mutableStateOf(ScenarioTypeDto.MESSAGES) }
-
     Card(
         modifier =
             modifier
@@ -116,13 +112,9 @@ fun RecentlyAdded(
                 )
             }
 
-            CategorySection(
-                selectedCategoryType = selectedCategory,
-                onCategorySelect = { selectedCategory = it },
-            )
+            Spacer(modifier = Modifier.height(8.dp))
 
             ScenariosGrid(
-                selectedCategoryType = selectedCategory,
                 allScenarios = scenarios,
                 onScenarioSelect = onScenarioSelect,
                 isLoading = isLoading,
@@ -215,13 +207,9 @@ fun CategorySection(
 fun ScenariosGrid(
     allScenarios: List<ScenarioDto>,
     onScenarioSelect: (ScenarioDto) -> Unit,
-    selectedCategoryType: ScenarioTypeDto,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
 ) {
-    val scenarios =
-        allScenarios.filter { it.scenarioType == selectedCategoryType }
-
     Column(modifier = modifier.fillMaxHeight()) {
         if (isLoading) {
             Row(
@@ -231,12 +219,12 @@ fun ScenariosGrid(
                         .padding(vertical = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                LoadingCard(selectedCategoryType, modifier = Modifier.weight(0.5f))
+                LoadingCard(modifier = Modifier.weight(0.5f))
                 Spacer(modifier = Modifier.weight(0.5f))
             }
             return@Column
         }
-        if (scenarios.isEmpty()) {
+        if (allScenarios.isEmpty()) {
             Box(
                 modifier =
                     Modifier
@@ -252,7 +240,7 @@ fun ScenariosGrid(
             }
             return@Column
         }
-        scenarios.chunked(2).forEach { rowItems ->
+        allScenarios.chunked(2).forEach { rowItems ->
             Row(
                 modifier =
                     Modifier

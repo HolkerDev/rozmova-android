@@ -30,8 +30,8 @@ class ScenariosRepository
         suspend fun getAllWithFilter(
             userLang: String,
             scenarioLang: String,
-            scenarioType: ScenarioTypeDto,
-            difficulty: DifficultyDto,
+            scenarioType: ScenarioTypeDto?,
+            difficulty: DifficultyDto?,
         ): Either<InfraErrors, List<ScenarioDto>> =
             Either
                 .catch {
@@ -44,8 +44,8 @@ class ScenariosRepository
                             FilterScenariosReq(
                                 userLang = userLang,
                                 scenarioLang = scenarioLang,
-                                scenarioType = scenarioType.name,
-                                difficulty = difficulty.name,
+                                scenarioType = scenarioType?.name,
+                                difficulty = difficulty?.name,
                             ),
                         )
                     if (scenarios.isSuccessful) {

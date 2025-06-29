@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,13 +28,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.components.Difficulty
-import eu.rozmova.app.domain.ScenarioTypeDto
 
 @Composable
-fun LoadingCard(
-    scenarioType: ScenarioTypeDto,
-    modifier: Modifier = Modifier,
-) {
+fun LoadingCard(modifier: Modifier = Modifier) {
     ElevatedCard(
         modifier =
             modifier
@@ -73,11 +67,7 @@ fun LoadingCard(
                             .background(MaterialTheme.colorScheme.secondaryContainer),
                     contentAlignment = Alignment.Center,
                 ) {
-                    val icon =
-                        when (scenarioType) {
-                            ScenarioTypeDto.CONVERSATION -> Icons.Default.RecordVoiceOver
-                            ScenarioTypeDto.MESSAGES -> Icons.Default.Chat
-                        }
+                    val icon = Icons.Default.RecordVoiceOver
 
                     Icon(
                         imageVector = icon,
@@ -117,7 +107,6 @@ fun LoadingCard(
 @Composable
 private fun Preview() {
     LoadingCard(
-        scenarioType = ScenarioTypeDto.CONVERSATION,
         modifier = Modifier.padding(8.dp),
     )
 }
