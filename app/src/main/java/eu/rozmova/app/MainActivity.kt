@@ -35,7 +35,6 @@ import eu.rozmova.app.nav.NavigationHost
 import eu.rozmova.app.nav.bottomNavigationItems
 import eu.rozmova.app.repositories.AuthRepository
 import eu.rozmova.app.repositories.AuthState
-import eu.rozmova.app.repositories.UserRepository
 import eu.rozmova.app.repositories.billing.SubscriptionRepository
 import eu.rozmova.app.services.billing.BillingEvents
 import eu.rozmova.app.services.billing.BillingService
@@ -59,7 +58,6 @@ class AppViewModel
     @Inject
     constructor(
         private val authRepository: AuthRepository,
-        private val userRepository: UserRepository,
         private val billingService: BillingService,
         private val subscriptionRepository: SubscriptionRepository,
         private val verificationClient: VerificationClient,
@@ -164,12 +162,11 @@ private fun App(viewModel: AppViewModel = hiltViewModel()) {
                     }
 
                     AppState.Authenticated -> {
-                        if (currentDestination == null ||
-                            currentDestination == NavRoutes.Main.route ||
+                        if (currentDestination == NavRoutes.Main.route ||
                             currentDestination == NavRoutes.Login.route
                         ) {
                             navController.navigate(NavRoutes.Learn.route) {
-                                popUpTo(0) { inclusive = true }
+                                popUpTo(NavRoutes.Main.route) { inclusive = true }
                                 launchSingleTop = true
                             }
                         }
@@ -207,12 +204,21 @@ private fun BottomNavBar(
                 label = { Text(stringResource(screen.labelResourceId!!)) },
                 selected = currentRoute == screen.route,
                 onClick = {
-                    navController.navigate(screen.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
+                    Log.i("MainActivity", "Navigating to ${screen.route} from $currentRoute")
+                    if (currentRoute != screen.route) {
+                        navController.navigate(screen.route) {
+                            // Pop up to the start destination of the graph to
+                            // avoid building up a large stack of destinations
+                            // on the back stack as users select items
+                            popUpTo(0) {
+                                saveState = true
+                            }
+                            // Avoid multiple copies of the same destination when
+                            // reselecting the same item
+                            launchSingleTop = true
+                            // Restore state when reselecting a previously selected item
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
                 },
             )

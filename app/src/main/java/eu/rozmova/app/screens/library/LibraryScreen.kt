@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,13 +68,6 @@ fun LibraryScreen(
     var selectedDifficulty by remember { mutableStateOf<DifficultyDto>(DifficultyDto.EASY) }
     var selectedScenarioType by remember { mutableStateOf<ScenarioTypeDto>(ScenarioTypeDto.MESSAGES) }
     var showFinished by remember { mutableStateOf(true) }
-
-    LaunchedEffect(viewModel) {
-        viewModel.fetchScenarios(
-            scenarioType = selectedScenarioType,
-            difficulty = selectedDifficulty,
-        )
-    }
 
     viewModel.collectSideEffect { event ->
         when (event) {

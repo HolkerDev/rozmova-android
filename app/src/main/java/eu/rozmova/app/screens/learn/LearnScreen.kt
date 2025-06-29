@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
@@ -38,6 +39,8 @@ fun LearnScreen(
 ) {
     val navigateToChatAction = rememberUpdatedState(navigateToChat)
     val state by viewModel.collectAsState()
+
+    Log.i("LearnScreen", "LearnScreen composed - ViewModel hashCode: ${viewModel.hashCode()}")
 
     viewModel.collectSideEffect { event ->
         when (event) {

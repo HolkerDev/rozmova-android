@@ -1,5 +1,6 @@
 package eu.rozmova.app.screens.learn
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ChatDto
@@ -30,6 +31,7 @@ data class LearnScreenState(
     val recommendedScenarios: TodayScenarioSelection? = null,
     val latestChat: ChatDto? = null,
     val isRefreshing: Boolean = false,
+    val isInitialized: Boolean = false,
 )
 
 @HiltViewModel
@@ -45,11 +47,23 @@ class LearnScreenViewModel
         override val container: Container<LearnScreenState, LearnEvent> = container(LearnScreenState())
 
         init {
-            fetchTodayScenarios()
-            fetchLatestChat()
-            fetchWeeklyScenarios()
-            fetchLearningLanguage()
+            Log.i("LearnScreenViewModel", "ViewModel created - hashCode: ${this.hashCode()}")
+            initialize()
         }
+
+        private fun initialize() =
+            intent {
+                if (state.isInitialized) {
+                    Log.i("LearnScreenViewModel", "Already initialized - skipping")
+                    return@intent
+                }
+                Log.i("LearnScreenViewModel", "Initializing LearnScreenViewModel - hashCode: ${this@LearnScreenViewModel.hashCode()}")
+                fetchTodayScenarios()
+                fetchLatestChat()
+                fetchWeeklyScenarios()
+                fetchLearningLanguage()
+                reduce { state.copy(isInitialized = true) }
+            }
 
         private fun fetchLearningLanguage() =
             intent {

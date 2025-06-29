@@ -35,6 +35,10 @@ class LibraryScreenViewModel
         ContainerHost<LibraryScreenState, LibraryScreenEvents> {
         override val container: Container<LibraryScreenState, LibraryScreenEvents> = container(LibraryScreenState())
 
+        init {
+            fetchScenarios(ScenarioTypeDto.MESSAGES, DifficultyDto.EASY)
+        }
+
         fun fetchScenarios(
             scenarioType: ScenarioTypeDto,
             difficulty: DifficultyDto,
