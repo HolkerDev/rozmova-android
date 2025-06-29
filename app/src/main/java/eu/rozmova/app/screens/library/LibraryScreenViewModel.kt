@@ -8,6 +8,7 @@ import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
 import eu.rozmova.app.repositories.SettingsRepository
+import eu.rozmova.app.state.AppStateRepository
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -31,12 +32,19 @@ class LibraryScreenViewModel
         private val scenariosRepository: ScenariosRepository,
         private val settingsRepository: SettingsRepository,
         private val chatsRepository: ChatsRepository,
+        private val appStateRepository: AppStateRepository,
     ) : ViewModel(),
         ContainerHost<LibraryScreenState, LibraryScreenEvents> {
         override val container: Container<LibraryScreenState, LibraryScreenEvents> = container(LibraryScreenState())
 
         init {
             fetchScenarios(ScenarioTypeDto.MESSAGES, DifficultyDto.EASY)
+
+            intent {
+                appStateRepository.refetch.collect {
+                    fetchScenarios(ScenarioTypeDto.MESSAGES, DifficultyDto.EASY)
+                }
+            }
         }
 
         fun fetchScenarios(

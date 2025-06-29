@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.SettingsRepository
+import eu.rozmova.app.state.AppStateRepository
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
@@ -23,6 +24,7 @@ class ChatsListViewModel
     constructor(
         private val chatsRepository: ChatsRepository,
         private val settingsRepository: SettingsRepository,
+        private val appStateRepository: AppStateRepository,
     ) : ViewModel(),
         ContainerHost<ChatsListState, Nothing> {
         override val container = container<ChatsListState, Nothing>(ChatsListState())
@@ -30,6 +32,11 @@ class ChatsListViewModel
 
         init {
             loadChats()
+            intent {
+                appStateRepository.refetch.collect {
+                    loadChats()
+                }
+            }
         }
 
         fun loadChats() =
