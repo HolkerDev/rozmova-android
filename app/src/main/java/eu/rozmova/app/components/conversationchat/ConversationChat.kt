@@ -78,7 +78,6 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 @Composable
 fun ConversationChat(
     onBackClick: () -> Unit,
-    onChatArchive: () -> Unit,
     onReviewAccept: () -> Unit,
     onNavigateToSubscription: () -> Unit,
     chatId: String,

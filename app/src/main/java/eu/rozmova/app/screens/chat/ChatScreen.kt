@@ -29,7 +29,6 @@ fun ChatScreen(
                 chatId = chatId,
                 onBackClick = onBack,
                 onReviewAccept = onMain,
-                onChatArchive = onMain,
                 onNavigateToSubscription = onNavigateToSubscription,
             )
         }
