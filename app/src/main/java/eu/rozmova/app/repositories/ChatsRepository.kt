@@ -4,7 +4,6 @@ import android.util.Log
 import arrow.core.Either
 import eu.rozmova.app.clients.backend.ChatClient
 import eu.rozmova.app.clients.backend.ChatCreateReq
-import eu.rozmova.app.clients.backend.FetchAllReq
 import eu.rozmova.app.clients.backend.FetchLatestReq
 import eu.rozmova.app.clients.backend.FinishChatRes
 import eu.rozmova.app.clients.backend.GenSignedUrlReq
@@ -79,19 +78,19 @@ class ChatsRepository
         ): Either<InfraErrors, List<ChatDto>> =
             Either
                 .catch {
-                    chatClient.fetchAll(FetchAllReq(userLang, scenarioLang)).let { res ->
+                    megaChatClient.listChats(userLang, scenarioLang).let { res ->
                         if (res.isSuccessful) {
-                            val chats =
+                            val responseBody =
                                 res.body()
                                     ?: throw IllegalStateException("Chats list fetch failed due to empty body: ${res.message()}")
-                            chats
+                            responseBody.chats
                         } else {
                             throw IllegalStateException("Chats list fetch failed: ${res.message()}")
                         }
                     }
                 }.mapLeft { e ->
                     Log.e(tag, "Failed to fetch all chats", e)
-                    InfraErrors.DatabaseError("Failed to fetch all chats")
+                    InfraErrors.NetworkError("Failed to fetch all chats")
                 }
 
         suspend fun deleteChat(chatId: String): Either<InfraErrors, List<ChatDto>> =
