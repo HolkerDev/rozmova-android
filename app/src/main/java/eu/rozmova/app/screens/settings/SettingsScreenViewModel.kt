@@ -2,7 +2,6 @@ package eu.rozmova.app.screens.settings
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.Language
 import eu.rozmova.app.domain.getLanguageByCode
@@ -10,8 +9,8 @@ import eu.rozmova.app.repositories.AuthRepository
 import eu.rozmova.app.repositories.SettingsRepository
 import eu.rozmova.app.repositories.UserRepository
 import eu.rozmova.app.repositories.billing.SubscriptionRepository
+import eu.rozmova.app.state.AppStateRepository
 import eu.rozmova.app.utils.LocaleManager
-import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -37,6 +36,7 @@ class SettingsScreenViewModel
         private val localeManager: LocaleManager,
         private val subscriptionRepository: SubscriptionRepository,
         private val userRepository: UserRepository,
+        private val appStateRepository: AppStateRepository,
     ) : ViewModel(),
         ContainerHost<SettingsState, Unit> {
         override val container: Container<SettingsState, Unit> = container(SettingsState())
@@ -69,29 +69,24 @@ class SettingsScreenViewModel
                 }
             }
 
-//        private fun fetchFF() {
-//            featureService.isFeatureEnabled(Feature.MoreLearningLanguages).let {
-//                _isNewLearningLanguagesEnabled.value = it
-//            }
-//        }
-
         fun setLearningLanguage(language: Language) =
             intent {
+                Log.i("SettingsScreenViewModel", "Setting learning language to: ${language.code}")
                 settingsRepository.setLearningLang(language.code)
                 reduce {
                     state.copy(
                         langSettings = state.langSettings?.copy(learningLang = language),
                     )
                 }
+                appStateRepository.triggerRefetch()
             }
 
-        fun signOut() {
-            viewModelScope.launch {
+        fun signOut() =
+            intent {
                 settingsRepository.clearLearningLang()
                 settingsRepository.clearSalutation()
                 authRepository.signOut()
             }
-        }
 
         fun setLocale(languageCode: String) =
             intent {
@@ -101,17 +96,16 @@ class SettingsScreenViewModel
                         langSettings = state.langSettings?.copy(interfaceLang = getLanguageByCode(languageCode)),
                     )
                 }
+                appStateRepository.triggerRefetch()
             }
 
-        fun deleteUserData() {
-            viewModelScope.launch {
+        fun deleteUserData() =
+            intent {
                 try {
                     // Clear all user settings
                     settingsRepository.clearLearningLang()
                     settingsRepository.clearSalutation()
-
                     userRepository.deleteUser()
-
                     // Sign out the user which should clear authentication data
                     authRepository.signOut()
 
@@ -120,5 +114,4 @@ class SettingsScreenViewModel
                     Log.e("SettingsScreenViewModel", "Error deleting user data", e)
                 }
             }
-        }
     }

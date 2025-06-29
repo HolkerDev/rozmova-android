@@ -50,10 +50,5 @@ class LocaleManager
             val displayMetrics = resources.displayMetrics
             @Suppress("DEPRECATION")
             resources.updateConfiguration(configuration, displayMetrics)
-
-//            // Recreate the activity to apply changes
-//            if (context is Activity) {
-//                context.recreate()
-//            }
         }
     }

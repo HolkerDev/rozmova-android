@@ -10,6 +10,7 @@ import eu.rozmova.app.domain.TodayScenarioSelection
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
 import eu.rozmova.app.repositories.SettingsRepository
+import eu.rozmova.app.state.AppStateRepository
 import eu.rozmova.app.utils.LocaleManager
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
@@ -31,7 +32,6 @@ data class LearnScreenState(
     val recommendedScenarios: TodayScenarioSelection? = null,
     val latestChat: ChatDto? = null,
     val isRefreshing: Boolean = false,
-    val isInitialized: Boolean = false,
 )
 
 @HiltViewModel
@@ -42,6 +42,7 @@ class LearnScreenViewModel
         private val settingsRepository: SettingsRepository,
         private val chatsRepository: ChatsRepository,
         private val localeManager: LocaleManager,
+        private val appStateRepository: AppStateRepository,
     ) : ViewModel(),
         ContainerHost<LearnScreenState, LearnEvent> {
         override val container: Container<LearnScreenState, LearnEvent> = container(LearnScreenState())
@@ -53,16 +54,21 @@ class LearnScreenViewModel
 
         private fun initialize() =
             intent {
-                if (state.isInitialized) {
-                    Log.i("LearnScreenViewModel", "Already initialized - skipping")
-                    return@intent
-                }
                 Log.i("LearnScreenViewModel", "Initializing LearnScreenViewModel - hashCode: ${this@LearnScreenViewModel.hashCode()}")
+                fetchLearningLanguage()
                 fetchTodayScenarios()
                 fetchLatestChat()
                 fetchWeeklyScenarios()
-                fetchLearningLanguage()
-                reduce { state.copy(isInitialized = true) }
+                observeLanguageChanges()
+            }
+
+        private fun observeLanguageChanges() =
+            intent {
+                appStateRepository.refetch.collect {
+                    fetchTodayScenarios()
+                    fetchLatestChat()
+                    fetchWeeklyScenarios()
+                }
             }
 
         private fun fetchLearningLanguage() =

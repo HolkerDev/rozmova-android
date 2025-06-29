@@ -217,14 +217,6 @@ private fun PageIndicator(
 @Preview(showBackground = true)
 @Composable
 private fun OnboardingScreenPreview() {
-    val localeManager = LocaleManager(LocalContext.current)
     MaterialTheme {
-        Content(
-            startLanguage = localeManager.getCurrentLocale().language,
-            setInterfaceLang = { lang -> localeManager.setLocale(lang) },
-            onOnboardingComplete = {},
-            onPronounSelect = {},
-            onLearnLangSelect = {},
-        )
     }
 }

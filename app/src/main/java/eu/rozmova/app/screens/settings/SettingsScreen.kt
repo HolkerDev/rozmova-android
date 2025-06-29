@@ -258,7 +258,7 @@ fun SettingsContent(
                     ) {
                         Text(
                             stringResource(R.string.delete),
-                            color = MaterialTheme.colorScheme.error
+                            color = MaterialTheme.colorScheme.error,
                         )
                     }
                 },
@@ -266,7 +266,7 @@ fun SettingsContent(
                     TextButton(onClick = onDeleteDataDismiss) {
                         Text(stringResource(R.string.cancel))
                     }
-                }
+                },
             )
         }
 

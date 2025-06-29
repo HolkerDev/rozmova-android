@@ -10,11 +10,8 @@ import eu.rozmova.app.clients.backend.ScenarioClient
 import eu.rozmova.app.clients.backend.WeeklyScenariosBody
 import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.domain.ScenarioDto
-import eu.rozmova.app.domain.ScenarioModel
 import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.domain.TodayScenarioSelection
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.postgrest.postgrest
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,25 +24,9 @@ data class ChatIdWithScenarioType(
 class ScenariosRepository
     @Inject
     constructor(
-        private val supabaseClient: SupabaseClient,
         private val scenarioClient: ScenarioClient,
         private val megaScenariosClient: MegaScenariosClient,
     ) {
-        suspend fun getAll(
-            learningLanguage: String,
-            interfaceLanguage: String,
-        ): List<ScenarioModel> =
-            supabaseClient.postgrest
-                .from(Tables.SCENARIOS)
-                .select {
-                    filter {
-                        and {
-                            ScenarioModel::targetLanguage eq learningLanguage
-                            ScenarioModel::userLanguage eq interfaceLanguage
-                        }
-                    }
-                }.decodeAs<List<ScenarioModel>>()
-
         suspend fun getAllWithFilter(
             userLang: String,
             scenarioLang: String,
@@ -54,6 +35,10 @@ class ScenariosRepository
         ): Either<InfraErrors, List<ScenarioDto>> =
             Either
                 .catch {
+                    Log.i(
+                        "ScenariosRepository",
+                        "Fetching scenarios with type: $scenarioType, difficulty: $difficulty",
+                    )
                     val scenarios =
                         megaScenariosClient.filter(
                             FilterScenariosReq(
@@ -63,7 +48,6 @@ class ScenariosRepository
                                 difficulty = difficulty.name,
                             ),
                         )
-                    Log.i("ScenariosRepository", "Scenarios: $scenarios")
                     if (scenarios.isSuccessful) {
                         scenarios.body()?.scenarios ?: emptyList()
                     } else {
@@ -85,7 +69,10 @@ class ScenariosRepository
         ): Either<InfraErrors, ChatIdWithScenarioType> =
             Either
                 .catch {
-                    Log.i("ScenariosRepository", "Generating scenario with description: $description")
+                    Log.i(
+                        "ScenariosRepository",
+                        "Generating scenario with type: $scenarioType, difficulty: $difficulty",
+                    )
                     val response =
                         megaScenariosClient.generateScenario(
                             GenerateScenarioReq(
@@ -104,7 +91,6 @@ class ScenariosRepository
                     val responseBody =
                         response.body()
                             ?: throw IllegalStateException("Response body is null")
-                    Log.i("ScenariosRepository", "Generated scenario response: $response")
                     ChatIdWithScenarioType(
                         chatId = responseBody.chatId,
                         scenarioType = responseBody.scenarioType,
@@ -120,6 +106,7 @@ class ScenariosRepository
         ): Either<InfraErrors, TodayScenarioSelection> =
             Either
                 .catch {
+                    Log.i("ScenariosRepository", "Fetching today's scenario selection")
                     val response =
                         scenarioClient.fetchRecommendedScenarios(
                             RecommendedScenariosRequest(
@@ -127,7 +114,6 @@ class ScenariosRepository
                                 scenarioLang = scenarioLang,
                             ),
                         )
-                    Log.i("ScenariosRepository", "Today selection response: $response")
                     if (response.isSuccessful) {
                         response.body()?.let { resp ->
                             TodayScenarioSelection(
