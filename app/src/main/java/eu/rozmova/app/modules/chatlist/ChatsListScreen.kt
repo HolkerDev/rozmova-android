@@ -69,9 +69,7 @@ fun ChatsListScreen(
                     ),
         ) {
             Column(
-                modifier =
-                    Modifier
-                        .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
             ) {
                 Card(
                     modifier =
@@ -87,41 +85,57 @@ fun ChatsListScreen(
                         ),
                     shape = MaterialTheme.shapes.medium,
                 ) {
-                    when {
-                        state.isLoading -> {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize().padding(24.dp),
-                            ) {
-                                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                            }
-                        }
-
-                        state.chats.isNotEmpty() -> {
-                            LazyColumn(
-                                modifier = Modifier.padding(vertical = 8.dp),
-                            ) {
-                                items(state.chats) { chat ->
-                                    ChatItem(chat, onChatClick = {
-                                        onChatSelect(
-                                            chat.id,
-                                            chat.scenario.scenarioType.toScenarioType(),
-                                        )
-                                    }, onChatDelete = {
-                                        viewModel.deleteChat(chat.id)
-                                    })
+                    // Use LazyColumn for all states to ensure consistent scrollable behavior
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(vertical = 8.dp),
+                    ) {
+                        when {
+                            state.isLoading -> {
+                                item {
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(24.dp),
+                                    ) {
+                                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                                    }
                                 }
                             }
-                        }
 
-                        else -> {
-                            Text(
-                                text = stringResource(R.string.chats_screen_no_chats),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(24.dp),
-                            )
+                            state.chats.isNotEmpty() -> {
+                                items(state.chats) { chat ->
+                                    ChatItem(
+                                        chat = chat,
+                                        onChatClick = {
+                                            onChatSelect(
+                                                chat.id,
+                                                chat.scenario.scenarioType.toScenarioType(),
+                                            )
+                                        },
+                                        onChatDelete = {
+                                            viewModel.deleteChat(chat.id)
+                                        },
+                                    )
+                                }
+                            }
+
+                            else -> {
+                                item {
+                                    Text(
+                                        text = stringResource(R.string.chats_screen_no_chats),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = TextAlign.Center,
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(24.dp),
+                                    )
+                                }
+                            }
                         }
                     }
                 }
