@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +53,9 @@ fun ChatsListScreen(
             )
         },
     ) { paddingValues ->
-        Column(
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = { viewModel.refresh() },
             modifier =
                 Modifier
                     .fillMaxSize()
@@ -65,73 +68,81 @@ fun ChatsListScreen(
                         ),
                     ),
         ) {
-            Card(
+            Column(
                 modifier =
                     Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp, start = 8.dp, end = 8.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
-                colors =
-                    CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                    ),
-                shape = MaterialTheme.shapes.medium,
+                        .fillMaxSize(),
             ) {
-                when {
-                    state.isLoading -> {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize().padding(24.dp),
-                        ) {
-                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                        }
-                    }
-                    state.chats.isNotEmpty() -> {
-                        LazyColumn(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                        ) {
-                            items(state.chats) { chat ->
-                                ChatItem(chat, onChatClick = {
-                                    onChatSelect(
-                                        chat.id,
-                                        chat.scenario.scenarioType.toScenarioType(),
-                                    )
-                                }, onChatDelete = {
-                                    viewModel.deleteChat(chat.id)
-                                })
+                Card(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp, start = 8.dp, end = 8.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        ),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    when {
+                        state.isLoading -> {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize().padding(24.dp),
+                            ) {
+                                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                             }
                         }
-                    }
-                    else -> {
-                        Text(
-                            text = stringResource(R.string.chats_screen_no_chats),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(24.dp),
-                        )
+
+                        state.chats.isNotEmpty() -> {
+                            LazyColumn(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                            ) {
+                                items(state.chats) { chat ->
+                                    ChatItem(chat, onChatClick = {
+                                        onChatSelect(
+                                            chat.id,
+                                            chat.scenario.scenarioType.toScenarioType(),
+                                        )
+                                    }, onChatDelete = {
+                                        viewModel.deleteChat(chat.id)
+                                    })
+                                }
+                            }
+                        }
+
+                        else -> {
+                            Text(
+                                text = stringResource(R.string.chats_screen_no_chats),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(24.dp),
+                            )
+                        }
                     }
                 }
-            }
 
-            Button(
-                onClick = onChatCreateClick,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                shape = MaterialTheme.shapes.medium,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.generate_scenario),
-                )
-                Text(
-                    text = stringResource(R.string.generate_scenario),
-                    modifier = Modifier.padding(start = 8.dp),
-                )
+                Button(
+                    onClick = onChatCreateClick,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                    shape = MaterialTheme.shapes.medium,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.generate_scenario),
+                    )
+                    Text(
+                        text = stringResource(R.string.generate_scenario),
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                }
             }
         }
     }

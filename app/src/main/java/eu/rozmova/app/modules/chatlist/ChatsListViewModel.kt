@@ -13,6 +13,7 @@ import javax.inject.Inject
 data class ChatsListState(
     val chats: List<ChatDto> = emptyList(),
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val error: Throwable? = null,
 )
 
@@ -44,6 +45,22 @@ class ChatsListViewModel
                         Log.e(tag, "Error loading chats", error)
                         reduce { state.copy(isLoading = false, error = error) }
                     }
+            }
+
+        fun refresh() =
+            intent {
+                reduce { state.copy(isRefreshing = true) }
+                try {
+                    val scenarioLang = settingsRepository.getLearningLangOrDefault()
+                    val userLang = settingsRepository.getInterfaceLang()
+                    val chats = chatsRepository.fetchAll(userLang, scenarioLang)
+
+                    chats.map { respChats ->
+                        reduce { state.copy(chats = respChats) }
+                    }
+                } finally {
+                    reduce { state.copy(isRefreshing = false) }
+                }
             }
 
         fun deleteChat(chatId: String) =
