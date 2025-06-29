@@ -68,9 +68,7 @@ fun ChatsListScreen(
                         ),
                     ),
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-            ) {
+            Column {
                 Card(
                     modifier =
                         Modifier
@@ -145,7 +143,7 @@ fun ChatsListScreen(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
+                            .padding(start = 8.dp, end = 8.dp, bottom = 4.dp),
                     shape = MaterialTheme.shapes.medium,
                 ) {
                     Icon(

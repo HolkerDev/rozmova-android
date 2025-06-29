@@ -1,7 +1,6 @@
 package eu.rozmova.app.screens.learn
 
 import android.util.Log
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -65,16 +64,13 @@ fun LearnScreen(
             )
         },
         modifier = modifier.fillMaxSize(),
-    ) { innerPadding ->
+    ) { paddingValues ->
         PullToRefreshBox(
             isRefreshing = state.isRefreshing,
             onRefresh = { viewModel.refresh() },
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
+            modifier = Modifier.fillMaxSize(),
         ) {
-            LazyColumn(contentPadding = PaddingValues(bottom = 8.dp)) {
+            LazyColumn(contentPadding = paddingValues) {
                 state.recommendedScenarios?.let { recommendedScenarios ->
                     item {
                         TodaysScenarioSelection(
