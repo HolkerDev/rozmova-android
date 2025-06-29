@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -18,8 +19,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -152,7 +151,7 @@ private fun App(viewModel: AppViewModel = hiltViewModel()) {
                     BottomNavBar(route, navController)
                 }
             },
-            contentWindowInsets = WindowInsets(0),
+            contentWindowInsets = WindowInsets.navigationBars,
             modifier = Modifier.fillMaxSize(),
         ) { innerPadding ->
             NavigationHost(navController, innerPadding)
@@ -203,14 +202,7 @@ private fun BottomNavBar(
                         contentDescription = stringResource(screen.labelResourceId!!),
                     )
                 },
-                label = {
-                    Text(
-                        stringResource(screen.labelResourceId!!),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        fontSize = 12.sp,
-                    )
-                },
+                label = { Text(stringResource(screen.labelResourceId!!)) },
                 selected = currentRoute == screen.route,
                 onClick = {
                     Log.i("MainActivity", "Navigating to ${screen.route} from $currentRoute")
