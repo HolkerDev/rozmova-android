@@ -191,25 +191,29 @@ class ChatsRepository
 
                     val pronounCode = settingsRepository.getPronounCodeOrDefault()
                     val response =
-                        messageClient.sendAudioMessage(
+                        megaChatClient.sendAudioMessage(
                             SendAudioReq(
                                 chatId = chatId,
                                 audioId = messageAudioFile.name.substringBefore("."),
-                                pronounCode = pronounCode,
+                                pronoun = pronounCode,
                             ),
                         )
 
                     if (response.isSuccessful) {
                         val responseBody =
                             response.body()
-                                ?: throw IllegalStateException("Audio message send failed: ${response.message()}")
+                                ?: throw IllegalStateException(
+                                    "Audio message send failed: ${response.errorBody()} status: ${response.code()}",
+                                )
 
                         ChatUpdate(
                             chat = responseBody.chat,
                             shouldFinish = responseBody.shouldFinish,
                         )
                     } else {
-                        throw IllegalStateException("Audio message send failed: ${response.message()}")
+                        throw IllegalStateException(
+                            "Audio message send failed: ${response.errorBody()?.string()} status: ${response.code()}",
+                        )
                     }
                 }.mapLeft { error ->
                     Log.e(tag, "Error sending audio message", error)
@@ -223,16 +227,26 @@ class ChatsRepository
             Either
                 .catch {
                     val pronounCode = settingsRepository.getPronounCodeOrDefault()
-                    messageClient.sendTextMessage(SendMessageReq(chatId = chatId, content = message, pronounCode = pronounCode)).let { res ->
-                        if (res.isSuccessful) {
-                            val responseBody =
-                                res.body()
-                                    ?: throw IllegalStateException("Text message send failed: ${res.message()}")
-                            ChatUpdate(chat = responseBody.chat, shouldFinish = responseBody.shouldFinish)
-                        } else {
-                            throw IllegalStateException("Text message send failed: ${res.message()}")
+                    messageClient
+                        .sendTextMessage(
+                            SendMessageReq(
+                                chatId = chatId,
+                                content = message,
+                                pronounCode = pronounCode,
+                            ),
+                        ).let { res ->
+                            if (res.isSuccessful) {
+                                val responseBody =
+                                    res.body()
+                                        ?: throw IllegalStateException("Text message send failed: ${res.body()} status: ${res.code()}")
+                                ChatUpdate(
+                                    chat = responseBody.chat,
+                                    shouldFinish = responseBody.shouldFinish,
+                                )
+                            } else {
+                                throw IllegalStateException("Text message send failed: ${res.errorBody()?.string()} status: ${res.code()}")
+                            }
                         }
-                    }
                 }.mapLeft { error ->
                     Log.e(tag, "Error sending message", error)
                     InfraErrors.NetworkError("Failed to send text message")

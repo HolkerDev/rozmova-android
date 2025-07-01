@@ -193,7 +193,6 @@ private fun ScenarioItem(
 @Preview(showBackground = true)
 @Composable
 private fun TodaysScenariosPreview() {
-    // sample scenario
     val scenario =
         ScenarioDto(
             id = "",

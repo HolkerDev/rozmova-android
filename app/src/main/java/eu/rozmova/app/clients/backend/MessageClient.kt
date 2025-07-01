@@ -15,11 +15,6 @@ interface MessageClient {
     suspend fun getSignedUrl(
         @Body body: GenSignedUrlReq,
     ): Response<GenSignedUrlRes>
-
-    @POST("messages/audio")
-    suspend fun sendAudioMessage(
-        @Body body: SendAudioReq,
-    ): Response<SendAudioRes>
 }
 
 data class SendMessageReq(
@@ -29,17 +24,6 @@ data class SendMessageReq(
 )
 
 data class SendMessageRes(
-    val chat: ChatDto,
-    val shouldFinish: Boolean,
-)
-
-data class SendAudioReq(
-    val chatId: String,
-    val audioId: String,
-    val pronounCode: String,
-)
-
-data class SendAudioRes(
     val chat: ChatDto,
     val shouldFinish: Boolean,
 )
