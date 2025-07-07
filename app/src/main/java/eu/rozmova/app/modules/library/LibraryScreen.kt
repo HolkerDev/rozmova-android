@@ -24,13 +24,34 @@ import eu.rozmova.app.modules.library.components.GenerateScenarioButton
 import eu.rozmova.app.modules.library.components.TeacherIntegrationButton
 
 @Composable
-fun LibraryScreen(modifier: Modifier = Modifier) {
-    Content()
+fun LibraryScreen(
+    onLibrary: () -> Unit,
+    onScenarioGeneration: () -> Unit,
+    onChecklist: () -> Unit,
+    onCompleteScenarios: () -> Unit,
+    onTeacherIntegration: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Content(
+        onLibrary = onLibrary,
+        onScenarioGeneration = onScenarioGeneration,
+        onChecklist = onChecklist,
+        onCompleteScenarios = onCompleteScenarios,
+        onTeacherIntegration = onTeacherIntegration,
+        modifier = modifier,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Content(modifier: Modifier = Modifier) {
+private fun Content(
+    onLibrary: () -> Unit,
+    onScenarioGeneration: () -> Unit,
+    onChecklist: () -> Unit,
+    onCompleteScenarios: () -> Unit,
+    onTeacherIntegration: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -46,10 +67,10 @@ private fun Content(modifier: Modifier = Modifier) {
                         .padding(horizontal = 16.dp),
             ) {
                 ExploreAllScenariosButton(
-                    onClick = { /* TODO: Navigate to scenarios */ },
+                    onClick = { onLibrary() },
                 )
                 Spacer(Modifier.padding(vertical = 8.dp))
-                GenerateScenarioButton(onClick = { /* TODO: Navigate to scenario generation */ })
+                GenerateScenarioButton(onClick = { onScenarioGeneration() })
                 Spacer(Modifier.padding(vertical = 8.dp))
                 Row(
                     modifier =
@@ -59,14 +80,16 @@ private fun Content(modifier: Modifier = Modifier) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     ChecklistButton(onClick = {
-                        // TODO: Navigate to checklist
+                        onChecklist()
                     }, modifier = Modifier.weight(1f).fillMaxHeight())
                     CompletedScenariosButton(onClick = {
-                        // TODO: Navigate to completed scenarios
+                        onCompleteScenarios()
                     }, modifier = Modifier.weight(1f).fillMaxHeight())
                 }
                 Spacer(Modifier.padding(vertical = 8.dp))
-                TeacherIntegrationButton(onClick = {})
+                TeacherIntegrationButton(onClick = {
+                    onTeacherIntegration()
+                })
             }
         },
     )
