@@ -140,4 +140,7 @@
     <string name="delete_user_data_title">Удалить данные пользователя</string>
     <string name="delete_user_data_confirmation">Вы уверены, что хотите удалить все данные пользователя? Это действие нельзя отменить.</string>
     <string name="delete">Удалить</string>
+    <string name="feature_in_progress">Мы работаем над этим функционалом.\nПроверьте снова после обновления.</string>
+    <string name="back">Назад</string>
+    <string name="coming_soon">Скоро будет!</string>
 </resources>

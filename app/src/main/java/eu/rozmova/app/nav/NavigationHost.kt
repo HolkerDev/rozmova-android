@@ -13,6 +13,7 @@ import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.toScenarioType
 import eu.rozmova.app.modules.allscenarios.AllScenariosScreen
 import eu.rozmova.app.modules.chatlist.ChatsListScreen
+import eu.rozmova.app.modules.devscreen.DevScreen
 import eu.rozmova.app.modules.generatechat.GenerateChatScreen
 import eu.rozmova.app.modules.library.LibraryNavigation
 import eu.rozmova.app.modules.library.LibraryScreen
@@ -64,15 +65,15 @@ fun NavigationHost(
                         }
 
                         override fun toChecklist() {
-                            TODO("Not yet implemented")
+                            navController.navigate(NavRoutes.DevScreen.route)
                         }
 
                         override fun toCompleteScenarios() {
-                            TODO("Not yet implemented")
+                            navController.navigate(NavRoutes.DevScreen.route)
                         }
 
                         override fun toTeacherIntegration() {
-                            TODO("Not yet implemented")
+                            navController.navigate(NavRoutes.DevScreen.route)
                         }
                     },
             )
@@ -123,6 +124,10 @@ fun NavigationHost(
                     navController.navigateUp()
                 },
             )
+        }
+
+        composable(route = NavRoutes.DevScreen.route) {
+            DevScreen(back = { navController.navigateUp() })
         }
 
         // Side Screens

@@ -50,6 +50,8 @@ sealed class NavRoutes(
 
     data object GenerateScenario : NavRoutes(route = "generate_scenario")
 
+    data object DevScreen : NavRoutes(route = "dev_screen")
+
     fun getLabel(context: Context): String? = labelResourceId?.let { context.getString(it) }
 }
 

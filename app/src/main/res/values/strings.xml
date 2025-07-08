@@ -143,4 +143,7 @@
     <string name="delete_user_data_title">Delete User Data</string>
     <string name="delete_user_data_confirmation">Are you sure you want to delete all your user data? This action cannot be undone.</string>
     <string name="delete">Delete</string>
+    <string name="feature_in_progress">We\'re working hard to bring you this feature.\nCheck back soon for updates!</string>
+    <string name="back">Back</string>
+    <string name="coming_soon">Coming Soon!</string>
 </resources>
