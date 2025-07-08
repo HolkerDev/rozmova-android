@@ -25,7 +25,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -183,26 +182,6 @@ private fun ChatTypeIconWithBackground(scenarioType: ScenarioTypeDto) {
             contentDescription = "Chat status: $scenarioType",
             tint = iconTint,
             modifier = Modifier.size(18.dp),
-        )
-    }
-}
-
-@Composable
-fun Chip(
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        modifier = modifier.padding(end = 8.dp, bottom = 4.dp),
-        shape = MaterialTheme.shapes.small,
-        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
-        shadowElevation = 0.dp,
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
         )
     }
 }
