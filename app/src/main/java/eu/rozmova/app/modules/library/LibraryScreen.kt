@@ -15,8 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import eu.rozmova.app.R
 import eu.rozmova.app.modules.library.components.ChecklistButton
 import eu.rozmova.app.modules.library.components.CompletedScenariosButton
 import eu.rozmova.app.modules.library.components.ExploreAllScenariosButton
@@ -56,7 +58,7 @@ private fun Content(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(text = "Library") },
+                title = { Text(text = stringResource(R.string.library_title)) },
             )
         },
         content = { paddingValues ->

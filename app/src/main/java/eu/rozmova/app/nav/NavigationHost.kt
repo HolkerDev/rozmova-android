@@ -40,7 +40,7 @@ fun NavigationHost(
         composable(NavRoutes.Chats.route) {
             ChatsListScreen(onChatSelect = { chatId, scenarioType ->
                 navController.navigate("chat/$chatId/$scenarioType")
-            }, onChatCreateClick = { navController.navigate(NavRoutes.GenerateScenario.route) })
+            })
         }
 
         composable(NavRoutes.Learn.route) {
@@ -82,7 +82,12 @@ fun NavigationHost(
         composable(route = NavRoutes.AllScenarios.route) {
             AllScenariosScreen(
                 navigateToChat = { chatId, scenarioType ->
-                    navController.navigate(NavRoutes.Chat.routeWith(chatId, scenarioType.toScenarioType()))
+                    navController.navigate(
+                        NavRoutes.Chat.routeWith(
+                            chatId,
+                            scenarioType.toScenarioType(),
+                        ),
+                    )
                 },
                 back = { navController.navigateUp() },
             )
@@ -118,7 +123,12 @@ fun NavigationHost(
         composable(route = NavRoutes.GenerateScenario.route) {
             GenerateChatScreen(
                 onChatReady = { chatId, scenarioType ->
-                    navController.navigate(NavRoutes.Chat.routeWith(chatId, scenarioType.toScenarioType()))
+                    navController.navigate(
+                        NavRoutes.Chat.routeWith(
+                            chatId,
+                            scenarioType.toScenarioType(),
+                        ),
+                    )
                 },
                 onBack = {
                     navController.navigateUp()
@@ -141,7 +151,9 @@ fun NavigationHost(
         ) { backStackEntry ->
             val chatId: String = backStackEntry.arguments?.getString("chatId") ?: ""
             val scenarioType =
-                backStackEntry.arguments?.getString("scenarioType")?.let { ScenarioType.valueOf(it) } ?: ScenarioType.CONVERSATION
+                backStackEntry.arguments
+                    ?.getString("scenarioType")
+                    ?.let { ScenarioType.valueOf(it) } ?: ScenarioType.CONVERSATION
             ChatScreen(
                 chatId = chatId,
                 scenarioType = scenarioType,

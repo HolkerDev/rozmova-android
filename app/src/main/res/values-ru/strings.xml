@@ -143,4 +143,14 @@
     <string name="feature_in_progress">Мы работаем над этим функционалом.\nПроверьте снова после обновления.</string>
     <string name="back">Назад</string>
     <string name="coming_soon">Скоро будет!</string>
+    <string name="explore_all_scenarios">Все сценарии</string>
+    <string name="explore_all_scenarios_desc">Практикуй сценарии в любой ситуации</string>
+    <string name="custom_scenario">Свой сценарий</string>
+    <string name="custom_scenario_desc">Сгенерируй свой сценарий с помощью ИИ</string>
+    <string name="checklist">Чеклист</string>
+    <string name="completed_scenarios">Выполненные сценарии</string>
+    <string name="checklist_desc">Управляй карточками и темами для обучения</string>
+    <string name="completed_scenarios_desc">Просмотри выполненные сценарии</string>
+    <string name="teacher_integration">Интеграция с учителем</string>
+    <string name="teacher_integration_desc">Управляй своей интеграцие с учителем</string>
 </resources>

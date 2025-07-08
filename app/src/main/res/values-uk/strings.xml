@@ -143,4 +143,14 @@
     <string name="feature_in_progress">Ми активно працюємо над цим функціоналом.\nПоверніться після оновлення!</string>
     <string name="back">Назад</string>
     <string name="coming_soon">Скоро буде!</string>
+    <string name="explore_all_scenarios">Усі сценарії</string>
+    <string name="explore_all_scenarios_desc">Практикуй сценарії в будь-якій ситуації</string>
+    <string name="custom_scenario">Свій сценарій</string>
+    <string name="custom_scenario_desc">Згенеруй свій сценарій за допомогою ШІ</string>
+    <string name="checklist">Чекліст</string>
+    <string name="completed_scenarios">Виконанні сценарії</string>
+    <string name="checklist_desc">Керуй картками та темами для навчання</string>
+    <string name="completed_scenarios_desc">Продивись виконанні сценарії</string>
+    <string name="teacher_integration">Інтеграція зі вчителем</string>
+    <string name="teacher_integration_desc">Налаштуй інтеграцію зі своїм вчителем</string>
 </resources>

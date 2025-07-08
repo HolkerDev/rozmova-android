@@ -146,4 +146,14 @@
     <string name="feature_in_progress">We\'re working hard to bring you this feature.\nCheck back soon for updates!</string>
     <string name="back">Back</string>
     <string name="coming_soon">Coming Soon!</string>
+    <string name="explore_all_scenarios">Explore All Scenarios</string>
+    <string name="explore_all_scenarios_desc">Practice conversations in any situations</string>
+    <string name="custom_scenario">Custom Scenario</string>
+    <string name="custom_scenario_desc">Let AI create a unique conversation for you</string>
+    <string name="checklist">Checklist</string>
+    <string name="completed_scenarios">Completed Scenarios</string>
+    <string name="checklist_desc">Manage your flashcards and learn topics</string>
+    <string name="completed_scenarios_desc">View your completed scenarios</string>
+    <string name="teacher_integration">Teacher Integration</string>
+    <string name="teacher_integration_desc">Manage your integration with teacher account</string>
 </resources>

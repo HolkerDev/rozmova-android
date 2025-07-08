@@ -8,12 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,7 +33,6 @@ import org.orbitmvi.orbit.compose.collectAsState
 @Composable
 fun ChatsListScreen(
     onChatSelect: (String, ScenarioType) -> Unit,
-    onChatCreateClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ChatsListViewModel = hiltViewModel(),
 ) {
@@ -119,24 +114,6 @@ fun ChatsListScreen(
                             }
                         }
                     }
-                }
-
-                Button(
-                    onClick = onChatCreateClick,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(start = 8.dp, end = 8.dp, bottom = 4.dp),
-                    shape = MaterialTheme.shapes.medium,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(R.string.generate_scenario),
-                    )
-                    Text(
-                        text = stringResource(R.string.generate_scenario),
-                        modifier = Modifier.padding(start = 8.dp),
-                    )
                 }
             }
         }

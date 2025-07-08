@@ -7,10 +7,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import eu.rozmova.app.R
 
 // Option 1: Creative Spark Button (Magical/AI theme)
 // @Composable
@@ -177,13 +179,13 @@ fun GenerateScenarioButton(
                 verticalArrangement = Arrangement.spacedBy(1.dp),
             ) {
                 Text(
-                    text = "Custom Scenario",
+                    text = stringResource(R.string.custom_scenario),
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = "Let AI create a unique conversation for you",
+                    text = stringResource(R.string.custom_scenario_desc),
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                     fontSize = 11.sp,
                 )
