@@ -23,21 +23,25 @@ import eu.rozmova.app.modules.library.components.ExploreAllScenariosButton
 import eu.rozmova.app.modules.library.components.GenerateScenarioButton
 import eu.rozmova.app.modules.library.components.TeacherIntegrationButton
 
+interface LibraryNavigation {
+    fun toAllScenarios()
+
+    fun toScenarioGeneration()
+
+    fun toChecklist()
+
+    fun toCompleteScenarios()
+
+    fun toTeacherIntegration()
+}
+
 @Composable
 fun LibraryScreen(
-    onLibrary: () -> Unit,
-    onScenarioGeneration: () -> Unit,
-    onChecklist: () -> Unit,
-    onCompleteScenarios: () -> Unit,
-    onTeacherIntegration: () -> Unit,
+    navigation: LibraryNavigation,
     modifier: Modifier = Modifier,
 ) {
     Content(
-        onLibrary = onLibrary,
-        onScenarioGeneration = onScenarioGeneration,
-        onChecklist = onChecklist,
-        onCompleteScenarios = onCompleteScenarios,
-        onTeacherIntegration = onTeacherIntegration,
+        navigation = navigation,
         modifier = modifier,
     )
 }
@@ -45,11 +49,7 @@ fun LibraryScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
-    onLibrary: () -> Unit,
-    onScenarioGeneration: () -> Unit,
-    onChecklist: () -> Unit,
-    onCompleteScenarios: () -> Unit,
-    onTeacherIntegration: () -> Unit,
+    navigation: LibraryNavigation,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -67,10 +67,10 @@ private fun Content(
                         .padding(horizontal = 16.dp),
             ) {
                 ExploreAllScenariosButton(
-                    onClick = { onLibrary() },
+                    onClick = navigation::toAllScenarios,
                 )
                 Spacer(Modifier.padding(vertical = 8.dp))
-                GenerateScenarioButton(onClick = { onScenarioGeneration() })
+                GenerateScenarioButton(onClick = navigation::toScenarioGeneration)
                 Spacer(Modifier.padding(vertical = 8.dp))
                 Row(
                     modifier =
@@ -79,17 +79,11 @@ private fun Content(
                             .height(IntrinsicSize.Max),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    ChecklistButton(onClick = {
-                        onChecklist()
-                    }, modifier = Modifier.weight(1f).fillMaxHeight())
-                    CompletedScenariosButton(onClick = {
-                        onCompleteScenarios()
-                    }, modifier = Modifier.weight(1f).fillMaxHeight())
+                    ChecklistButton(onClick = navigation::toChecklist, modifier = Modifier.weight(1f).fillMaxHeight())
+                    CompletedScenariosButton(onClick = navigation::toCompleteScenarios, modifier = Modifier.weight(1f).fillMaxHeight())
                 }
                 Spacer(Modifier.padding(vertical = 8.dp))
-                TeacherIntegrationButton(onClick = {
-                    onTeacherIntegration()
-                })
+                TeacherIntegrationButton(onClick = navigation::toTeacherIntegration)
             }
         },
     )
@@ -98,5 +92,23 @@ private fun Content(
 @Preview
 @Composable
 private fun LibraryScreenPreview() {
-    Content()
+    Content(
+        navigation =
+            object : LibraryNavigation {
+                override fun toAllScenarios() {
+                }
+
+                override fun toScenarioGeneration() {
+                }
+
+                override fun toChecklist() {
+                }
+
+                override fun toCompleteScenarios() {
+                }
+
+                override fun toTeacherIntegration() {
+                }
+            },
+    )
 }

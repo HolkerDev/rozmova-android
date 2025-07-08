@@ -1,4 +1,4 @@
-package eu.rozmova.app.screens.library
+package eu.rozmova.app.modules.allscenarios
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.People
@@ -57,10 +58,11 @@ enum class ScenarioType(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryScreen(
+fun AllScenariosScreen(
     navigateToChat: (chatId: String, scenarioType: ScenarioTypeDto) -> Unit,
+    back: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: LibraryScreenViewModel = hiltViewModel(),
+    viewModel: AllScenariosVM = hiltViewModel(),
 ) {
     val state by viewModel.collectAsState()
 
@@ -80,6 +82,11 @@ fun LibraryScreen(
     Column(modifier = modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(stringResource(R.string.library_title)) },
+            navigationIcon = {
+                IconButton(onClick = back) {
+                    Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
+                }
+            },
             actions = {
                 IconButton(onClick = { showFilterDialog = true }) {
                     Icon(Icons.Default.FilterList, contentDescription = "Filter")

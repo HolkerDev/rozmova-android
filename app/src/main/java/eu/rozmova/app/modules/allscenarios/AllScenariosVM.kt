@@ -1,4 +1,4 @@
-package eu.rozmova.app.screens.library
+package eu.rozmova.app.modules.allscenarios
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,7 +26,7 @@ sealed interface LibraryScreenEvents {
 }
 
 @HiltViewModel
-class LibraryScreenViewModel
+class AllScenariosVM
     @Inject
     constructor(
         private val scenariosRepository: ScenariosRepository,

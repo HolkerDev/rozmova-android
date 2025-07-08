@@ -34,6 +34,8 @@ sealed class NavRoutes(
 
     data object Library : NavRoutes(route = "library", icon = Icons.Default.LocalLibrary, labelResourceId = R.string.library_screen)
 
+    data object AllScenarios : NavRoutes(route = "all_scenarios")
+
     data object Settings : NavRoutes(
         route = "settings",
         icon = Icons.Default.Settings,
@@ -46,7 +48,7 @@ sealed class NavRoutes(
 
     data object Subscription : NavRoutes(route = "subscription")
 
-    data object GenerateChat : NavRoutes(route = "generate_chat")
+    data object GenerateScenario : NavRoutes(route = "generate_scenario")
 
     fun getLabel(context: Context): String? = labelResourceId?.let { context.getString(it) }
 }
