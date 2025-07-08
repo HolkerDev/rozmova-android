@@ -153,4 +153,5 @@
     <string name="completed_scenarios_desc">Просмотри выполненные сценарии</string>
     <string name="teacher_integration">Интеграция с учителем</string>
     <string name="teacher_integration_desc">Управляй своей интеграцие с учителем</string>
+    <string name="type_all">Все</string>
 </resources>

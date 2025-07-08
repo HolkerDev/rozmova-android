@@ -156,4 +156,5 @@
     <string name="completed_scenarios_desc">View your completed scenarios</string>
     <string name="teacher_integration">Teacher Integration</string>
     <string name="teacher_integration_desc">Manage your integration with teacher account</string>
+    <string name="type_all">All</string>
 </resources>

@@ -38,18 +38,18 @@ class AllScenariosVM
         override val container: Container<LibraryScreenState, LibraryScreenEvents> = container(LibraryScreenState())
 
         init {
-            fetchScenarios(ScenarioTypeDto.MESSAGES, DifficultyDto.EASY)
+            fetchScenarios(null, null)
 
             intent {
                 appStateRepository.refetch.collect {
-                    fetchScenarios(ScenarioTypeDto.MESSAGES, DifficultyDto.EASY)
+                    fetchScenarios(null, null)
                 }
             }
         }
 
         fun fetchScenarios(
-            scenarioType: ScenarioTypeDto,
-            difficulty: DifficultyDto,
+            scenarioType: ScenarioTypeDto?,
+            difficulty: DifficultyDto?,
         ) = intent {
             val scenarioLang = settingsRepository.getLearningLangOrDefault()
             val userLang = settingsRepository.getInterfaceLang()

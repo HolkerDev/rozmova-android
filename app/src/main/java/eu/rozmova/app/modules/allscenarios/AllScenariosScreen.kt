@@ -2,6 +2,8 @@ package eu.rozmova.app.modules.allscenarios
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -49,11 +50,22 @@ import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
 enum class ScenarioType(
-    val scenarioTypeDto: ScenarioTypeDto,
+    val scenarioTypeDto: ScenarioTypeDto?,
     val labelId: Int,
 ) {
     MESSAGES(ScenarioTypeDto.MESSAGES, R.string.category_message),
     CONVERSATION(ScenarioTypeDto.CONVERSATION, R.string.category_conversation),
+    ALL(null, R.string.type_all),
+}
+
+enum class Difficulty(
+    val difficultyDto: DifficultyDto?,
+    val labelId: Int,
+) {
+    EASY(DifficultyDto.EASY, R.string.level_easy),
+    MEDIUM(DifficultyDto.MEDIUM, R.string.level_medium),
+    HARD(DifficultyDto.HARD, R.string.level_hard),
+    ALL(null, R.string.type_all),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,8 +79,8 @@ fun AllScenariosScreen(
     val state by viewModel.collectAsState()
 
     var showFilterDialog by remember { mutableStateOf(false) }
-    var selectedDifficulty by remember { mutableStateOf<DifficultyDto>(DifficultyDto.EASY) }
-    var selectedScenarioType by remember { mutableStateOf<ScenarioTypeDto>(ScenarioTypeDto.MESSAGES) }
+    var selectedDifficulty by remember { mutableStateOf<DifficultyDto?>(null) }
+    var selectedScenarioType by remember { mutableStateOf<ScenarioTypeDto?>(null) }
     var showFinished by remember { mutableStateOf(true) }
 
     viewModel.collectSideEffect { event ->
@@ -128,42 +140,75 @@ fun AllScenariosScreen(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun FilterDialog(
-    selectedDifficulty: DifficultyDto,
-    selectedType: ScenarioTypeDto,
+    selectedDifficulty: DifficultyDto?,
+    selectedType: ScenarioTypeDto?,
     showFinished: Boolean,
     onDismiss: () -> Unit,
-    onApplyFilters: (DifficultyDto, ScenarioTypeDto, Boolean) -> Unit,
+    onApplyFilters: (DifficultyDto?, ScenarioTypeDto?, Boolean) -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.filter_dialog_title)) },
         text = {
-            Column {
-                Text(stringResource(R.string.filter_dialog_lang_levels), style = MaterialTheme.typography.titleMedium)
-                Row {
-                    DifficultyDto.entries.forEach { difficulty ->
-                        FilterChip(
-                            selected = selectedDifficulty == difficulty,
-                            onClick = { onApplyFilters(difficulty, selectedType, showFinished) },
-                            label = { Text(stringResource(difficulty.toDifficulty().labelId)) },
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                // Difficulty Level Section
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = stringResource(R.string.filter_dialog_lang_levels),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Difficulty.entries.forEach { difficulty ->
+                            FilterChip(
+                                selected = selectedDifficulty == difficulty.difficultyDto,
+                                onClick = {
+                                    onApplyFilters(difficulty.difficultyDto, selectedType, showFinished)
+                                },
+                                label = {
+                                    Text(
+                                        text = stringResource(difficulty.labelId),
+                                        style = MaterialTheme.typography.labelMedium,
+                                    )
+                                },
+                            )
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                // Scenario Type Section
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = stringResource(R.string.filter_dialog_scenario_type),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
 
-                Text(stringResource(R.string.filter_dialog_scenario_type), style = MaterialTheme.typography.titleMedium)
-                Row {
-                    listOf(ScenarioType.MESSAGES, ScenarioType.CONVERSATION).forEach { type ->
-                        FilterChip(
-                            selected = selectedType == type.scenarioTypeDto,
-                            onClick = { onApplyFilters(selectedDifficulty, type.scenarioTypeDto, showFinished) },
-                            label = { Text(stringResource(type.labelId)) },
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        listOf(ScenarioType.MESSAGES, ScenarioType.CONVERSATION, ScenarioType.ALL).forEach { type ->
+                            FilterChip(
+                                selected = selectedType == type.scenarioTypeDto,
+                                onClick = {
+                                    onApplyFilters(selectedDifficulty, type.scenarioTypeDto, showFinished)
+                                },
+                                label = {
+                                    Text(
+                                        text = stringResource(type.labelId),
+                                        style = MaterialTheme.typography.labelMedium,
+                                    )
+                                },
+                            )
+                        }
                     }
                 }
             }

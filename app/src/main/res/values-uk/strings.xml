@@ -153,4 +153,5 @@
     <string name="completed_scenarios_desc">Продивись виконанні сценарії</string>
     <string name="teacher_integration">Інтеграція зі вчителем</string>
     <string name="teacher_integration_desc">Налаштуй інтеграцію зі своїм вчителем</string>
+    <string name="type_all">Усі</string>
 </resources>
