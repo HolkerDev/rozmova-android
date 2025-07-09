@@ -36,6 +36,8 @@ sealed class NavRoutes(
 
     data object AllScenarios : NavRoutes(route = "all_scenarios")
 
+    data object CreateChat : NavRoutes(route = "create_chat/{scenarioId}")
+
     data object Settings : NavRoutes(
         route = "settings",
         icon = Icons.Default.Settings,

@@ -4,7 +4,9 @@ import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioTypeDto
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 interface MegaScenariosClient {
     @POST("v1/scenarios/generate")
@@ -16,6 +18,11 @@ interface MegaScenariosClient {
     suspend fun filter(
         @Body body: FilterScenariosReq,
     ): Response<FilterScenariosResp>
+
+    @GET("v1/scenarios/{scenarioId}")
+    suspend fun findById(
+        @Path("scenarioId") scenarioId: String,
+    ): Response<ScenarioDto>
 }
 
 data class GenerateScenarioReq(

@@ -132,6 +132,25 @@ class ScenariosRepository
                     InfraErrors.DatabaseError("Error trying to fetch today selection")
                 }
 
+        suspend fun getScenarioById(scenarioId: String): Either<InfraErrors, ScenarioDto> =
+            Either
+                .catch {
+                    Log.i("ScenariosRepository", "Fetching scenario by ID")
+                    val response = megaScenariosClient.findById(scenarioId)
+                    if (!response.isSuccessful) {
+                        throw InfraErrors.NetworkError(
+                            "Error trying to fetch scenario by ID: ${response.errorBody()}",
+                        )
+                    }
+                    response.body()?.let { scenario ->
+                        Log.i("ScenariosRepository", "Scenario fetched successfully: $scenario")
+                        scenario
+                    } ?: throw IllegalStateException("Response body is null")
+                }.mapLeft {
+                    Log.e("ScenariosRepository", "Error trying to fetch scenario by ID", it)
+                    InfraErrors.DatabaseError("Error trying to fetch scenario by ID: $it")
+                }
+
         suspend fun weeklyScenarios(
             userLang: String,
             scenarioLang: String,
