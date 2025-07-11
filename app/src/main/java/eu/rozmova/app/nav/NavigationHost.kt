@@ -13,6 +13,7 @@ import eu.rozmova.app.domain.ScenarioType
 import eu.rozmova.app.domain.toScenarioType
 import eu.rozmova.app.modules.allscenarios.AllScenariosScreen
 import eu.rozmova.app.modules.chatlist.ChatsListScreen
+import eu.rozmova.app.modules.createchat.CreateChatScreen
 import eu.rozmova.app.modules.devscreen.DevScreen
 import eu.rozmova.app.modules.generatechat.GenerateChatScreen
 import eu.rozmova.app.modules.library.LibraryNavigation
@@ -76,6 +77,17 @@ fun NavigationHost(
                             navController.navigate(NavRoutes.DevScreen.route)
                         }
                     },
+            )
+        }
+
+        composable(NavRoutes.CreateChat.route,
+            arguments =) listOf(navArgument("scenarioId") { type = NavType.StringType }
+            arguments =) listOf(navArgument("scenarioId") { type = NavType.StringType }),
+            CreateChatScreen(
+                scenarioId = TODO(),
+                navigation = TODO(),
+                modifier = TODO(),
+                viewModel = TODO()
             )
         }
 
