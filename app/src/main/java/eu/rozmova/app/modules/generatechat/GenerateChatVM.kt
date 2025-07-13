@@ -2,8 +2,8 @@ package eu.rozmova.app.modules.generatechat
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.domain.DifficultyDto
-import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.repositories.ScenariosRepository
 import eu.rozmova.app.repositories.SettingsRepository
 import org.orbitmvi.orbit.Container
@@ -18,7 +18,7 @@ data class GenerateChatState(
 sealed interface GenerateChatEvents {
     data class ChatCreated(
         val chatId: String,
-        val scenarioType: ScenarioTypeDto,
+        val chatType: ChatType,
     ) : GenerateChatEvents
 }
 
@@ -35,19 +35,19 @@ class GenerateChatVM
 
         fun generateScenario(
             difficultyDto: DifficultyDto,
-            scenarioType: ScenarioTypeDto,
+            chatType: ChatType,
             description: String,
         ) = intent {
             reduce { state.copy(isLoading = true) }
             val userLang = settingsRepository.getInterfaceLang()
             val scenarioLang = settingsRepository.getLearningLangOrDefault()
             scenariosRepository
-                .generateScenario(userLang, scenarioLang, scenarioType, difficultyDto, description)
+                .generateScenario(userLang, scenarioLang, chatType, difficultyDto, description)
                 .map { response ->
                     postSideEffect(
                         GenerateChatEvents.ChatCreated(
-                            response.chatId,
-                            response.scenarioType,
+                            response,
+                            chatType,
                         ),
                     )
                     reduce { state.copy(isLoading = false) }

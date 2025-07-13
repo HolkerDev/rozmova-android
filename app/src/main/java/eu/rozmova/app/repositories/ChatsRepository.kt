@@ -3,8 +3,7 @@ package eu.rozmova.app.repositories
 import android.util.Log
 import arrow.core.Either
 import eu.rozmova.app.clients.backend.ChatClient
-import eu.rozmova.app.clients.backend.ChatCreateReq
-import eu.rozmova.app.clients.backend.FetchLatestReq
+import eu.rozmova.app.clients.backend.CreateChatReq
 import eu.rozmova.app.clients.backend.FinishChatRes
 import eu.rozmova.app.clients.backend.GenSignedUrlReq
 import eu.rozmova.app.clients.backend.MegaChatClient
@@ -13,6 +12,7 @@ import eu.rozmova.app.clients.backend.SendAudioReq
 import eu.rozmova.app.clients.backend.SendMessageReq
 import eu.rozmova.app.clients.s3.S3Client
 import eu.rozmova.app.domain.ChatDto
+import eu.rozmova.app.domain.ChatType
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -52,16 +52,17 @@ class ChatsRepository
         ): Either<InfraErrors, ChatDto?> =
             Either
                 .catch {
-                    chatClient
-                        .fetchLatestChat(
-                            FetchLatestReq(
-                                userLang = userLang,
-                                scenarioLang = scenarioLang,
-                            ),
+                    Log.i(tag, "Fetching latest chat for userLang: $userLang, scenarioLang: $scenarioLang")
+                    megaChatClient
+                        .getLatest(
+                            userLang = userLang,
+                            scenarioLang = scenarioLang,
                         ).let { res ->
                             if (res.isSuccessful) {
-                                res.body()
+                                res.body()?.chat
+                                    ?: throw IllegalStateException("Latest chat fetch failed due to empty body: ${res.message()}")
                             } else if (res.code() == 404) {
+                                Log.i(tag, "No latest chat found.")
                                 null
                             } else {
                                 throw IllegalStateException("Latest chat failed to fetch: ${res.message()}")
@@ -128,19 +129,19 @@ class ChatsRepository
                     InfraErrors.DatabaseError("Failed to fetch chat by ID")
                 }
 
-        suspend fun createChatFromScenario(scenarioId: String): Either<InfraErrors, ChatDto> =
+        suspend fun createChat(
+            scenarioId: String,
+            chatType: ChatType,
+        ): Either<InfraErrors, String> =
             Either
                 .catch {
-                    chatClient.createChat(ChatCreateReq(scenarioId = scenarioId)).let { res ->
-                        if (res.isSuccessful) {
-                            val chat =
-                                res.body()
-                                    ?: throw IllegalStateException("Chat creation failed")
-                            chat
-                        } else {
-                            throw IllegalStateException("Chat creation failed")
-                        }
+                    val response = megaChatClient.createChat(CreateChatReq(scenarioId = scenarioId, chatType = chatType.name))
+                    if (!response.isSuccessful) {
+                        Log.e(tag, "Chat creation failed: ${response.errorBody()?.string()}")
+                        throw IllegalStateException("Chat creation failed: ${response.message()}")
                     }
+                    response.body()?.chatId
+                        ?: throw IllegalStateException("Chat creation failed")
                 }.mapLeft { e ->
                     Log.e(tag, "Failed to create chat", e)
                     InfraErrors.NetworkError("Failed to create chat")

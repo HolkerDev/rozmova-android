@@ -5,7 +5,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioTypeDto
-import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
 import eu.rozmova.app.repositories.SettingsRepository
 import eu.rozmova.app.state.AppStateRepository
@@ -31,7 +30,6 @@ class AllScenariosVM
     constructor(
         private val scenariosRepository: ScenariosRepository,
         private val settingsRepository: SettingsRepository,
-        private val chatsRepository: ChatsRepository,
         private val appStateRepository: AppStateRepository,
     ) : ViewModel(),
         ContainerHost<LibraryScreenState, LibraryScreenEvents> {
@@ -57,11 +55,4 @@ class AllScenariosVM
                 reduce { state.copy(scenarios = scenarios) }
             } // TODO: Map error to state
         }
-
-        fun createChat(scenarioId: String) =
-            intent {
-                chatsRepository.createChatFromScenario(scenarioId).map { chatDto ->
-                    postSideEffect(LibraryScreenEvents.ChatCreated(chatDto.id, chatDto.scenario.scenarioType))
-                }
-            }
     }

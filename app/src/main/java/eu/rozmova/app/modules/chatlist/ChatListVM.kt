@@ -19,7 +19,7 @@ data class ChatsListState(
 )
 
 @HiltViewModel
-class ChatsListViewModel
+class ChatListVM
     @Inject
     constructor(
         private val chatsRepository: ChatsRepository,

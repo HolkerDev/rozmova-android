@@ -3,11 +3,12 @@ package eu.rozmova.app.repositories
 import android.util.Log
 import arrow.core.Either
 import eu.rozmova.app.clients.backend.FilterScenariosReq
-import eu.rozmova.app.clients.backend.GenerateScenarioReq
+import eu.rozmova.app.clients.backend.GenerateScenarioV2Req
 import eu.rozmova.app.clients.backend.MegaScenariosClient
 import eu.rozmova.app.clients.backend.RecommendedScenariosRequest
 import eu.rozmova.app.clients.backend.ScenarioClient
 import eu.rozmova.app.clients.backend.WeeklyScenariosBody
+import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioTypeDto
@@ -63,23 +64,23 @@ class ScenariosRepository
         suspend fun generateScenario(
             userLang: String,
             scenarioLang: String,
-            scenarioType: ScenarioTypeDto,
+            chatType: ChatType,
             difficulty: DifficultyDto,
             description: String,
-        ): Either<InfraErrors, ChatIdWithScenarioType> =
+        ): Either<InfraErrors, String> =
             Either
                 .catch {
                     Log.i(
                         "ScenariosRepository",
-                        "Generating scenario with type: $scenarioType, difficulty: $difficulty",
+                        "Generating scenario with type: $chatType, difficulty: $difficulty",
                     )
                     val response =
-                        megaScenariosClient.generateScenario(
-                            GenerateScenarioReq(
+                        megaScenariosClient.generateScenarioV2(
+                            GenerateScenarioV2Req(
                                 description = description,
                                 userLang = userLang,
                                 scenarioLang = scenarioLang,
-                                scenarioType = scenarioType.name,
+                                chatType = chatType.name,
                                 difficulty = difficulty.name,
                             ),
                         )
@@ -88,13 +89,8 @@ class ScenariosRepository
                             "Error trying to generate scenario: ${response.errorBody()}",
                         )
                     }
-                    val responseBody =
-                        response.body()
-                            ?: throw IllegalStateException("Response body is null")
-                    ChatIdWithScenarioType(
-                        chatId = responseBody.chatId,
-                        scenarioType = responseBody.scenarioType,
-                    )
+                    response.body()
+                        ?: throw IllegalStateException("Response body is null")
                 }.mapLeft { error ->
                     Log.e("ScenariosRepository", "Error trying to generate scenario", error)
                     InfraErrors.NetworkError("Error trying to generate scenario: $error")

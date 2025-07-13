@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ScenarioDto
-import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.domain.TodayScenarioSelection
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
@@ -18,11 +17,6 @@ import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
 
 sealed class LearnEvent {
-    data class ChatCreated(
-        val chatId: String,
-        val scenarioType: ScenarioTypeDto,
-    ) : LearnEvent()
-
     data object StartOnboarding : LearnEvent()
 }
 
@@ -35,7 +29,7 @@ data class LearnScreenState(
 )
 
 @HiltViewModel
-class LearnScreenViewModel
+class LearnScreenVM
     @Inject
     constructor(
         private val scenariosRepository: ScenariosRepository,
@@ -54,7 +48,7 @@ class LearnScreenViewModel
 
         private fun initialize() =
             intent {
-                Log.i("LearnScreenViewModel", "Initializing LearnScreenViewModel - hashCode: ${this@LearnScreenViewModel.hashCode()}")
+                Log.i("LearnScreenViewModel", "Initializing LearnScreenViewModel - hashCode: ${this@LearnScreenVM.hashCode()}")
                 fetchLearningLanguage()
                 fetchTodayScenarios()
                 fetchLatestChat()
@@ -126,13 +120,6 @@ class LearnScreenViewModel
                 val userLang = localeManager.getCurrentLocale().language
                 chatsRepository.fetchLatest(learnLang, userLang).map {
                     reduce { state.copy(latestChat = it) }
-                }
-            }
-
-        fun createChatFromScenario(scenarioId: String) =
-            intent {
-                chatsRepository.createChatFromScenario(scenarioId).map { createdChat ->
-                    postSideEffect(LearnEvent.ChatCreated(createdChat.id, createdChat.scenario.scenarioType))
                 }
             }
 

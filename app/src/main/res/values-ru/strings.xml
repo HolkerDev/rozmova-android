@@ -154,4 +154,6 @@
     <string name="teacher_integration">Интеграция с учителем</string>
     <string name="teacher_integration_desc">Управляй своей интеграцие с учителем</string>
     <string name="type_all">Все</string>
+    <string name="chat_type_speaking">Говорение</string>
+    <string name="chat_type_writing">Письмо</string>
 </resources>

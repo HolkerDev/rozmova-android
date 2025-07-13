@@ -157,4 +157,6 @@
     <string name="teacher_integration">Teacher Integration</string>
     <string name="teacher_integration_desc">Manage your integration with teacher account</string>
     <string name="type_all">All</string>
+    <string name="chat_type_speaking">Speaking</string>
+    <string name="chat_type_writing">Writing</string>
 </resources>

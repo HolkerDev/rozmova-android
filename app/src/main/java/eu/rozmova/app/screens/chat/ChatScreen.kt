@@ -1,22 +1,20 @@
 package eu.rozmova.app.screens.chat
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import eu.rozmova.app.components.conversationchat.ConversationChat
 import eu.rozmova.app.components.messagechat.MessageChat
-import eu.rozmova.app.domain.ScenarioType
+import eu.rozmova.app.domain.ChatType
 
 @Composable
 fun ChatScreen(
     chatId: String,
-    scenarioType: ScenarioType,
+    chatType: ChatType,
     onBack: () -> Unit,
     onMain: () -> Unit,
     onNavigateToSubscription: () -> Unit,
 ) {
-    Log.i("ChatScreen", "ChatScreen: $chatId, $scenarioType")
-    when (scenarioType) {
-        ScenarioType.MESSAGES -> {
+    when (chatType) {
+        ChatType.WRITING -> {
             MessageChat(
                 chatId = chatId,
                 onReviewAccept = onMain,
@@ -24,7 +22,7 @@ fun ChatScreen(
                 navigateToSubscription = onNavigateToSubscription,
             )
         }
-        ScenarioType.CONVERSATION -> {
+        ChatType.SPEAKING -> {
             ConversationChat(
                 chatId = chatId,
                 onBackClick = onBack,

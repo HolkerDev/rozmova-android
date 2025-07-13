@@ -10,20 +10,10 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface ChatClient {
-    @POST("chats/new")
-    suspend fun createChat(
-        @Body body: ChatCreateReq,
-    ): Response<ChatDto>
-
     @GET("chats/{chatId}")
     suspend fun fetchChatById(
         @Path("chatId") chatId: String,
     ): Response<ChatDto>
-
-    @POST("chats")
-    suspend fun fetchAll(
-        @Body body: FetchAllReq,
-    ): Response<List<ChatDto>>
 
     @POST("chats/latest")
     suspend fun fetchLatestChat(
@@ -49,10 +39,6 @@ data class FetchLatestReq(
 data class FetchAllReq(
     val userLang: String,
     val scenarioLang: String,
-)
-
-data class ChatCreateReq(
-    val scenarioId: String,
 )
 
 data class FinishChatRes(

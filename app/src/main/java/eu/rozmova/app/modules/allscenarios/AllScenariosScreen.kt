@@ -34,7 +34,6 @@ import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.modules.allscenarios.components.ScenarioCard
 import org.orbitmvi.orbit.compose.collectAsState
-import org.orbitmvi.orbit.compose.collectSideEffect
 
 enum class ScenarioType(
     val scenarioTypeDto: ScenarioTypeDto?,
@@ -58,8 +57,8 @@ enum class Difficulty(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllScenariosScreen(
-    navigateToChat: (chatId: String, scenarioType: ScenarioTypeDto) -> Unit,
     back: () -> Unit,
+    toChatCreate: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AllScenariosVM = hiltViewModel(),
 ) {
@@ -69,14 +68,6 @@ fun AllScenariosScreen(
     var selectedDifficulty by remember { mutableStateOf<DifficultyDto?>(null) }
     var selectedScenarioType by remember { mutableStateOf<ScenarioTypeDto?>(null) }
     var showFinished by remember { mutableStateOf(true) }
-
-    viewModel.collectSideEffect { event ->
-        when (event) {
-            is LibraryScreenEvents.ChatCreated -> {
-                navigateToChat(event.chatId, event.scenarioType)
-            }
-        }
-    }
 
     Column(modifier = modifier.fillMaxSize()) {
         TopAppBar(
@@ -119,7 +110,7 @@ fun AllScenariosScreen(
                 items(scenarios) { scenario ->
                     ScenarioCard(
                         scenario = scenario,
-                        onClick = { scenario -> viewModel.createChat(scenario.id) },
+                        onClick = { scenario -> toChatCreate(scenario.id) },
                     )
                 }
             }

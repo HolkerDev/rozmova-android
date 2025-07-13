@@ -8,7 +8,7 @@ import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import eu.rozmova.app.R
-import eu.rozmova.app.domain.ScenarioType
+import eu.rozmova.app.domain.ChatType
 
 sealed class NavRoutes(
     val route: String,
@@ -25,18 +25,20 @@ sealed class NavRoutes(
         labelResourceId = R.string.bottom_nav_chats,
     )
 
-    data object Chat : NavRoutes(route = "chat/{chatId}/{scenarioType}") {
+    data object Chat : NavRoutes(route = "chat/{chatId}/{chatType}") {
         fun routeWith(
             chatId: String,
-            scenarioType: ScenarioType,
-        ) = "chat/$chatId/${scenarioType.name}"
+            chatType: ChatType,
+        ) = "chat/$chatId/${chatType.name}"
     }
 
     data object Library : NavRoutes(route = "library", icon = Icons.Default.LocalLibrary, labelResourceId = R.string.library_screen)
 
     data object AllScenarios : NavRoutes(route = "all_scenarios")
 
-    data object CreateChat : NavRoutes(route = "create_chat/{scenarioId}")
+    data object CreateChat : NavRoutes(route = "create_chat/{scenarioId}") {
+        fun routeWith(scenarioId: String) = "create_chat/$scenarioId"
+    }
 
     data object Settings : NavRoutes(
         route = "settings",

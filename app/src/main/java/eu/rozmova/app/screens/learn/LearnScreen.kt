@@ -10,9 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -21,41 +19,31 @@ import eu.rozmova.app.R
 import eu.rozmova.app.components.QuickResumeCard
 import eu.rozmova.app.components.RecentlyAdded
 import eu.rozmova.app.components.TodaysScenarioSelection
-import eu.rozmova.app.domain.ScenarioDto
-import eu.rozmova.app.domain.ScenarioType
-import eu.rozmova.app.domain.toScenarioType
+import eu.rozmova.app.domain.ChatType
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LearnScreen(
-    navigateToChat: (chatId: String, scenarioType: ScenarioType) -> Unit,
+    toCreateChat: (scenarioId: String) -> Unit,
+    toChat: (chatId: String, chatType: ChatType) -> Unit,
     startOnboarding: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: LearnScreenViewModel = hiltViewModel(),
+    viewModel: LearnScreenVM = hiltViewModel(),
 ) {
-    val navigateToChatAction = rememberUpdatedState(navigateToChat)
     val state by viewModel.collectAsState()
 
     Log.i("LearnScreen", "LearnScreen composed - ViewModel hashCode: ${viewModel.hashCode()}")
 
     viewModel.collectSideEffect { event ->
         when (event) {
-            is LearnEvent.ChatCreated -> {
-                navigateToChatAction.value(event.chatId, event.scenarioType.toScenarioType())
-            }
-
             LearnEvent.StartOnboarding -> {
                 Log.i("LearnScreen", "Starting onboarding")
                 startOnboarding()
             }
         }
     }
-
-    fun onScenarioSelect(scenario: ScenarioDto) = viewModel.createChatFromScenario(scenario.id)
-
-    fun onScenarioDtoSelect(scenario: ScenarioDto) = viewModel.createChatFromScenario(scenarioId = scenario.id)
 
     Scaffold(
         topBar = {
@@ -75,7 +63,7 @@ fun LearnScreen(
                     item {
                         TodaysScenarioSelection(
                             onScenarioClick = { scenario ->
-                                onScenarioSelect(scenario)
+                                toCreateChat(scenario.id)
                             },
                             state = recommendedScenarios,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -86,11 +74,8 @@ fun LearnScreen(
                     item {
                         QuickResumeCard(
                             chat = latestChat,
-                            onContinueClick = { chatId, scenarioType ->
-                                navigateToChat(
-                                    chatId,
-                                    scenarioType,
-                                )
+                            onContinueClick = { chatId, chatType ->
+                                toChat(chatId, chatType)
                             },
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         )
@@ -102,7 +87,7 @@ fun LearnScreen(
                         scenarios = state.weeklyScenarios ?: emptyList(),
                         isLoading = state.weeklyScenariosLoading,
                         onScenarioSelect = { scenario ->
-                            onScenarioDtoSelect(scenario)
+                            toCreateChat(scenario.id)
                         },
                     )
                 }

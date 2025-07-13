@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -24,19 +25,18 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
-import eu.rozmova.app.domain.ScenarioType
-import eu.rozmova.app.domain.toScenarioType
+import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.modules.chatlist.components.ChatItem
 import org.orbitmvi.orbit.compose.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatsListScreen(
-    onChatSelect: (String, ScenarioType) -> Unit,
+    onChatSelect: (String, ChatType) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ChatsListViewModel = hiltViewModel(),
+    viewModel: ChatListVM = hiltViewModel(),
 ) {
-    val state = viewModel.collectAsState().value
+    val state by viewModel.collectAsState()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -50,16 +50,14 @@ fun ChatsListScreen(
             isRefreshing = state.isRefreshing,
             onRefresh = { viewModel.refresh() },
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(
-                        PaddingValues(
-                            top = paddingValues.calculateTopPadding(),
-                            start = paddingValues.calculateLeftPadding(LayoutDirection.Ltr),
-                            end = paddingValues.calculateRightPadding(LayoutDirection.Ltr),
-                            bottom = 4.dp,
-                        ),
+                Modifier.fillMaxSize().padding(
+                    PaddingValues(
+                        top = paddingValues.calculateTopPadding(),
+                        start = paddingValues.calculateLeftPadding(LayoutDirection.Ltr),
+                        end = paddingValues.calculateRightPadding(LayoutDirection.Ltr),
+                        bottom = 4.dp,
                     ),
+                ),
         ) {
             Column {
                 // Use LazyColumn for all states to ensure consistent scrollable behavior
@@ -72,10 +70,7 @@ fun ChatsListScreen(
                             item {
                                 Box(
                                     contentAlignment = Alignment.Center,
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .padding(24.dp),
+                                    modifier = Modifier.fillMaxWidth().padding(24.dp),
                                 ) {
                                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                                 }
@@ -89,7 +84,7 @@ fun ChatsListScreen(
                                     onChatClick = {
                                         onChatSelect(
                                             chat.id,
-                                            chat.scenario.scenarioType.toScenarioType(),
+                                            chat.chatType,
                                         )
                                     },
                                     onChatDelete = {
@@ -106,10 +101,7 @@ fun ChatsListScreen(
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center,
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .padding(24.dp),
+                                    modifier = Modifier.fillMaxWidth().padding(24.dp),
                                 )
                             }
                         }

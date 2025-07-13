@@ -43,8 +43,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
+import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.domain.ScenarioTypeDto
+import eu.rozmova.app.modules.createchat.ChatTypeUI
+import eu.rozmova.app.modules.createchat.toModel
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -53,13 +56,13 @@ typealias ChatId = String
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GenerateChatScreen(
-    onChatReady: (ChatId, ScenarioTypeDto) -> Unit,
+    onChatReady: (ChatId, ChatType) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: GenerateChatVM = hiltViewModel(),
 ) {
     var description by remember { mutableStateOf("") }
-    var selectedScenarioType by remember { mutableStateOf(ScenarioType.MESSAGES) }
+    var selectedChatType by remember { mutableStateOf(ChatTypeUI.WRITING) }
     var selectedDifficulty by remember { mutableStateOf(Difficulty.EASY) }
 
     val state by viewModel.collectAsState()
@@ -67,13 +70,13 @@ fun GenerateChatScreen(
     viewModel.collectSideEffect { events ->
         when (events) {
             is GenerateChatEvents.ChatCreated -> {
-                onChatReady(events.chatId, events.scenarioType)
+                onChatReady(events.chatId, events.chatType)
             }
         }
     }
 
     fun generateScenario() {
-        viewModel.generateScenario(selectedDifficulty.toDto(), selectedScenarioType.toDto(), description)
+        viewModel.generateScenario(selectedDifficulty.toDto(), selectedChatType.toModel(), description)
     }
 
     Scaffold(
@@ -154,32 +157,32 @@ fun GenerateChatScreen(
                         modifier = Modifier.selectableGroup(),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        ScenarioType.entries.forEach { scenarioType ->
+                        ChatTypeUI.entries.forEach { chatType ->
                             Row(
                                 modifier =
                                     Modifier
                                         .fillMaxWidth()
                                         .selectable(
-                                            selected = selectedScenarioType == scenarioType,
-                                            onClick = { selectedScenarioType = scenarioType },
+                                            selected = selectedChatType == chatType,
+                                            onClick = { selectedChatType = chatType },
                                             role = Role.RadioButton,
                                             enabled = !state.isLoading,
                                         ).padding(vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 RadioButton(
-                                    selected = selectedScenarioType == scenarioType,
+                                    selected = selectedChatType == chatType,
                                     onClick = null,
                                     enabled = !state.isLoading,
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
                                     Text(
-                                        text = stringResource(scenarioType.displayName),
+                                        text = stringResource(chatType.textLabelId),
                                         style = MaterialTheme.typography.bodyLarge,
                                     )
                                     Text(
-                                        text = stringResource(scenarioType.description),
+                                        text = stringResource(chatType.textLabelId),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )

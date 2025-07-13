@@ -14,11 +14,35 @@ interface MegaChatClient {
         @Query("scenarioLang") scenarioLang: String,
     ): Response<ListChatsResp>
 
+    @GET("v1/chats/latest")
+    suspend fun getLatest(
+        @Query("userLang") userLang: String,
+        @Query("scenarioLang") scenarioLang: String,
+    ): Response<GetLatestChatResp>
+
     @POST("v1/chats/messages/audio")
     suspend fun sendAudioMessage(
         @Body body: SendAudioReq,
     ): Response<SendAudioRes>
+
+    @POST("v1/chats")
+    suspend fun createChat(
+        @Body body: CreateChatReq,
+    ): Response<CreateChatResp>
 }
+
+data class GetLatestChatResp(
+    val chat: ChatDto,
+)
+
+data class CreateChatReq(
+    val scenarioId: String,
+    val chatType: String,
+)
+
+data class CreateChatResp(
+    val chatId: String,
+)
 
 data class ListChatsResp(
     val chats: List<ChatDto>,

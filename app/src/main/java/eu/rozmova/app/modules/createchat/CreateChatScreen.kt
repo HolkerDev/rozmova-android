@@ -45,20 +45,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import eu.rozmova.app.R
+import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.modules.shared.DifficultyLabel
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
-enum class ChatType(
-    val displayName: String,
+enum class ChatTypeUI(
+    val textLabelId: Int,
     val icon: ImageVector,
 ) {
-    SPEAKING("Speaking", Icons.Default.Mic),
-    TEXTING("Texting", Icons.Default.TextFields),
+    SPEAKING(R.string.chat_type_speaking, Icons.Default.Mic),
+    WRITING(R.string.chat_type_writing, Icons.Default.TextFields),
 }
+
+fun ChatType.toUI(): ChatTypeUI =
+    when (this) {
+        ChatType.SPEAKING -> ChatTypeUI.SPEAKING
+        ChatType.WRITING -> ChatTypeUI.WRITING
+    }
+
+fun ChatTypeUI.toModel(): ChatType =
+    when (this) {
+        ChatTypeUI.SPEAKING -> ChatType.SPEAKING
+        ChatTypeUI.WRITING -> ChatType.WRITING
+    }
 
 interface CreateChatNavigation {
     fun back()
@@ -82,9 +98,19 @@ fun CreateChatScreen(
         viewModel.fetchScenario(scenarioId)
     }
 
+    viewModel.collectSideEffect { event ->
+        when (event) {
+            is CreateChatEvent.ChatCreated -> {
+                navigation.toChat(event.chatId, event.chatType)
+            }
+        }
+    }
+
     Content(
         navigation = navigation,
-        onChatStart = {},
+        onChatStart = { chatType ->
+            viewModel.createChat(scenarioId, chatType.toModel())
+        },
         state = state,
         modifier = modifier,
     )
@@ -94,11 +120,11 @@ fun CreateChatScreen(
 @Composable
 private fun Content(
     navigation: CreateChatNavigation,
-    onChatStart: () -> Unit,
+    onChatStart: (ChatTypeUI) -> Unit,
     state: CreateChatState,
     modifier: Modifier = Modifier,
 ) {
-    var selectedChatTypes by remember { mutableStateOf(ChatType.SPEAKING) }
+    var selectedChatType by remember { mutableStateOf(ChatTypeUI.SPEAKING) }
     val scrollState = rememberScrollState()
 
     Scaffold(
@@ -132,7 +158,7 @@ private fun Content(
                             .padding(16.dp),
                 ) {
                     Button(
-                        onClick = { TODO("something") },
+                        onClick = { onChatStart(selectedChatType) },
                         modifier =
                             Modifier
                                 .fillMaxWidth()
@@ -149,7 +175,7 @@ private fun Content(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Start ${selectedChatTypes.displayName} Chat",
+                            text = "Start ${stringResource(selectedChatType.textLabelId)} Chat",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Medium,
                         )
@@ -178,7 +204,7 @@ private fun Content(
                 return@Column
             }
 
-            state.scenario?.let { scenario ->
+            state.scenario.let { scenario ->
                 // Scenario Details Card
                 ScenarioDetailsCard(
                     title = scenario.title,
@@ -188,8 +214,8 @@ private fun Content(
 
                 // Chat Type Selection
                 ChatTypeSelection(
-                    selectedType = selectedChatTypes,
-                    onTypeSelected = { selectedChatTypes = it },
+                    selectedType = selectedChatType,
+                    onTypeSelect = { selectedChatType = it },
                 )
 
                 // Add bottom padding to ensure content doesn't get hidden behind bottom bar
@@ -253,8 +279,8 @@ private fun ScenarioDetailsCard(
 
 @Composable
 private fun ChatTypeSelection(
-    selectedType: ChatType,
-    onTypeSelected: (ChatType) -> Unit,
+    selectedType: ChatTypeUI,
+    onTypeSelect: (ChatTypeUI) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -275,11 +301,11 @@ private fun ChatTypeSelection(
                     .selectableGroup(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            ChatType.entries.forEach { chatType ->
+            ChatTypeUI.entries.forEach { chatType ->
                 ChatTypeOption(
-                    chatTypes = chatType,
+                    chatType = chatType,
                     selected = selectedType == chatType,
-                    onSelected = { onTypeSelected(chatType) },
+                    onSelect = { onTypeSelect(chatType) },
                 )
             }
         }
@@ -288,13 +314,13 @@ private fun ChatTypeSelection(
 
 @Composable
 private fun ChatTypeOption(
-    chatTypes: ChatType,
+    chatType: ChatTypeUI,
     selected: Boolean,
-    onSelected: () -> Unit,
+    onSelect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
-        onClick = onSelected,
+        onClick = onSelect,
         modifier = modifier.fillMaxWidth(),
         colors =
             CardDefaults.cardColors(
@@ -328,7 +354,7 @@ private fun ChatTypeOption(
         ) {
             RadioButton(
                 selected = selected,
-                onClick = onSelected,
+                onClick = onSelect,
                 colors =
                     RadioButtonDefaults.colors(
                         selectedColor = MaterialTheme.colorScheme.primary,
@@ -336,7 +362,7 @@ private fun ChatTypeOption(
             )
 
             Icon(
-                imageVector = chatTypes.icon,
+                imageVector = chatType.icon,
                 contentDescription = null,
                 tint =
                     if (selected) {
@@ -349,7 +375,7 @@ private fun ChatTypeOption(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = chatTypes.displayName,
+                    text = stringResource(chatType.textLabelId),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color =
@@ -362,9 +388,9 @@ private fun ChatTypeOption(
 
                 Text(
                     text =
-                        when (chatTypes) {
-                            ChatType.SPEAKING -> "Practice verbal communication skills"
-                            ChatType.TEXTING -> "Practice written communication skills"
+                        when (chatType) {
+                            ChatTypeUI.SPEAKING -> "Practice verbal communication skills"
+                            ChatTypeUI.WRITING -> "Practice written communication skills"
                         },
                     style = MaterialTheme.typography.bodyMedium,
                     color =
