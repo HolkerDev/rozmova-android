@@ -86,7 +86,7 @@ class ScenariosRepository
                         )
                     if (!response.isSuccessful) {
                         throw InfraErrors.NetworkError(
-                            "Error trying to generate scenario: ${response.errorBody()}",
+                            "Error trying to generate scenario: ${response.errorBody()?.string()}",
                         )
                     }
                     response.body()
