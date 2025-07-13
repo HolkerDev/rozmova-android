@@ -182,7 +182,7 @@ fun NavigationHost(
                 chatType = chatType,
                 onBack = {
                     val previousRoute = navController.previousBackStackEntry?.destination?.route
-                    if (previousRoute == NavRoutes.GenerateScenario.route) {
+                    if (previousRoute == NavRoutes.GenerateScenario.route || previousRoute == NavRoutes.CreateChat.route) {
                         navController.navigate(NavRoutes.Learn.route) {
                             popUpTo(NavRoutes.GenerateScenario.route) { inclusive = true }
                         }
