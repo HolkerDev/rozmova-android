@@ -16,7 +16,6 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material3.Button
@@ -47,11 +46,16 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.domain.DifficultyDto
+import eu.rozmova.app.domain.LangDto
+import eu.rozmova.app.domain.ScenarioDto
+import eu.rozmova.app.domain.ScenarioTypeDto
+import eu.rozmova.app.domain.UserInstruction
 import eu.rozmova.app.modules.shared.DifficultyLabel
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -61,7 +65,10 @@ enum class ChatTypeUI(
     val icon: ImageVector,
 ) {
     SPEAKING(R.string.chat_type_speaking, Icons.Default.Mic),
-    WRITING(R.string.chat_type_writing, Icons.Default.TextFields),
+    WRITING(
+        R.string.chat_type_writing,
+        Icons.Default.TextFields,
+    ),
 }
 
 fun ChatType.toUI(): ChatTypeUI =
@@ -152,32 +159,20 @@ private fun Content(
                 color = MaterialTheme.colorScheme.surface,
             ) {
                 Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(16.dp).padding(bottom = 4.dp),
                 ) {
                     Button(
                         onClick = { onChatStart(selectedChatType) },
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .height(56.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = state.scenario != null,
+                        shape = MaterialTheme.shapes.medium,
                         colors =
                             ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
                             ),
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Chat,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Start ${stringResource(selectedChatType.textLabelId)} Chat",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium,
+                            text = "Start chat",
                         )
                     }
                 }
@@ -241,36 +236,34 @@ private fun ScenarioDetailsCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(18.dp),
         ) {
-            // Title
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(modifier = Modifier.weight(1f))
 
-            // Difficulty Badge
-            DifficultyLabel(difficulty = difficulty)
+                // Difficulty Badge
+                DifficultyLabel(difficulty = difficulty)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Situation
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = "Situation",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
                     text = situation,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
-                    lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.4,
                 )
             }
         }
@@ -295,10 +288,7 @@ private fun ChatTypeSelection(
         )
 
         Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .selectableGroup(),
+            modifier = Modifier.fillMaxWidth().selectableGroup(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             ChatTypeUI.entries.forEach { chatType ->
@@ -345,10 +335,7 @@ private fun ChatTypeOption(
             },
     ) {
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -405,15 +392,49 @@ private fun ChatTypeOption(
     }
 }
 
-// @Preview(showBackground = true)
-// @Composable
-// private fun ScenarioDetailsScreenPreview() {
-//    MaterialTheme {
-//        Content(
-//        )
-//    }
-// }
-//
+@Preview(showBackground = true)
+@Composable
+private fun ScenarioDetailsScreenPreview() {
+    MaterialTheme {
+        Content(
+            navigation =
+                object : CreateChatNavigation {
+                    override fun back() {}
+
+                    override fun toChat(
+                        chatId: String,
+                        chatType: ChatType,
+                    ) {
+                    }
+                },
+            onChatStart = {},
+            state =
+                CreateChatState(
+                    scenario =
+                        ScenarioDto(
+                            id = "1",
+                            createdAt = "now",
+                            userLang = LangDto.EN,
+                            scenarioLang = LangDto.DE,
+                            difficulty = DifficultyDto.HARD,
+                            scenarioType = ScenarioTypeDto.CONVERSATION,
+                            title = "Job Interview Scenario",
+                            situation = "You are interviewing for a software developer position at a startup. The interviewer asks you to explain a complex technical concept to someone without a technical background. You need to demonstrate both your technical knowledge and communication skills.",
+                            labels = listOf(),
+                            helperWords = listOf(),
+                            userInstructions =
+                                listOf(
+                                    UserInstruction(
+                                        assessment = "Explain the concept clearly and concisely, avoiding jargon.",
+                                        task = "Explain a complex technical concept to a non-technical person.",
+                                    ),
+                                ),
+                        ),
+                ),
+        )
+    }
+}
+
 // @Preview(showBackground = true)
 // @Composable
 // private fun ScenarioDetailsScreenDarkPreview() {
