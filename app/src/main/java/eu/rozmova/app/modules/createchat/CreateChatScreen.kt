@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -137,7 +138,7 @@ private fun Content(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Scenario Details") },
+                title = { Text(stringResource(R.string.create_chat_title)) },
                 navigationIcon = {
                     IconButton(onClick = navigation::back) {
                         Icon(
@@ -172,7 +173,7 @@ private fun Content(
                             ),
                     ) {
                         Text(
-                            text = "Start chat",
+                            text = stringResource(R.string.start_chat),
                         )
                     }
                 }
@@ -238,34 +239,26 @@ private fun ScenarioDetailsCard(
         Column(
             modifier = Modifier.fillMaxWidth().padding(18.dp),
         ) {
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f), // Add weight to title
                 )
-                Spacer(modifier = Modifier.weight(1f))
-
-                // Difficulty Badge
                 DifficultyLabel(difficulty = difficulty)
             }
-
             Spacer(modifier = Modifier.height(8.dp))
 
             // Situation
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = "Situation",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = situation,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            }
+            Text(
+                text = situation,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
         }
     }
 }
@@ -281,7 +274,7 @@ private fun ChatTypeSelection(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
-            text = "Choose Chat Type",
+            text = stringResource(R.string.choose_chat_type),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -376,8 +369,8 @@ private fun ChatTypeOption(
                 Text(
                     text =
                         when (chatType) {
-                            ChatTypeUI.SPEAKING -> "Practice verbal communication skills"
-                            ChatTypeUI.WRITING -> "Practice written communication skills"
+                            ChatTypeUI.SPEAKING -> stringResource(R.string.chat_type_speaking_desc)
+                            ChatTypeUI.WRITING -> stringResource(R.string.chat_type_writing_desc)
                         },
                     style = MaterialTheme.typography.bodyMedium,
                     color =

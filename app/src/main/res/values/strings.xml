@@ -159,4 +159,9 @@
     <string name="type_all">All</string>
     <string name="chat_type_speaking">Speaking</string>
     <string name="chat_type_writing">Writing</string>
+    <string name="start_chat">Start Chat</string>
+    <string name="choose_chat_type">Choose chat type</string>
+    <string name="chat_type_writing_desc">Practice written communication skills</string>
+    <string name="chat_type_speaking_desc">Practice verbal communication skills</string>
+    <string name="create_chat_title">Scenario Details</string>
 </resources>

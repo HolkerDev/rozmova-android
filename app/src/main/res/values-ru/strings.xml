@@ -156,4 +156,9 @@
     <string name="type_all">Все</string>
     <string name="chat_type_speaking">Говорение</string>
     <string name="chat_type_writing">Письмо</string>
+    <string name="start_chat">Начать чат</string>
+    <string name="choose_chat_type">Выбери тип чата</string>
+    <string name="chat_type_writing_desc">Практика письма</string>
+    <string name="chat_type_speaking_desc">Практика говорения</string>
+    <string name="create_chat_title">Описание сценария</string>
 </resources>

@@ -156,4 +156,9 @@
     <string name="type_all">Усі</string>
     <string name="chat_type_speaking">Говоріння</string>
     <string name="chat_type_writing">Письмо</string>
+    <string name="start_chat">Почати чат</string>
+    <string name="choose_chat_type">Вибери тип чату</string>
+    <string name="chat_type_writing_desc">Практика письма</string>
+    <string name="chat_type_speaking_desc">Практика говоріння</string>
+    <string name="create_chat_title">Опис сценарію</string>
 </resources>
