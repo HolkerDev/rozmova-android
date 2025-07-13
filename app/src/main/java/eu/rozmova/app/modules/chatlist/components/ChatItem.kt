@@ -41,7 +41,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.domain.ChatDto
-import eu.rozmova.app.domain.ScenarioTypeDto
+import eu.rozmova.app.modules.createchat.ChatTypeUI
+import eu.rozmova.app.modules.createchat.toUI
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -123,7 +124,7 @@ fun ChatItem(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.weight(1f),
                 ) {
-                    ChatTypeIconWithBackground(scenarioType = chat.scenario.scenarioType)
+                    ChatTypeIconWithBackground(chatType = chat.chatType.toUI())
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = chat.scenario.title,
@@ -150,23 +151,23 @@ fun ChatItem(
 }
 
 @Composable
-private fun ChatTypeIconWithBackground(scenarioType: ScenarioTypeDto) {
+private fun ChatTypeIconWithBackground(chatType: ChatTypeUI) {
     val backgroundColor =
-        when (scenarioType) {
-            ScenarioTypeDto.CONVERSATION -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-            ScenarioTypeDto.MESSAGES -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
+        when (chatType) {
+            ChatTypeUI.SPEAKING -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+            ChatTypeUI.WRITING -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
         }
 
     val iconTint =
-        when (scenarioType) {
-            ScenarioTypeDto.CONVERSATION -> MaterialTheme.colorScheme.primary
-            ScenarioTypeDto.MESSAGES -> MaterialTheme.colorScheme.tertiary
+        when (chatType) {
+            ChatTypeUI.WRITING -> MaterialTheme.colorScheme.primary
+            ChatTypeUI.SPEAKING -> MaterialTheme.colorScheme.tertiary
         }
 
     val icon =
-        when (scenarioType) {
-            ScenarioTypeDto.CONVERSATION -> Icons.Default.RecordVoiceOver
-            ScenarioTypeDto.MESSAGES -> Icons.AutoMirrored.Filled.Chat
+        when (chatType) {
+            ChatTypeUI.SPEAKING -> Icons.Default.RecordVoiceOver
+            ChatTypeUI.WRITING -> Icons.AutoMirrored.Filled.Chat
         }
 
     Box(
@@ -179,7 +180,7 @@ private fun ChatTypeIconWithBackground(scenarioType: ScenarioTypeDto) {
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = "Chat status: $scenarioType",
+            contentDescription = "Chat status: $chatType",
             tint = iconTint,
             modifier = Modifier.size(18.dp),
         )

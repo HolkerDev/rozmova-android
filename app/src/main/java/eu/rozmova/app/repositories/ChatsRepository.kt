@@ -84,6 +84,7 @@ class ChatsRepository
                             val responseBody =
                                 res.body()
                                     ?: throw IllegalStateException("Chats list fetch failed due to empty body: ${res.message()}")
+                            Log.i(tag, "Fetched ${responseBody.chats.map { it.chatType }.joinToString(",")} chats")
                             responseBody.chats
                         } else {
                             throw IllegalStateException("Chats list fetch failed: ${res.message()}")
