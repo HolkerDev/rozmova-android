@@ -4,7 +4,6 @@ import android.util.Log
 import arrow.core.Either
 import eu.rozmova.app.clients.backend.ChatClient
 import eu.rozmova.app.clients.backend.CreateChatReq
-import eu.rozmova.app.clients.backend.FinishChatRes
 import eu.rozmova.app.clients.backend.GenSignedUrlReq
 import eu.rozmova.app.clients.backend.MegaChatClient
 import eu.rozmova.app.clients.backend.MessageClient
@@ -13,6 +12,7 @@ import eu.rozmova.app.clients.backend.SendMessageReq
 import eu.rozmova.app.clients.s3.S3Client
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatType
+import eu.rozmova.app.domain.ReviewDto
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -148,22 +148,37 @@ class ChatsRepository
                     InfraErrors.NetworkError("Failed to create chat")
                 }
 
-        suspend fun finishChat(chatId: String): Either<InfraErrors, FinishChatRes> =
+        suspend fun review(chatId: String): Either<InfraErrors, String> =
             Either
                 .catch {
-                    chatClient.finish(chatId).let { res ->
-                        if (res.isSuccessful) {
-                            val responseBody =
-                                res.body()
-                                    ?: throw IllegalStateException("Chat finish failed: ${res.message()}")
-                            responseBody
-                        } else {
-                            throw IllegalStateException("Chat finish failed: ${res.message()}")
-                        }
+                    val response = megaChatClient.review(chatId)
+                    if (!response.isSuccessful) {
+                        Log.e(tag, "Chat finish failed: ${response.errorBody()?.string()}")
+                        throw IllegalStateException("Chat finish failed: ${response.message()}")
                     }
+                    response.body()?.reviewId ?: throw IllegalStateException("Chat finish failed")
                 }.mapLeft { error ->
                     Log.e(tag, "Error finishing chat", error)
                     InfraErrors.NetworkError("Failed to finish chat")
+                }
+
+        suspend fun getReview(reviewId: String): Either<InfraErrors, ReviewDto> =
+            Either
+                .catch {
+                    Log.i(tag, "Fetching chat review for reviewId: $reviewId")
+                    val response = megaChatClient.getReview(reviewId)
+                    if (!response.isSuccessful) {
+                        throw IllegalStateException(
+                            "Chat review fetch failed: ${
+                                response.errorBody()?.string()
+                            } status: ${response.code()}",
+                        )
+                    }
+                    response.body()?.review
+                        ?: throw IllegalStateException("Chat review fetch failed: ${response.errorBody()} status: ${response.code()}")
+                }.mapLeft { error ->
+                    Log.e(tag, "Error fetching chat review", error)
+                    InfraErrors.NetworkError("Failed to fetch chat review")
                 }
 
         suspend fun sendAudioMessage(

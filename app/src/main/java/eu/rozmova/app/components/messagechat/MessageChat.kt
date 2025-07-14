@@ -87,6 +87,7 @@ fun MessageChat(
     chatId: ChatId,
     onReviewAccept: () -> Unit,
     onBackClick: () -> Unit,
+    toReview: (reviewId: String) -> Unit,
     navigateToSubscription: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MessageChatViewModel = hiltViewModel(),
@@ -117,6 +118,7 @@ fun MessageChat(
                         lastUserMsg = event.lastUserMsg,
                     )
             MessageChatEvent.ScrollToBottom -> scrollToBottom()
+            is MessageChatEvent.ShowReview -> toReview(event.reviewId)
         }
     }
 

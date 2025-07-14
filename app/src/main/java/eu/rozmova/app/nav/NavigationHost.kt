@@ -19,6 +19,7 @@ import eu.rozmova.app.modules.generatechat.GenerateChatScreen
 import eu.rozmova.app.modules.library.LibraryNavigation
 import eu.rozmova.app.modules.library.LibraryScreen
 import eu.rozmova.app.modules.onboarding.OnboardingScreen
+import eu.rozmova.app.modules.review.ReviewScreen
 import eu.rozmova.app.modules.subscription.SubscriptionScreen
 import eu.rozmova.app.screens.chat.ChatScreen
 import eu.rozmova.app.screens.learn.LearnScreen
@@ -162,6 +163,21 @@ fun NavigationHost(
             DevScreen(back = { navController.navigateUp() })
         }
 
+        composable(
+            route = NavRoutes.Review.route,
+            arguments = listOf(navArgument("reviewId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val reviewId: String = backStackEntry.arguments?.getString("reviewId") ?: ""
+            ReviewScreen(
+                reviewId = reviewId,
+                onClose = {
+                    navController.navigate(NavRoutes.Learn.route) {
+                        popUpTo(NavRoutes.Chat.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
         // Side Screens
         composable(
             route = NavRoutes.Chat.route,
@@ -189,6 +205,9 @@ fun NavigationHost(
                     } else {
                         navController.navigateUp()
                     }
+                },
+                toReview = { reviewId ->
+                    navController.navigate(NavRoutes.Review.routeWith(reviewId))
                 },
                 onMain = { navController.navigate(NavRoutes.Learn.route) },
                 onNavigateToSubscription = {

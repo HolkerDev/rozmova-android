@@ -1,10 +1,12 @@
 package eu.rozmova.app.clients.backend
 
 import eu.rozmova.app.domain.ChatDto
+import eu.rozmova.app.domain.ReviewDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface MegaChatClient {
@@ -25,11 +27,29 @@ interface MegaChatClient {
         @Body body: SendAudioReq,
     ): Response<SendAudioRes>
 
+    @POST("v1/chats/{chatId}/review")
+    suspend fun review(
+        @Path("chatId") chatId: String,
+    ): Response<ReviewChatResp>
+
+    @GET("v1/chats/{reviewId}/review")
+    suspend fun getReview(
+        @Path("reviewId") reviewId: String,
+    ): Response<GetReviewResp>
+
     @POST("v1/chats")
     suspend fun createChat(
         @Body body: CreateChatReq,
     ): Response<CreateChatResp>
 }
+
+data class GetReviewResp(
+    val review: ReviewDto,
+)
+
+data class ReviewChatResp(
+    val reviewId: String,
+)
 
 data class GetLatestChatResp(
     val chat: ChatDto,

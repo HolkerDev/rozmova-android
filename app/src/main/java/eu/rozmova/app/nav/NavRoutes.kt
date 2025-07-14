@@ -25,6 +25,10 @@ sealed class NavRoutes(
         labelResourceId = R.string.bottom_nav_chats,
     )
 
+    data object Review : NavRoutes(route = "review/{reviewId}") {
+        fun routeWith(reviewId: String) = "review/$reviewId"
+    }
+
     data object Chat : NavRoutes(route = "chat/{chatId}/{chatType}") {
         fun routeWith(
             chatId: String,

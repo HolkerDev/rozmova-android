@@ -27,6 +27,10 @@ sealed class MessageChatEvent {
         val lastUserMsg: MessageDto,
     ) : MessageChatEvent()
 
+    data class ShowReview(
+        val reviewId: String,
+    ) : MessageChatEvent()
+
     data object Close : MessageChatEvent()
 }
 
@@ -64,14 +68,8 @@ class MessageChatViewModel
         fun finishChat(chatId: String) =
             intent {
                 reduce { state.copy(isLoadingReview = true) }
-                chatsRepository.finishChat(chatId = chatId).map { chatUpdate ->
-                    reduce {
-                        state.copy(
-                            chat = chatUpdate.chat,
-                            isLoadingReview = false,
-                            review = chatUpdate.review,
-                        )
-                    }
+                chatsRepository.review(chatId = chatId).map { reviewId ->
+                    postSideEffect(MessageChatEvent.ShowReview(reviewId))
                 }
             }
 

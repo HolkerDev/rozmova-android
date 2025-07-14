@@ -96,16 +96,16 @@ class ChatDetailsViewModel
 
         fun finishChat(chatId: String) =
             intent {
-                reduce { state.copy(isReviewLoading = true) }
-                chatsRepository.finishChat(chatId = chatId).map { chatUpdate ->
-                    reduce {
-                        state.copy(
-                            chat = chatUpdate.chat,
-                            isReviewLoading = false,
-                            review = chatUpdate.review,
-                        )
-                    }
-                }
+//                reduce { state.copy(isReviewLoading = true) }
+//                chatsRepository.review(chatId = chatId).map { chatUpdate ->
+//                    reduce {
+//                        state.copy(
+//                            chat = chatUpdate.chat,
+//                            isReviewLoading = false,
+//                            review = chatUpdate.review,
+//                        )
+//                    }
+//                }
             }
 
         fun onAudioSaved() =

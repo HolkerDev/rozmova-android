@@ -11,6 +11,7 @@ fun ChatScreen(
     chatType: ChatType,
     onBack: () -> Unit,
     onMain: () -> Unit,
+    toReview: (reviewId: String) -> Unit,
     onNavigateToSubscription: () -> Unit,
 ) {
     when (chatType) {
@@ -20,6 +21,7 @@ fun ChatScreen(
                 onReviewAccept = onMain,
                 onBackClick = onBack,
                 navigateToSubscription = onNavigateToSubscription,
+                toReview = toReview,
             )
         }
         ChatType.SPEAKING -> {
