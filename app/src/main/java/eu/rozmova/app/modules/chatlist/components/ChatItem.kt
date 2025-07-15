@@ -151,7 +151,10 @@ fun ChatItem(
 }
 
 @Composable
-private fun ChatTypeIconWithBackground(chatType: ChatTypeUI) {
+fun ChatTypeIconWithBackground(
+    chatType: ChatTypeUI,
+    modifier: Modifier = Modifier,
+) {
     val backgroundColor =
         when (chatType) {
             ChatTypeUI.SPEAKING -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
@@ -173,7 +176,7 @@ private fun ChatTypeIconWithBackground(chatType: ChatTypeUI) {
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-            Modifier
+            modifier
                 .size(30.dp)
                 .clip(MaterialTheme.shapes.small)
                 .background(backgroundColor),

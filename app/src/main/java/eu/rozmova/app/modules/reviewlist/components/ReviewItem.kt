@@ -2,20 +2,18 @@ package eu.rozmova.app.modules.reviewlist.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Assessment
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -28,6 +26,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.domain.ReviewDto
+import eu.rozmova.app.modules.chatlist.components.ChatTypeIconWithBackground
+import eu.rozmova.app.modules.createchat.toUI
+import eu.rozmova.app.modules.shared.DifficultyLabel
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -69,7 +70,7 @@ fun ReviewItem(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.weight(1f),
                 ) {
-                    ReviewIconWithBackground(isCompleted = review.taskCompletion.isCompleted)
+                    ChatTypeIconWithBackground(review.chat.chatType.toUI())
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = review.chat.scenario.title,
@@ -80,97 +81,39 @@ fun ReviewItem(
                     )
                 }
 
-                // Rating
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                // Rating and completion status
+                Column(
+                    horizontalAlignment = Alignment.End,
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Rating",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp),
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${review.taskCompletion.rating}/3",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Task completion status
-            val completionText =
-                if (review.taskCompletion.isCompleted) {
-                    "Task completed successfully"
-                } else {
-                    "Task not completed"
-                }
-
-            Text(
-                text = completionText,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-
-            // Show summary info
-            if (review.topicsToReview.isNotEmpty() || review.wordsToLearn.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(4.dp))
-                val summaryText =
-                    buildString {
-                        if (review.topicsToReview.isNotEmpty()) {
-                            append("${review.topicsToReview.size} topics to review")
-                        }
-                        if (review.wordsToLearn.isNotEmpty()) {
-                            if (isNotEmpty()) append(" • ")
-                            append("${review.wordsToLearn.size} words to learn")
-                        }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = if (review.taskCompletion.isCompleted) Icons.Default.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
+                            contentDescription = if (review.taskCompletion.isCompleted) "Completed" else "Not completed",
+                            tint = if (review.taskCompletion.isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.size(16.dp),
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Rating",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp),
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "${review.taskCompletion.rating}/3",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
                     }
-                Text(
-                    text = summaryText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                    DifficultyLabel(
+                        difficulty = review.chat.scenario.difficulty,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
             }
         }
-    }
-}
-
-@Composable
-private fun ReviewIconWithBackground(isCompleted: Boolean) {
-    val backgroundColor =
-        if (isCompleted) {
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-        } else {
-            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
-        }
-
-    val iconTint =
-        if (isCompleted) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.tertiary
-        }
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier =
-            Modifier
-                .size(30.dp)
-                .clip(MaterialTheme.shapes.small)
-                .background(backgroundColor),
-    ) {
-        Icon(
-            imageVector = Icons.Default.Assessment,
-            contentDescription = "Review status: ${if (isCompleted) "completed" else "incomplete"}",
-            tint = iconTint,
-            modifier = Modifier.size(18.dp),
-        )
     }
 }
