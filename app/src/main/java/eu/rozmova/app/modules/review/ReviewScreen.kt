@@ -30,7 +30,6 @@ import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Translate
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -63,8 +62,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
+import eu.rozmova.app.domain.ChatDto
+import eu.rozmova.app.domain.ChatStatus
+import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.domain.MistakeDto
 import eu.rozmova.app.domain.ReviewDto
+import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.TaskCompletionDto
 import org.orbitmvi.orbit.compose.collectAsState
 
@@ -91,23 +94,26 @@ private fun Content(
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(topBar = {
-        TopAppBar(
-            title = { Text(text = stringResource(R.string.chat_analysis_title)) },
-            navigationIcon = {
-                IconButton(onClick = onClose) {
-                    Icon(
-                        Icons.Default.Close,
-                        contentDescription = stringResource(R.string.close_content_description),
-                    )
-                }
-            },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
-        )
-    }) { paddingValues ->
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = { Text(text = stringResource(R.string.chat_analysis_title)) },
+                navigationIcon = {
+                    IconButton(onClick = onClose) {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = stringResource(R.string.close_content_description),
+                        )
+                    }
+                },
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                    ),
+            )
+        },
+    ) { paddingValues ->
         // Loading state
         if (state.review == null) {
             Box(
@@ -123,7 +129,7 @@ private fun Content(
 
         Surface(
             modifier =
-                modifier
+                Modifier
                     .padding(paddingValues)
                     .fillMaxSize()
                     .fillMaxHeight(),
@@ -216,16 +222,6 @@ private fun Content(
                             WordsToLearn(state.review.wordsToLearn)
                         }
                     }
-                }
-                Button(
-                    onClick = onClose,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                    shape = MaterialTheme.shapes.medium,
-                ) {
-                    Text(text = stringResource(R.string.confirm))
                 }
             }
         }
@@ -618,12 +614,13 @@ private fun MistakesSection(mistakes: List<MistakeDto>) {
 
 @Preview
 @Composable
-private fun ChatAnalysisDialogPreview() {
+private fun ReviewScreenPreview() {
     Content(
         onClose = {},
         state =
             ReviewState(
                 ReviewDto(
+                    id = "review_1",
                     taskCompletion =
                         TaskCompletionDto(
                             isCompleted = true,
@@ -649,6 +646,27 @@ private fun ChatAnalysisDialogPreview() {
                     wordsToLearn =
                         listOf(
                             "der Junge",
+                        ),
+                    chat =
+                        ChatDto(
+                            id = "chat_1",
+                            scenario =
+                                ScenarioDto(
+                                    id = "scenario_1",
+                                    createdAt = TODO(),
+                                    userLang = TODO(),
+                                    scenarioLang = TODO(),
+                                    difficulty = TODO(),
+                                    scenarioType = TODO(),
+                                    title = TODO(),
+                                    situation = TODO(),
+                                    labels = TODO(),
+                                    helperWords = TODO(),
+                                    userInstructions = TODO(),
+                                ),
+                            status = ChatStatus.FINISHED,
+                            chatType = ChatType.SPEAKING,
+                            messages = listOf(),
                         ),
                 ),
             ),

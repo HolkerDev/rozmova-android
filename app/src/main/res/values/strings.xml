@@ -8,7 +8,9 @@
     <string name="logout">Log out</string>
     <string name="scenarios_page_title">Select scenario</string>
     <string name="chats_screen_title">Chats</string>
-    <string name="chats_screen_no_chats">No chats yet</string> <string name="error_message">Something went wrong. Please report it in the settings section.</string>
+    <string name="chats_screen_no_chats">No chats yet</string>
+    <string name="reviews_screen_no_reviews">No reviews yet</string>
+    <string name="error_message">Something went wrong. Please report it in the settings section.</string>
     <string name="error">Error</string>
     <string name="audio_recorder_permission_denied">You denied microphone permission. Cannot record your answer.</string>
     <string name="chat_analysis_title">Chat Analysis</string>

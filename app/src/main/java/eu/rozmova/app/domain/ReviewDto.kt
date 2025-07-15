@@ -1,6 +1,8 @@
 package eu.rozmova.app.domain
 
 data class ReviewDto(
+    val id: String,
+    val chat: ChatDto,
     val taskCompletion: TaskCompletionDto,
     val topicsToReview: List<String>,
     val wordsToLearn: List<String>,
