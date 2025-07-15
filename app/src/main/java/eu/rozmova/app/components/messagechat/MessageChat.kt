@@ -62,7 +62,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
-import eu.rozmova.app.components.ChatAnalysisDialog
 import eu.rozmova.app.components.MessageInput
 import eu.rozmova.app.components.MessageItem
 import eu.rozmova.app.components.ShouldFinishChatDialog
@@ -85,7 +84,6 @@ data class FinishChat(
 @Composable
 fun MessageChat(
     chatId: ChatId,
-    onReviewAccept: () -> Unit,
     onBackClick: () -> Unit,
     toReview: (reviewId: String) -> Unit,
     navigateToSubscription: () -> Unit,
@@ -146,14 +144,6 @@ fun MessageChat(
     Box(modifier = modifier.fillMaxSize()) {
         // Main content
         Column(modifier = Modifier.fillMaxSize()) {
-            state.review?.let {
-                ChatAnalysisDialog(
-                    review = it,
-                    onConfirm = { onReviewAccept() },
-                    isLoading = false,
-                )
-            }
-
             if (state.isLoadingReview) {
                 AlertDialog(
                     onDismissRequest = { },

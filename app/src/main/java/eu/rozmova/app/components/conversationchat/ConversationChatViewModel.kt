@@ -15,7 +15,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.MessageDto
-import eu.rozmova.app.domain.ReviewDto
 import eu.rozmova.app.repositories.ChatsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -32,7 +31,6 @@ data class ConvoChatState(
     val isAudioRecording: Boolean = false,
     val isReviewLoading: Boolean = false,
     val isMessageLoading: Boolean = false,
-    val review: ReviewDto? = null,
     val isSubscribed: Boolean = false,
 )
 
@@ -49,6 +47,10 @@ sealed interface ConvoChatEvents {
     data class ProposeFinish(
         val lastBotMsg: MessageDto,
         val lastUserMsg: MessageDto,
+    ) : ConvoChatEvents
+
+    data class ToReview(
+        val reviewId: String,
     ) : ConvoChatEvents
 
     data object Close : ConvoChatEvents
@@ -96,16 +98,10 @@ class ChatDetailsViewModel
 
         fun finishChat(chatId: String) =
             intent {
-//                reduce { state.copy(isReviewLoading = true) }
-//                chatsRepository.review(chatId = chatId).map { chatUpdate ->
-//                    reduce {
-//                        state.copy(
-//                            chat = chatUpdate.chat,
-//                            isReviewLoading = false,
-//                            review = chatUpdate.review,
-//                        )
-//                    }
-//                }
+                reduce { state.copy(isReviewLoading = true) }
+                chatsRepository.review(chatId = chatId).map { reviewId ->
+                    postSideEffect(ConvoChatEvents.ToReview(reviewId))
+                }
             }
 
         fun onAudioSaved() =

@@ -30,7 +30,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.CollectionsBookmark
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.AlertDialog
@@ -63,7 +62,6 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.components.AudioRecorderButton
-import eu.rozmova.app.components.ChatAnalysisDialog
 import eu.rozmova.app.components.InstructionsButton
 import eu.rozmova.app.components.SituationButton
 import eu.rozmova.app.components.messagechat.FinishChat
@@ -81,7 +79,7 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 @Composable
 fun ConversationChat(
     onBackClick: () -> Unit,
-    onReviewAccept: () -> Unit,
+    toReview: (reviewId: String) -> Unit,
     onNavigateToSubscription: () -> Unit,
     chatId: String,
     modifier: Modifier = Modifier,
@@ -111,6 +109,8 @@ fun ConversationChat(
                         chat.messages.size - 1,
                     )
                 }
+
+            is ConvoChatEvents.ToReview -> toReview(event.reviewId)
         }
     }
 
@@ -167,14 +167,6 @@ fun ConversationChat(
             confirmButton = {},
             containerColor = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(16.dp),
-        )
-    }
-
-    state.review?.let {
-        ChatAnalysisDialog(
-            review = it,
-            onConfirm = { onReviewAccept() },
-            isLoading = false,
         )
     }
 

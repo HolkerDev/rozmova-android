@@ -18,7 +18,6 @@ fun ChatScreen(
         ChatType.WRITING -> {
             MessageChat(
                 chatId = chatId,
-                onReviewAccept = onMain,
                 onBackClick = onBack,
                 navigateToSubscription = onNavigateToSubscription,
                 toReview = toReview,
@@ -28,8 +27,8 @@ fun ChatScreen(
             ConversationChat(
                 chatId = chatId,
                 onBackClick = onBack,
-                onReviewAccept = onMain,
                 onNavigateToSubscription = onNavigateToSubscription,
+                toReview = toReview,
             )
         }
     }
