@@ -11,13 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -49,7 +48,12 @@ fun ReviewItem(
             ),
         colors =
             CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                containerColor =
+                    if (review.taskCompletion.isCompleted) {
+                        MaterialTheme.colorScheme.secondaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerLow
+                    },
             ),
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
         shape = MaterialTheme.shapes.medium,
@@ -89,13 +93,6 @@ fun ReviewItem(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
-                            imageVector = if (review.taskCompletion.isCompleted) Icons.Default.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
-                            contentDescription = if (review.taskCompletion.isCompleted) "Completed" else "Not completed",
-                            tint = if (review.taskCompletion.isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                            modifier = Modifier.size(16.dp),
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = "Rating",
                             tint = MaterialTheme.colorScheme.primary,
@@ -108,10 +105,27 @@ fun ReviewItem(
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
-                    DifficultyLabel(
-                        difficulty = review.chat.scenario.difficulty,
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.padding(top = 4.dp),
-                    )
+                    ) {
+                        if (review.taskCompletion.isCompleted) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                                shape = MaterialTheme.shapes.extraSmall,
+                            ) {
+                                Text(
+                                    text = "Completed",
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
+                        DifficultyLabel(
+                            difficulty = review.chat.scenario.difficulty,
+                        )
+                    }
                 }
             }
         }

@@ -8,12 +8,13 @@ import eu.rozmova.app.domain.LangDto
 import eu.rozmova.app.domain.ReviewDto
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioTypeDto
+import eu.rozmova.app.domain.TaskCompletionDto
 
 object MockData {
     fun mockScenarioDto(): ScenarioDto =
         ScenarioDto(
             id = "1",
-            title = "Sample Conversation",
+            title = "Sample Conversation with a very long title that exceeds the usual length",
             situation = "A casual conversation with a friend about weekend plans",
             difficulty = DifficultyDto.EASY,
             scenarioType = ScenarioTypeDto.CONVERSATION,
@@ -34,19 +35,21 @@ object MockData {
             messages = listOf(),
         )
 
-    fun mockReviewDto(chatDto: ChatDto = mockChatDto()) =
-        ReviewDto(
-            id = "preview_review_1",
-            taskCompletion =
-                eu.rozmova.app.domain.TaskCompletionDto(
-                    isCompleted = true,
-                    metInstructions = listOf("Used polite language"),
-                    missedInstructions = listOf(),
-                    mistakes = listOf(),
-                    rating = 3,
-                ),
-            topicsToReview = listOf("Past tense", "Question formation"),
-            wordsToLearn = listOf("appointment", "schedule"),
-            chat = chatDto,
-        )
+    fun mockReviewDto(
+        isCompleted: Boolean = true,
+        chatDto: ChatDto = mockChatDto(),
+    ) = ReviewDto(
+        id = "preview_review_1",
+        taskCompletion =
+            TaskCompletionDto(
+                isCompleted = isCompleted,
+                metInstructions = listOf("Used polite language"),
+                missedInstructions = listOf(),
+                mistakes = listOf(),
+                rating = 3,
+            ),
+        topicsToReview = listOf("Past tense", "Question formation"),
+        wordsToLearn = listOf("appointment", "schedule"),
+        chat = chatDto,
+    )
 }

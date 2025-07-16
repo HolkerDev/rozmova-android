@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.modules.reviewlist.components.ReviewItem
+import eu.rozmova.app.utils.MockData.mockChatDto
 import eu.rozmova.app.utils.MockData.mockReviewDto
 import org.orbitmvi.orbit.compose.collectAsState
 
@@ -149,8 +150,8 @@ private fun ReviewListScreenPreview() {
             ReviewListState(
                 reviews =
                     listOf(
-                        mockReviewDto(),
-                        mockReviewDto(),
+                        mockReviewDto(chatDto = mockChatDto()),
+                        mockReviewDto(isCompleted = false),
                     ),
             ),
         back = {},
