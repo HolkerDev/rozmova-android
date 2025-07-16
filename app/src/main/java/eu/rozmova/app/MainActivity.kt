@@ -74,15 +74,20 @@ class AppViewModel
                         BillingEvents.Loading -> {
                             Log.d("AppViewModel", "Billing service is loading")
                         }
+
                         is BillingEvents.PurchaseFound -> {
                             Log.d("AppViewModel", "Purchase found: ${billingEvent.purchase}")
                             handlePurchaseFound(billingEvent.purchase)
                         }
+
                         BillingEvents.NoPurchaseFound -> {
                             Log.d("AppViewModel", "No purchase found")
                             val isVIPResp = verificationClient.verifyVIP()
                             if (!isVIPResp.isSuccessful) {
-                                Log.e("AppViewModel", "Failed to verify VIP status: ${isVIPResp.body()}")
+                                Log.e(
+                                    "AppViewModel",
+                                    "Failed to verify VIP status: ${isVIPResp.body()}",
+                                )
                                 return@collect
                             }
                             if (isVIPResp.body()?.isVIP == true) {
@@ -140,7 +145,8 @@ class AppViewModel
 @Composable
 private fun App(viewModel: AppViewModel = hiltViewModel()) {
     val navController = rememberNavController()
-    val bottomNavScreens = listOf(NavRoutes.Learn, NavRoutes.Chats, NavRoutes.Library, NavRoutes.Settings)
+    val bottomNavScreens =
+        listOf(NavRoutes.Learn, NavRoutes.Chats, NavRoutes.Library, NavRoutes.Settings)
     val appState by viewModel.appState.collectAsState()
 
     RozmovaTheme {

@@ -172,9 +172,17 @@ fun NavigationHost(
             ReviewScreen(
                 reviewId = reviewId,
                 onClose = {
-                    navController.navigate(NavRoutes.Learn.route) {
-                        popUpTo(NavRoutes.Chat.route) { inclusive = true }
+                    val previousRoute = navController.previousBackStackEntry?.destination?.route
+                    if (previousRoute == NavRoutes.Chat.route) {
+                        navController.navigate(NavRoutes.Learn.route) {
+                            popUpTo(0) {
+                                inclusive = true
+                            }
+                        }
+                        return@ReviewScreen
                     }
+
+                    navController.navigateUp()
                 },
             )
         }
@@ -209,17 +217,20 @@ fun NavigationHost(
                 onBack = {
                     val previousRoute = navController.previousBackStackEntry?.destination?.route
                     if (previousRoute == NavRoutes.GenerateScenario.route || previousRoute == NavRoutes.CreateChat.route) {
+                        // Clear everything back to Learn and recreate bottom nav state
                         navController.navigate(NavRoutes.Learn.route) {
-                            popUpTo(NavRoutes.GenerateScenario.route) { inclusive = true }
+                            popUpTo(0) {
+                                inclusive = true // Clear everything
+                            }
                         }
                     } else {
                         navController.navigateUp()
                     }
                 },
                 toReview = { reviewId ->
+                    navController.popBackStack()
                     navController.navigate(NavRoutes.Review.routeWith(reviewId))
                 },
-                onMain = { navController.navigate(NavRoutes.Learn.route) },
                 onNavigateToSubscription = {
                     navController.navigate(NavRoutes.Subscription.route)
                 },

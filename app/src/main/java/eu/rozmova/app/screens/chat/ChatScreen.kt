@@ -10,7 +10,6 @@ fun ChatScreen(
     chatId: String,
     chatType: ChatType,
     onBack: () -> Unit,
-    onMain: () -> Unit,
     toReview: (reviewId: String) -> Unit,
     onNavigateToSubscription: () -> Unit,
 ) {
