@@ -29,6 +29,8 @@ sealed class NavRoutes(
         fun routeWith(reviewId: String) = "review/$reviewId"
     }
 
+    data object ReviewList : NavRoutes(route = "review_list")
+
     data object Chat : NavRoutes(route = "chat/{chatId}/{chatType}") {
         fun routeWith(
             chatId: String,

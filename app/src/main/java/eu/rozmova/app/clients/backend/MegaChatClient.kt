@@ -37,11 +37,18 @@ interface MegaChatClient {
         @Path("reviewId") reviewId: String,
     ): Response<GetReviewResp>
 
+    @GET("v1/chats/reviews")
+    suspend fun getReviews(): Response<GetReviewsResp>
+
     @POST("v1/chats")
     suspend fun createChat(
         @Body body: CreateChatReq,
     ): Response<CreateChatResp>
 }
+
+data class GetReviewsResp(
+    val reviews: List<ReviewDto>,
+)
 
 data class GetReviewResp(
     val review: ReviewDto,

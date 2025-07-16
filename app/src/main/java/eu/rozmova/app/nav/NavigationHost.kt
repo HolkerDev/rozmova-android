@@ -20,6 +20,7 @@ import eu.rozmova.app.modules.library.LibraryNavigation
 import eu.rozmova.app.modules.library.LibraryScreen
 import eu.rozmova.app.modules.onboarding.OnboardingScreen
 import eu.rozmova.app.modules.review.ReviewScreen
+import eu.rozmova.app.modules.reviewlist.ReviewListScreen
 import eu.rozmova.app.modules.subscription.SubscriptionScreen
 import eu.rozmova.app.screens.chat.ChatScreen
 import eu.rozmova.app.screens.learn.LearnScreen
@@ -74,7 +75,7 @@ fun NavigationHost(
                         }
 
                         override fun toCompleteScenarios() {
-                            navController.navigate(NavRoutes.DevScreen.route)
+                            navController.navigate(NavRoutes.ReviewList.route)
                         }
 
                         override fun toTeacherIntegration() {
@@ -174,6 +175,15 @@ fun NavigationHost(
                     navController.navigate(NavRoutes.Learn.route) {
                         popUpTo(NavRoutes.Chat.route) { inclusive = true }
                     }
+                },
+            )
+        }
+
+        composable(route = NavRoutes.ReviewList.route) {
+            ReviewListScreen(
+                back = { navController.navigateUp() },
+                toReview = { reviewId ->
+                    navController.navigate(NavRoutes.Review.routeWith(reviewId))
                 },
             )
         }

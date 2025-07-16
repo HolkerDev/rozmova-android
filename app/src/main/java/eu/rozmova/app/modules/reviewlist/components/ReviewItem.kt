@@ -74,10 +74,10 @@ fun ReviewItem(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.weight(1f),
                 ) {
-                    ChatTypeIconWithBackground(review.chat.chatType.toUI())
+                    ChatTypeIconWithBackground(review.chatType.toUI())
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = review.chat.scenario.title,
+                        text = review.chatTitle,
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
@@ -123,7 +123,7 @@ fun ReviewItem(
                             }
                         }
                         DifficultyLabel(
-                            difficulty = review.chat.scenario.difficulty,
+                            difficulty = review.difficulty,
                         )
                     }
                 }

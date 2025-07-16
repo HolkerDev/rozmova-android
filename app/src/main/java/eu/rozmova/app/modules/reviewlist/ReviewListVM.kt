@@ -3,7 +3,7 @@ package eu.rozmova.app.modules.reviewlist
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ReviewDto
-import eu.rozmova.app.utils.MockData.mockReviewDto
+import eu.rozmova.app.repositories.ChatsRepository
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -18,8 +18,9 @@ data class ReviewListState(
 @HiltViewModel
 class ReviewListVM
     @Inject
-    constructor() :
-    ViewModel(),
+    constructor(
+        private val chatsRepository: ChatsRepository,
+    ) : ViewModel(),
         ContainerHost<ReviewListState, Unit> {
         override val container: Container<ReviewListState, Unit> = container(ReviewListState())
 
@@ -30,7 +31,16 @@ class ReviewListVM
         fun fetchReviews() =
             intent {
                 reduce { state.copy(isLoading = true) }
-                reduce { state.copy(isLoading = false, reviews = listOf(mockReviewDto())) }
+                chatsRepository
+                    .getReviews()
+                    .map { reviews ->
+                        reduce {
+                            state.copy(reviews = reviews, isLoading = false)
+                        }
+                    }.mapLeft { error ->
+                        // Handle error, e.g., show a message or log it
+                        reduce { state.copy(isLoading = false) }
+                    }
             }
 
         fun refresh() =

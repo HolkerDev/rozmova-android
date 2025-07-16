@@ -181,6 +181,25 @@ class ChatsRepository
                     InfraErrors.NetworkError("Failed to fetch chat review")
                 }
 
+        suspend fun getReviews(): Either<InfraErrors, List<ReviewDto>> =
+            Either
+                .catch {
+                    Log.i(tag, "Fetching chat reviews")
+                    val response = megaChatClient.getReviews()
+                    if (!response.isSuccessful) {
+                        throw IllegalStateException(
+                            "Reviews fetch failed: ${
+                                response.errorBody()?.string()
+                            } status: ${response.code()}",
+                        )
+                    }
+                    response.body()?.reviews
+                        ?: throw IllegalStateException("Chat reviews fetch failed: ${response.errorBody()} status: ${response.code()}")
+                }.mapLeft { error ->
+                    Log.e(tag, "Error fetching all reviews", error)
+                    InfraErrors.NetworkError("Failed to fetch all reviews")
+                }
+
         suspend fun sendAudioMessage(
             chatId: String,
             messageAudioFile: File,

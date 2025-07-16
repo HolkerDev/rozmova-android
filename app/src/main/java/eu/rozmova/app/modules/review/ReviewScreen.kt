@@ -62,12 +62,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
-import eu.rozmova.app.domain.ChatDto
-import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.domain.ChatType
+import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.domain.MistakeDto
 import eu.rozmova.app.domain.ReviewDto
-import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.TaskCompletionDto
 import org.orbitmvi.orbit.compose.collectAsState
 
@@ -647,27 +645,9 @@ private fun ReviewScreenPreview() {
                         listOf(
                             "der Junge",
                         ),
-                    chat =
-                        ChatDto(
-                            id = "chat_1",
-                            scenario =
-                                ScenarioDto(
-                                    id = "scenario_1",
-                                    createdAt = TODO(),
-                                    userLang = TODO(),
-                                    scenarioLang = TODO(),
-                                    difficulty = TODO(),
-                                    scenarioType = TODO(),
-                                    title = TODO(),
-                                    situation = TODO(),
-                                    labels = TODO(),
-                                    helperWords = TODO(),
-                                    userInstructions = TODO(),
-                                ),
-                            status = ChatStatus.FINISHED,
-                            chatType = ChatType.SPEAKING,
-                            messages = listOf(),
-                        ),
+                    chatType = ChatType.SPEAKING,
+                    chatTitle = "Chat with John",
+                    difficulty = DifficultyDto.MEDIUM,
                 ),
             ),
     )

@@ -35,21 +35,21 @@ object MockData {
             messages = listOf(),
         )
 
-    fun mockReviewDto(
-        isCompleted: Boolean = true,
-        chatDto: ChatDto = mockChatDto(),
-    ) = ReviewDto(
-        id = "preview_review_1",
-        taskCompletion =
-            TaskCompletionDto(
-                isCompleted = isCompleted,
-                metInstructions = listOf("Used polite language"),
-                missedInstructions = listOf(),
-                mistakes = listOf(),
-                rating = 3,
-            ),
-        topicsToReview = listOf("Past tense", "Question formation"),
-        wordsToLearn = listOf("appointment", "schedule"),
-        chat = chatDto,
-    )
+    fun mockReviewDto(isCompleted: Boolean = true) =
+        ReviewDto(
+            id = "preview_review_1",
+            taskCompletion =
+                TaskCompletionDto(
+                    isCompleted = isCompleted,
+                    metInstructions = listOf("Used polite language"),
+                    missedInstructions = listOf(),
+                    mistakes = listOf(),
+                    rating = 3,
+                ),
+            topicsToReview = listOf("Past tense", "Question formation"),
+            wordsToLearn = listOf("appointment", "schedule"),
+            chatType = ChatType.WRITING,
+            chatTitle = "Sample Conversation",
+            difficulty = DifficultyDto.EASY,
+        )
 }
