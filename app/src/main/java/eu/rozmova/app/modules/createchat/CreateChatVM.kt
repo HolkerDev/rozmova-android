@@ -7,6 +7,7 @@ import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
+import eu.rozmova.app.state.AppStateRepository
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -29,6 +30,7 @@ class CreateChatVM
     constructor(
         private val scenariosRepository: ScenariosRepository,
         private val chatsRepository: ChatsRepository,
+        private val appStateRepository: AppStateRepository,
     ) : ViewModel(),
         ContainerHost<CreateChatState, CreateChatEvent> {
         override val container: Container<CreateChatState, CreateChatEvent> =
@@ -53,6 +55,7 @@ class CreateChatVM
                 .createChat(scenarioId, chatType)
                 .map { chatId ->
                     Log.d("CreateChatVM", "Chat created with ID: $chatId")
+                    appStateRepository.triggerFetchChats()
                     postSideEffect(CreateChatEvent.ChatCreated(chatId, chatType))
                 }.mapLeft { error ->
                     Log.e("CreateChatVM", "Error creating chat", error)

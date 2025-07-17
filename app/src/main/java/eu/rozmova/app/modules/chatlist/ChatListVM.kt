@@ -37,6 +37,11 @@ class ChatListVM
                     loadChats()
                 }
             }
+            intent {
+                appStateRepository.fetchChats.collect {
+                    loadChats()
+                }
+            }
         }
 
         fun loadChats() =
