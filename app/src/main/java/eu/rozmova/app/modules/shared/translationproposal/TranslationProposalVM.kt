@@ -45,7 +45,7 @@ class TranslationProposalVM
                 .genProposal(phrase, learnLanguage, userLang, chatId)
                 .map { translationProposal ->
                     val currentTranslations = state.translatedTexts.toMutableList()
-                    currentTranslations.add(translationProposal)
+                    currentTranslations.add(0, translationProposal)
                     reduce { state.copy(translatedTexts = currentTranslations, isLoading = false) }
                     postSideEffect(TranslationEvents.ClearInput)
                 }.mapLeft {
