@@ -115,7 +115,7 @@ private fun Content(
                         }
 
                         state.reviews.isNotEmpty() -> {
-                            items(state.reviews) { review ->
+                            items(state.reviews, key = { it.id }) { review ->
                                 ReviewItem(
                                     review = review,
                                     onReviewClick = { reviewId ->

@@ -55,7 +55,7 @@ class CreateChatVM
                 .createChat(scenarioId, chatType)
                 .map { chatId ->
                     Log.d("CreateChatVM", "Chat created with ID: $chatId")
-                    appStateRepository.triggerFetchChats()
+                    appStateRepository.triggerRefetch()
                     postSideEffect(CreateChatEvent.ChatCreated(chatId, chatType))
                 }.mapLeft { error ->
                     Log.e("CreateChatVM", "Error creating chat", error)

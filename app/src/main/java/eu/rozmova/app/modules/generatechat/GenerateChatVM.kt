@@ -46,7 +46,7 @@ class GenerateChatVM
             scenariosRepository
                 .generateScenario(userLang, scenarioLang, chatType, difficultyDto, description)
                 .map { response ->
-                    appStateRepository.triggerFetchChats()
+                    appStateRepository.triggerRefetch()
                     postSideEffect(
                         GenerateChatEvents.ChatCreated(
                             response,
