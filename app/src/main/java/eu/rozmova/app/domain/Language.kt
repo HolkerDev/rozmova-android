@@ -30,7 +30,7 @@ fun getLanguageByCode(code: String): Language =
         else -> Language.ENGLISH
     }
 
-val LEARN_LANGUAGES = listOf(Language.GERMAN, Language.POLISH, Language.GREEK)
+val LEARN_LANGUAGES = listOf(Language.GERMAN, Language.POLISH)
 
 val INTERFACE_LANGUAGES =
     listOf(

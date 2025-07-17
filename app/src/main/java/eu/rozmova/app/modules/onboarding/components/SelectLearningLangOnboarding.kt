@@ -53,7 +53,6 @@ fun SelectLearningLangOnboarding(
         listOf(
             Language("de", R.string.lang_de, "Deutsch"),
             Language("pl", R.string.lang_pl, "Polski"),
-            Language("el", R.string.lang_el, "Ελληνικά"),
         )
 
     Scaffold(
