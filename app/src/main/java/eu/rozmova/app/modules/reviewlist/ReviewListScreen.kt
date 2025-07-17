@@ -66,7 +66,7 @@ private fun Content(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(R.string.chat_analysis_title)) },
+                title = { Text(text = stringResource(R.string.review_list_title)) },
                 navigationIcon = {
                     IconButton(onClick = back) {
                         Icon(

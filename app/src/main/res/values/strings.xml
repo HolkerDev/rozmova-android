@@ -166,4 +166,5 @@
     <string name="chat_type_writing_desc">Practice written communication skills</string>
     <string name="chat_type_speaking_desc">Practice verbal communication skills</string>
     <string name="create_chat_title">Scenario Details</string>
+    <string name="review_list_title">Completed scenarios</string>
 </resources>

@@ -10,6 +10,7 @@
     <string name="scenarios_page_title">Выбрать сценарий</string>
     <string name="chats_screen_title">Чаты</string>
     <string name="chats_screen_no_chats">Пока нет чатов</string>
+    <string name="reviews_screen_no_reviews">Пока нету истории</string>
     <string name="error_message">Что-то пошло не так. Пожалуйста, сообщите о проблеме через Настройки.</string>
     <string name="error">Ошибка</string>
     <string name="audio_recorder_permission_denied">Вы отказали в доступе к микрофону</string>
@@ -161,4 +162,5 @@
     <string name="chat_type_writing_desc">Практика письма</string>
     <string name="chat_type_speaking_desc">Практика говорения</string>
     <string name="create_chat_title">Описание сценария</string>
+    <string name="review_list_title">Выполненные сценарии</string>
 </resources>
