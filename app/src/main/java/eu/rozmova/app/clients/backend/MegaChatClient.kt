@@ -4,6 +4,7 @@ import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ReviewDto
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -40,11 +41,20 @@ interface MegaChatClient {
     @GET("v1/chats/reviews")
     suspend fun getReviews(): Response<GetReviewsResp>
 
+    @DELETE("v1/chats/{chatId}")
+    suspend fun delete(
+        @Path("chatId") chatId: String,
+    ): Response<DeleteChatResp>
+
     @POST("v1/chats")
     suspend fun createChat(
         @Body body: CreateChatReq,
     ): Response<CreateChatResp>
 }
+
+data class DeleteChatResp(
+    val chats: List<ChatDto>,
+)
 
 data class GetReviewsResp(
     val reviews: List<ReviewDto>,

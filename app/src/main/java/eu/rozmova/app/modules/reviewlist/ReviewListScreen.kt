@@ -48,7 +48,9 @@ fun ReviewListScreen(
         state = state,
         modifier = modifier,
         back = back,
-        refresh = {},
+        refresh = {
+            viewModel.refresh()
+        },
         toReview = toReview,
     )
 }

@@ -247,6 +247,14 @@ fun GenerateChatScreen(
                 }
             }
 
+            if (state.error) {
+                Text(
+                    text = stringResource(R.string.generate_scenario_error),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+
             // Generate Button
             Button(
                 onClick = {

@@ -13,6 +13,7 @@ import javax.inject.Inject
 
 data class GenerateChatState(
     val isLoading: Boolean = false,
+    val error: Boolean = false,
 )
 
 sealed interface GenerateChatEvents {
@@ -38,7 +39,7 @@ class GenerateChatVM
             chatType: ChatType,
             description: String,
         ) = intent {
-            reduce { state.copy(isLoading = true) }
+            reduce { state.copy(isLoading = true, error = false) }
             val userLang = settingsRepository.getInterfaceLang()
             val scenarioLang = settingsRepository.getLearningLangOrDefault()
             scenariosRepository
@@ -51,6 +52,8 @@ class GenerateChatVM
                         ),
                     )
                     reduce { state.copy(isLoading = false) }
+                }.mapLeft {
+                    reduce { state.copy(isLoading = false, error = true) }
                 }
         }
     }

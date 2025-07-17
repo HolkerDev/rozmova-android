@@ -163,4 +163,7 @@
     <string name="chat_type_speaking_desc">Практика говоріння</string>
     <string name="create_chat_title">Опис сценарію</string>
     <string name="review_list_title">Виконані сценарії</string>
+    <string name="delete_chat">Видалити чат?</string>
+    <string name="delete_chat_desc">Ви впевненні, що хочете видалити цей чат?</string>
+    <string name="generate_scenario_error">Щось пішло не так. Спробуйте пізніше.</string>
 </resources>

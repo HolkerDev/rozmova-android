@@ -38,7 +38,6 @@ class ReviewListVM
                             state.copy(reviews = reviews, isLoading = false)
                         }
                     }.mapLeft { error ->
-                        // Handle error, e.g., show a message or log it
                         reduce { state.copy(isLoading = false) }
                     }
             }
@@ -46,8 +45,14 @@ class ReviewListVM
         fun refresh() =
             intent {
                 reduce { state.copy(isRefreshing = true) }
-                // TODO: Implement actual API call to refresh reviews
-                // For now, we'll just clear the refreshing state
-                reduce { state.copy(isRefreshing = false) }
+                chatsRepository
+                    .getReviews()
+                    .map { reviews ->
+                        reduce {
+                            state.copy(reviews = reviews, isRefreshing = false)
+                        }
+                    }.mapLeft { error ->
+                        reduce { state.copy(isRefreshing = false) }
+                    }
             }
     }

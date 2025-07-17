@@ -52,7 +52,10 @@ class ChatsRepository
         ): Either<InfraErrors, ChatDto?> =
             Either
                 .catch {
-                    Log.i(tag, "Fetching latest chat for userLang: $userLang, scenarioLang: $scenarioLang")
+                    Log.i(
+                        tag,
+                        "Fetching latest chat for userLang: $userLang, scenarioLang: $scenarioLang",
+                    )
                     megaChatClient
                         .getLatest(
                             userLang = userLang,
@@ -84,7 +87,12 @@ class ChatsRepository
                             val responseBody =
                                 res.body()
                                     ?: throw IllegalStateException("Chats list fetch failed due to empty body: ${res.message()}")
-                            Log.i(tag, "Fetched ${responseBody.chats.map { it.chatType }.joinToString(",")} chats")
+                            Log.i(
+                                tag,
+                                "Fetched ${
+                                    responseBody.chats.map { it.chatType }.joinToString(",")
+                                } chats",
+                            )
                             responseBody.chats
                         } else {
                             throw IllegalStateException("Chats list fetch failed: ${res.message()}")
@@ -98,14 +106,12 @@ class ChatsRepository
         suspend fun deleteChat(chatId: String): Either<InfraErrors, List<ChatDto>> =
             Either
                 .catch {
-                    val response = chatClient.deleteById(chatId)
+                    val response = megaChatClient.delete(chatId)
                     if (response.isSuccessful) {
-                        val chats =
-                            response.body()
-                                ?: throw IllegalStateException("Chat deletion failed: ${response.message()}")
-                        chats
+                        response.body()?.chats
+                            ?: throw IllegalStateException("Chat deletion failed: ${response.errorBody()?.string()}")
                     } else {
-                        throw IllegalStateException("Chat deletion failed: ${response.message()}")
+                        throw IllegalStateException("Chat deletion failed: ${response.errorBody()?.string()}")
                     }
                 }.mapLeft { error ->
                     Log.e(tag, "Error deleting chat", error)
@@ -136,7 +142,13 @@ class ChatsRepository
         ): Either<InfraErrors, String> =
             Either
                 .catch {
-                    val response = megaChatClient.createChat(CreateChatReq(scenarioId = scenarioId, chatType = chatType.name))
+                    val response =
+                        megaChatClient.createChat(
+                            CreateChatReq(
+                                scenarioId = scenarioId,
+                                chatType = chatType.name,
+                            ),
+                        )
                     if (!response.isSuccessful) {
                         Log.e(tag, "Chat creation failed: ${response.errorBody()?.string()}")
                         throw IllegalStateException("Chat creation failed: ${response.message()}")
@@ -248,7 +260,9 @@ class ChatsRepository
                         )
                     } else {
                         throw IllegalStateException(
-                            "Audio message send failed: ${response.errorBody()?.string()} status: ${response.code()}",
+                            "Audio message send failed: ${
+                                response.errorBody()?.string()
+                            } status: ${response.code()}",
                         )
                     }
                 }.mapLeft { error ->
@@ -280,7 +294,11 @@ class ChatsRepository
                                     shouldFinish = responseBody.shouldFinish,
                                 )
                             } else {
-                                throw IllegalStateException("Text message send failed: ${res.errorBody()?.string()} status: ${res.code()}")
+                                throw IllegalStateException(
+                                    "Text message send failed: ${
+                                        res.errorBody()?.string()
+                                    } status: ${res.code()}",
+                                )
                             }
                         }
                 }.mapLeft { error ->

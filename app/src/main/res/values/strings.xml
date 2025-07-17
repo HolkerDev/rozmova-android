@@ -167,4 +167,7 @@
     <string name="chat_type_speaking_desc">Practice verbal communication skills</string>
     <string name="create_chat_title">Scenario Details</string>
     <string name="review_list_title">Completed scenarios</string>
+    <string name="delete_chat">Delete chat?</string>
+    <string name="delete_chat_desc">Are you sure you want to delete this chat?</string>
+    <string name="generate_scenario_error">Something went wrong. Try again later.</string>
 </resources>

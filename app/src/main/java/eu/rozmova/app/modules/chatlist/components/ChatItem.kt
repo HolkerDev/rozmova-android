@@ -38,8 +38,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import eu.rozmova.app.R
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.modules.createchat.ChatTypeUI
 import eu.rozmova.app.modules.createchat.toUI
@@ -60,8 +62,8 @@ fun ChatItem(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Chat") },
-            text = { Text("Are you sure you want to delete this chat?") },
+            title = { Text(stringResource(R.string.delete_chat)) },
+            text = { Text(stringResource(R.string.delete_chat_desc)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -73,12 +75,12 @@ fun ChatItem(
                             contentColor = MaterialTheme.colorScheme.error,
                         ),
                 ) {
-                    Text("Delete")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )
