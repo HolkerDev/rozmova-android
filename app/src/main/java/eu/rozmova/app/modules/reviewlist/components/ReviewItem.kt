@@ -22,8 +22,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import eu.rozmova.app.R
 import eu.rozmova.app.domain.ReviewDto
 import eu.rozmova.app.modules.chatlist.components.ChatTypeIconWithBackground
 import eu.rozmova.app.modules.createchat.toUI
@@ -115,7 +117,7 @@ fun ReviewItem(
                                 shape = MaterialTheme.shapes.extraSmall,
                             ) {
                                 Text(
-                                    text = "Completed",
+                                    text = stringResource(R.string.completed),
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.primary,
