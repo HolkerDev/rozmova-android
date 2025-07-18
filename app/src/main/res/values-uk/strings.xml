@@ -166,4 +166,5 @@
     <string name="delete_chat">Видалити чат?</string>
     <string name="delete_chat_desc">Ви впевненні, що хочете видалити цей чат?</string>
     <string name="generate_scenario_error">Щось пішло не так. Спробуйте пізніше.</string>
+    <string name="error_generic">Щось пішло не так. Спробуйте пізніше.</string>
 </resources>

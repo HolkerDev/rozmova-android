@@ -15,6 +15,9 @@ import javax.inject.Inject
 
 data class CreateChatState(
     val scenario: ScenarioDto? = null,
+    val isLoading: Boolean = false,
+    val errorChatCreation: Boolean = false,
+    val errorScenarioLoad: Boolean = false,
 )
 
 sealed interface CreateChatEvent {
@@ -43,6 +46,7 @@ class CreateChatVM
                     .map { scenario ->
                         reduce { state.copy(scenario) }
                     }.mapLeft { error ->
+                        reduce { state.copy(errorScenarioLoad = true) }
                         Log.e("CreateChatVM", "Error fetching scenario", error)
                     }
             }
@@ -51,6 +55,7 @@ class CreateChatVM
             scenarioId: String,
             chatType: ChatType,
         ) = intent {
+            reduce { state.copy(errorChatCreation = false, isLoading = true) }
             chatsRepository
                 .createChat(scenarioId, chatType)
                 .map { chatId ->
@@ -59,6 +64,7 @@ class CreateChatVM
                     postSideEffect(CreateChatEvent.ChatCreated(chatId, chatType))
                 }.mapLeft { error ->
                     Log.e("CreateChatVM", "Error creating chat", error)
+                    reduce { state.copy(errorChatCreation = true, isLoading = false) }
                 }
         }
     }

@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -131,7 +132,7 @@ private fun Content(
     state: CreateChatState,
     modifier: Modifier = Modifier,
 ) {
-    var selectedChatType by remember { mutableStateOf(ChatTypeUI.SPEAKING) }
+    var selectedChatType by remember { mutableStateOf(ChatTypeUI.WRITING) }
     val scrollState = rememberScrollState()
 
     Scaffold(
@@ -161,16 +162,32 @@ private fun Content(
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(16.dp).padding(bottom = 4.dp),
                 ) {
+                    if (state.errorChatCreation) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                            text = stringResource(R.string.error_generic),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                     Button(
                         onClick = { onChatStart(selectedChatType) },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = state.scenario != null,
+                        enabled = state.scenario != null && !state.isLoading,
                         shape = MaterialTheme.shapes.medium,
                         colors =
                             ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
                             ),
                     ) {
+                        if (state.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                            )
+                            return@Button
+                        }
                         Text(
                             text = stringResource(R.string.start_chat),
                         )
@@ -189,6 +206,19 @@ private fun Content(
                     .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
+            if (state.errorScenarioLoad) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = stringResource(R.string.error_generic),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+                return@Column
+            }
             if (state.scenario == null) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -238,7 +268,10 @@ private fun ScenarioDetailsCard(
         Column(
             modifier = Modifier.fillMaxWidth().padding(18.dp),
         ) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
@@ -283,7 +316,7 @@ private fun ChatTypeSelection(
             modifier = Modifier.fillMaxWidth().selectableGroup(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            ChatTypeUI.entries.forEach { chatType ->
+            listOf(ChatTypeUI.WRITING, ChatTypeUI.SPEAKING).forEach { chatType ->
                 ChatTypeOption(
                     chatType = chatType,
                     selected = selectedType == chatType,
@@ -327,7 +360,7 @@ private fun ChatTypeOption(
             },
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -387,6 +420,9 @@ private fun ChatTypeOption(
 @Preview(showBackground = true)
 @Composable
 private fun ScenarioDetailsScreenPreview() {
+    var isLoading by remember { mutableStateOf(false) }
+    var isCreationError by remember { mutableStateOf(false) }
+
     MaterialTheme {
         Content(
             navigation =
@@ -399,9 +435,12 @@ private fun ScenarioDetailsScreenPreview() {
                     ) {
                     }
                 },
-            onChatStart = {},
+            onChatStart = { isCreationError = true },
             state =
                 CreateChatState(
+                    isLoading = isLoading,
+                    errorChatCreation = isCreationError,
+                    errorScenarioLoad = true,
                     scenario =
                         ScenarioDto(
                             id = "1",
@@ -426,18 +465,3 @@ private fun ScenarioDetailsScreenPreview() {
         )
     }
 }
-
-// @Preview(showBackground = true)
-// @Composable
-// private fun ScenarioDetailsScreenDarkPreview() {
-//    MaterialTheme(colorScheme = darkColorScheme()) {
-//        CreateChatScreen(
-//            scenario =
-//                ScenarioData(
-//                    title = "Job Interview Scenario",
-//                    situation = "You are interviewing for a software developer position at a startup. The interviewer asks you to explain a complex technical concept to someone without a technical background. You need to demonstrate both your technical knowledge and communication skills.",
-//                    difficulty = "Advanced",
-//                ),
-//        )
-//    }
-// }
