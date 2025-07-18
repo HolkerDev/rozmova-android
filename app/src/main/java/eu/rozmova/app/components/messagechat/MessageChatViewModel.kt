@@ -7,6 +7,7 @@ import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.domain.ReviewDto
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.billing.SubscriptionRepository
+import eu.rozmova.app.state.AppStateRepository
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
@@ -40,6 +41,7 @@ class MessageChatViewModel
     constructor(
         private val chatsRepository: ChatsRepository,
         private val subscriptionRepository: SubscriptionRepository,
+        private val appStateRepository: AppStateRepository,
     ) : ViewModel(),
         ContainerHost<MessageChatState, MessageChatEvent> {
         override val container = container<MessageChatState, MessageChatEvent>(MessageChatState())
@@ -69,6 +71,7 @@ class MessageChatViewModel
             intent {
                 reduce { state.copy(isLoadingReview = true) }
                 chatsRepository.review(chatId = chatId).map { reviewId ->
+                    appStateRepository.triggerRefetch()
                     postSideEffect(MessageChatEvent.ShowReview(reviewId))
                 }
             }

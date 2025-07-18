@@ -16,6 +16,7 @@ import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.repositories.ChatsRepository
+import eu.rozmova.app.state.AppStateRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.orbitmvi.orbit.Container
@@ -62,6 +63,7 @@ class ChatDetailsViewModel
     constructor(
         private val expoPlayer: ExoPlayer,
         private val chatsRepository: ChatsRepository,
+        private val appStateRepository: AppStateRepository,
         application: Application,
     ) : AndroidViewModel(application),
         ContainerHost<ConvoChatState, ConvoChatEvents> {
@@ -100,6 +102,7 @@ class ChatDetailsViewModel
             intent {
                 reduce { state.copy(isReviewLoading = true) }
                 chatsRepository.review(chatId = chatId).map { reviewId ->
+                    appStateRepository.triggerRefetch()
                     postSideEffect(ConvoChatEvents.ToReview(reviewId))
                 }
             }
