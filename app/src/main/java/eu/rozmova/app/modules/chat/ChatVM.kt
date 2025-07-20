@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.ChatDto
+import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.state.AppStateRepository
 import org.orbitmvi.orbit.ContainerHost
@@ -12,6 +13,7 @@ import javax.inject.Inject
 
 data class ChatState(
     val chat: ChatDto? = null,
+    val messages: List<MessageUI> = emptyList(),
     val isLoading: Boolean = false,
     val isReviewLoading: Boolean = false,
     val isAudioRecording: Boolean = false,
@@ -25,6 +27,11 @@ sealed interface ChatEvents {
         val reviewId: String,
     ) : ChatEvents
 }
+
+data class MessageUI(
+    val dto: MessageDto,
+    val isPlaying: Boolean = false,
+)
 
 @HiltViewModel
 class ChatVM
@@ -42,7 +49,7 @@ class ChatVM
                 chatsRepository
                     .fetchChatById(chatId)
                     .map { chat ->
-                        reduce { state.copy(chat = chat) }
+                        reduce { state.copy(chat = chat, messages = chat.messages.map { MessageUI(it, false) }) }
                         postSideEffect(ChatEvents.ScrollToBottom)
                     }.mapLeft { err ->
                         Log.e(tag, "Error loading chat: ${err.message}")

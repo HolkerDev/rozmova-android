@@ -1,8 +1,13 @@
 package eu.rozmova.app.modules.chat
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -10,11 +15,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.rounded.CollectionsBookmark
 import androidx.compose.material.icons.rounded.Translate
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,18 +39,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.components.AudioRecorderButton
+import eu.rozmova.app.components.InstructionsButton
 import eu.rozmova.app.components.ShouldFinishChatDialog
-import eu.rozmova.app.components.conversationchat.ScenarioInfoCard
-import eu.rozmova.app.components.conversationchat.toAudioMessage
+import eu.rozmova.app.components.SituationButton
+import eu.rozmova.app.components.conversationchat.AudioMessageList
 import eu.rozmova.app.components.messagechat.FinishChat
+import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.modules.chat.components.ReviewDialog
 import eu.rozmova.app.modules.chat.components.RightTranslationBar
+import eu.rozmova.app.modules.chat.components.SituationDialog
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -126,6 +143,9 @@ private fun Content(
     modifier: Modifier = Modifier,
 ) {
     var showHelpModal by remember { mutableStateOf(false) }
+    var showInstructionsDialog by remember { mutableStateOf(false) }
+    var showSituationDialog by remember { mutableStateOf(false) }
+    var showWordsBottomSheet by remember { mutableStateOf(false) }
 
     finishChatModal?.let { data ->
         ShouldFinishChatDialog(
@@ -147,7 +167,7 @@ private fun Content(
         ReviewDialog()
     }
 
-    Scaffold(topBar = {
+    Scaffold(modifier = modifier, topBar = {
         TopAppBar(
             title = { Text(text = stringResource(R.string.chat_details_title)) },
             navigationIcon = {
@@ -171,7 +191,7 @@ private fun Content(
     }) { paddingValues ->
         Column(
             modifier =
-                modifier
+                Modifier
                     .padding(paddingValues)
                     .fillMaxSize(),
         ) {
@@ -186,19 +206,109 @@ private fun Content(
                         .weight(1f)
                         .fillMaxWidth(),
             ) {
-                ScenarioInfoCard(
-                    onPlayMessage = handlers.playAudio,
-                    onStopMessage = handlers.stopAudio,
-                    navigateToSubscription = handlers.toSubscription,
-                    scenario = state.chat.scenario,
-                    messages = state.chat.messages.map { it.toAudioMessage() },
-                    chatModel = state.chat,
-                    words = state.chat.scenario.helperWords,
-                    isMessageLoading = state.isMessageLoading,
-                    messageListState = listRef,
-                    onChatFinish = handlers.finishChat,
-                    isSubscribed = true,
-                )
+                Column {
+                    Card(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                                .fillMaxHeight(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors =
+                            CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                            ),
+                    ) {
+                        Column(
+                            modifier =
+                                Modifier
+                                    .padding(12.dp)
+                                    .fillMaxWidth(),
+                        ) {
+                            Row(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = state.chat.scenario.title,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f),
+                                ) // Title
+
+                                if (state.chat.scenario.helperWords
+                                        .isNotEmpty()
+                                ) {
+                                    FilledTonalButton(
+                                        onClick = { showWordsBottomSheet = true },
+                                        colors = ButtonDefaults.filledTonalButtonColors(),
+                                        modifier = Modifier.padding(start = 8.dp),
+                                        shape = MaterialTheme.shapes.medium,
+                                        contentPadding =
+                                            PaddingValues(
+                                                horizontal = 12.dp,
+                                                vertical = 6.dp,
+                                            ),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.CollectionsBookmark,
+                                            contentDescription = stringResource(R.string.helper_words),
+                                            modifier = Modifier.size(16.dp),
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Compact information cards in a Row
+                            Row(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                SituationButton(
+                                    modifier =
+                                        Modifier
+                                            .weight(1f)
+                                            .clickable { showSituationDialog = true },
+                                )
+                                InstructionsButton(
+                                    modifier =
+                                        Modifier
+                                            .weight(1f)
+                                            .clickable { showInstructionsDialog = true },
+                                )
+                            }
+
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant,
+                                modifier = Modifier.padding(vertical = 8.dp),
+                            )
+
+                            AudioMessageList(
+                                messages = state.messages,
+                                onPlayMessage = handlers.playAudio,
+                                onStopMessage = handlers.stopAudio,
+                                onChatFinish = handlers.finishChat,
+                                messageListState = listRef,
+                                isLoadingMessage = state.isMessageLoading,
+                                isSubscribed = true,
+                                navigateToSubscription = handlers.toSubscription,
+                                showFinishButton = state.messages.isNotEmpty() && state.chat.status == ChatStatus.IN_PROGRESS,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                    }
+                }
             }
             Spacer(modifier = Modifier.height(8.dp))
             AudioRecorderButton(
@@ -218,5 +328,12 @@ private fun Content(
             show = showHelpModal,
             onClose = { showHelpModal = false },
         )
+
+        if (showSituationDialog) {
+            SituationDialog(
+                state.chat.scenario.situation,
+                onClose = { showSituationDialog = false },
+            )
+        }
     }
 }

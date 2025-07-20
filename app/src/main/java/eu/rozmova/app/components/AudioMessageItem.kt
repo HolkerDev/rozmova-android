@@ -41,10 +41,11 @@ import androidx.compose.ui.unit.dp
 import eu.rozmova.app.R
 import eu.rozmova.app.components.conversationchat.AudioChatMessage
 import eu.rozmova.app.domain.Author
+import eu.rozmova.app.modules.chat.MessageUI
 
 @Composable
 fun AudioMessageItem(
-    message: AudioChatMessage,
+    message: MessageUI,
     isSubscribed: Boolean,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
@@ -56,11 +57,11 @@ fun AudioMessageItem(
         if (message.isPlaying) {
             onStopMessage()
         } else {
-            onPlayMessage(message.id)
+            onPlayMessage(message.dto.id)
         }
     }
 
-    val isUserMessage = message.author == Author.USER
+    val isUserMessage = message.dto.author == Author.USER
     Row(
         modifier = modifier.padding(vertical = 4.dp),
         horizontalArrangement = if (isUserMessage) Arrangement.End else Arrangement.Start,
@@ -153,7 +154,7 @@ fun AudioMessageItem(
                 ) {
                     if (isSubscribed) {
                         Text(
-                            text = message.body,
+                            text = message.dto.content,
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(horizontal = 8.dp),
                         )

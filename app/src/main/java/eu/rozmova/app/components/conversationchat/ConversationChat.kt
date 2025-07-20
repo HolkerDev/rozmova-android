@@ -378,51 +378,6 @@ fun ScenarioInfoCard(
     }
 
     if (showSituationDialog) {
-        val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-        AlertDialog(
-            properties =
-                DialogProperties(
-                    dismissOnClickOutside = true,
-                    dismissOnBackPress = true,
-                    usePlatformDefaultWidth = false,
-                ),
-            onDismissRequest = { showSituationDialog = false },
-            title = {
-                Text(
-                    stringResource(R.string.situation),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            },
-            text = {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState()),
-                ) {
-                    Text(
-                        text = scenario.situation,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = { showSituationDialog = false },
-                ) {
-                    Text(stringResource(R.string.close_content_description))
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.surface,
-            modifier =
-                Modifier
-                    .fillMaxWidth(0.95f)
-                    .wrapContentHeight()
-                    .heightIn(max = screenHeight * 0.8f),
-            shape = RoundedCornerShape(16.dp),
-        )
     }
 
     if (showInstructionsDialog) {

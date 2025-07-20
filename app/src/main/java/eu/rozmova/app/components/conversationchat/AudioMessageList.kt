@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import eu.rozmova.app.components.AudioMessageItem
 import eu.rozmova.app.components.StopChatButton
 import eu.rozmova.app.domain.MessageDto
+import eu.rozmova.app.modules.chat.MessageUI
 
 fun MessageDto.toAudioMessage(isPlaying: Boolean = false): AudioChatMessage =
     AudioChatMessage(
@@ -34,7 +35,7 @@ fun MessageDto.toAudioMessage(isPlaying: Boolean = false): AudioChatMessage =
 
 @Composable
 fun AudioMessageList(
-    messages: List<AudioChatMessage>,
+    messages: List<MessageUI>,
     onPlayMessage: (messageId: String) -> Unit,
     onStopMessage: () -> Unit,
     onChatFinish: () -> Unit,
