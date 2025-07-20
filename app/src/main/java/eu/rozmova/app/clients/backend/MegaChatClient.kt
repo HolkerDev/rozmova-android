@@ -33,6 +33,11 @@ interface MegaChatClient {
         @Body body: SendAudioReq,
     ): Response<SendAudioRes>
 
+    @POST("v1/chats/messages/text")
+    suspend fun sendTextMessage(
+        @Body body: SendTextReq,
+    ): Response<SendTextResp>
+
     @POST("v1/chats/{chatId}/review")
     suspend fun review(
         @Path("chatId") chatId: String,
@@ -56,6 +61,17 @@ interface MegaChatClient {
         @Body body: CreateChatReq,
     ): Response<CreateChatResp>
 }
+
+data class SendTextReq(
+    val chatId: String,
+    val content: String,
+    val pronoun: String,
+)
+
+data class SendTextResp(
+    val chat: ChatDto,
+    val shouldFinish: Boolean,
+)
 
 data class GetChatByIdResp(
     val chat: ChatDto,

@@ -8,7 +8,7 @@ import eu.rozmova.app.clients.backend.GenSignedUrlReq
 import eu.rozmova.app.clients.backend.MegaChatClient
 import eu.rozmova.app.clients.backend.MessageClient
 import eu.rozmova.app.clients.backend.SendAudioReq
-import eu.rozmova.app.clients.backend.SendMessageReq
+import eu.rozmova.app.clients.backend.SendTextReq
 import eu.rozmova.app.clients.s3.S3Client
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatType
@@ -283,30 +283,29 @@ class ChatsRepository
             Either
                 .catch {
                     val pronounCode = settingsRepository.getPronounCodeOrDefault()
-                    messageClient
-                        .sendTextMessage(
-                            SendMessageReq(
-                                chatId = chatId,
-                                content = message,
-                                pronounCode = pronounCode,
-                            ),
-                        ).let { res ->
-                            if (res.isSuccessful) {
-                                val responseBody =
-                                    res.body()
-                                        ?: throw IllegalStateException("Text message send failed: ${res.body()} status: ${res.code()}")
-                                ChatUpdate(
-                                    chat = responseBody.chat,
-                                    shouldFinish = responseBody.shouldFinish,
-                                )
-                            } else {
-                                throw IllegalStateException(
-                                    "Text message send failed: ${
-                                        res.errorBody()?.string()
-                                    } status: ${res.code()}",
-                                )
-                            }
-                        }
+                    val response =
+                        megaChatClient
+                            .sendTextMessage(
+                                SendTextReq(
+                                    chatId = chatId,
+                                    content = message,
+                                    pronoun = pronounCode,
+                                ),
+                            )
+                    if (!response.isSuccessful) {
+                        throw IllegalStateException(
+                            "Text message send failed: ${
+                                response.errorBody()?.string()
+                            } status: ${response.code()}",
+                        )
+                    }
+                    val responseBody =
+                        response.body()
+                            ?: throw IllegalStateException("Text message send failed: ${response.body()} status: ${response.code()}")
+                    ChatUpdate(
+                        chat = responseBody.chat,
+                        shouldFinish = responseBody.shouldFinish,
+                    )
                 }.mapLeft { error ->
                     Log.e(tag, "Error sending message", error)
                     InfraErrors.NetworkError("Failed to send text message")

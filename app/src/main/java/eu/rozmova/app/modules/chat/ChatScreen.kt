@@ -70,6 +70,7 @@ private data class Handlers(
     val toSubscription: () -> Unit,
     val playAudio: (messageId: String) -> Unit,
     val stopAudio: () -> Unit,
+    val sendMessage: (content: String) -> Unit,
     val startRecording: () -> Unit,
     val stopRecording: () -> Unit,
     val back: () -> Unit,
@@ -139,6 +140,7 @@ fun ChatScreen(
                 stopRecording = {
                     viewModel.stopRecording()
                 },
+                sendMessage = { msg -> viewModel.sendMessage(chatId, msg) },
             ),
         modifier,
     )
@@ -334,7 +336,7 @@ private fun Content(
             Spacer(modifier = Modifier.height(8.dp))
             if (state.chat.chatType == ChatType.WRITING) {
                 MessageInput(
-                    onSendMessage = {},
+                    onSendMessage = handlers.sendMessage,
                     isDisabled = state.isMessageLoading,
                 )
             } else {

@@ -96,6 +96,31 @@ class ChatVM
                 }
             }
 
+        fun sendMessage(
+            chatId: String,
+            message: String,
+        ) = intent {
+            reduce { state.copy(isMessageLoading = true) }
+            chatsRepository
+                .sendMessage(
+                    chatId = chatId,
+                    message = message,
+                ).map { chatUpdate ->
+                    val messages = chatUpdate.chat.messages.map { MessageUI(it, false) }
+                    reduce { state.copy(chat = chatUpdate.chat, messages = messages, isMessageLoading = false) }
+                    if (chatUpdate.shouldFinish) {
+                        postSideEffect(
+                            ChatEvents.ProposeFinish(
+                                lastBotMsg = messages.last(),
+                                lastUserMsg = messages[messages.size - 2],
+                                chatType = chatUpdate.chat.chatType,
+                            ),
+                        )
+                    }
+                }
+            postSideEffect(ChatEvents.ScrollToBottom)
+        }
+
         fun onAudioSaved() =
             intent {
                 reduce { state.copy(isMessageLoading = true) }
@@ -122,6 +147,7 @@ class ChatVM
                                 messages = messages,
                             )
                         }
+                        postSideEffect(ChatEvents.ScrollToBottom)
                     }.mapLeft { error ->
                         Log.e("ChatDetailsViewModel", "Error sending audio message: ${error.message}")
                         reduce { state.copy(isMessageLoading = false) }
