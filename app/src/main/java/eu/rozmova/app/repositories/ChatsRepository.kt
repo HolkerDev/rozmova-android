@@ -109,9 +109,17 @@ class ChatsRepository
                     val response = megaChatClient.delete(chatId)
                     if (response.isSuccessful) {
                         response.body()?.chats
-                            ?: throw IllegalStateException("Chat deletion failed: ${response.errorBody()?.string()}")
+                            ?: throw IllegalStateException(
+                                "Chat deletion failed: ${
+                                    response.errorBody()?.string()
+                                }",
+                            )
                     } else {
-                        throw IllegalStateException("Chat deletion failed: ${response.errorBody()?.string()}")
+                        throw IllegalStateException(
+                            "Chat deletion failed: ${
+                                response.errorBody()?.string()
+                            }",
+                        )
                     }
                 }.mapLeft { error ->
                     Log.e(tag, "Error deleting chat", error)
@@ -121,12 +129,10 @@ class ChatsRepository
         suspend fun fetchChatById(chatId: String): Either<InfraErrors, ChatDto> =
             Either
                 .catch {
-                    chatClient.fetchChatById(chatId).let { res ->
+                    megaChatClient.getById(chatId).let { res ->
                         if (res.isSuccessful) {
-                            val chat =
-                                res.body()
-                                    ?: throw IllegalStateException("Chat fetch failed: ${res.message()}")
-                            chat
+                            res.body()?.chat
+                                ?: throw IllegalStateException("Chat fetch failed: ${res.message()}")
                         } else {
                             throw IllegalStateException("Chat fetch failed: ${res.message()}")
                         }

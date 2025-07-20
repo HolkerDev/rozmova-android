@@ -129,8 +129,8 @@ private fun Content(
                     )
                     return@Column
                 }
-                MessageItem(lastUserMsg.dto, modifier = Modifier.fillMaxWidth())
-                MessageItem(lastBotMsg.dto, modifier = Modifier.fillMaxWidth())
+                MessageItem(lastUserMsg, modifier = Modifier.fillMaxWidth())
+                MessageItem(lastBotMsg, modifier = Modifier.fillMaxWidth())
             }
         },
         confirmButton = {

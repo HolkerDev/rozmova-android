@@ -48,11 +48,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.components.AudioRecorderButton
 import eu.rozmova.app.components.InstructionsButton
+import eu.rozmova.app.components.MessageInput
 import eu.rozmova.app.components.ShouldFinishDialog
 import eu.rozmova.app.components.SituationButton
 import eu.rozmova.app.components.conversationchat.AudioMessageList
 import eu.rozmova.app.components.messagechat.FinishChat
+import eu.rozmova.app.components.messagechat.MessageList
 import eu.rozmova.app.domain.ChatStatus
+import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.modules.chat.components.ReviewDialog
 import eu.rozmova.app.modules.chat.components.RightTranslationBar
 import eu.rozmova.app.modules.chat.components.SituationDialog
@@ -301,30 +304,48 @@ private fun Content(
                                 modifier = Modifier.padding(vertical = 8.dp),
                             )
 
-                            AudioMessageList(
-                                messages = state.messages,
-                                onPlayMessage = handlers.playAudio,
-                                onStopMessage = handlers.stopAudio,
-                                onChatFinish = handlers.finishChat,
-                                messageListState = listRef,
-                                isLoadingMessage = state.isMessageLoading,
-                                isSubscribed = true,
-                                navigateToSubscription = handlers.toSubscription,
-                                showFinishButton = state.messages.isNotEmpty() && state.chat.status == ChatStatus.IN_PROGRESS,
-                                modifier = Modifier.weight(1f),
-                            )
+                            if (state.chat.chatType == ChatType.WRITING) {
+                                MessageList(
+                                    messages = state.messages,
+                                    onChatFinish = handlers.finishChat,
+                                    messageListState = listRef,
+                                    isLoadingMessage = state.isMessageLoading,
+                                    showFinishButton = state.messages.isNotEmpty() && state.chat.status == ChatStatus.IN_PROGRESS,
+                                    modifier = Modifier.weight(1f),
+                                )
+                            } else {
+                                AudioMessageList(
+                                    messages = state.messages,
+                                    onPlayMessage = handlers.playAudio,
+                                    onStopMessage = handlers.stopAudio,
+                                    onChatFinish = handlers.finishChat,
+                                    messageListState = listRef,
+                                    isLoadingMessage = state.isMessageLoading,
+                                    isSubscribed = true,
+                                    navigateToSubscription = handlers.toSubscription,
+                                    showFinishButton = state.messages.isNotEmpty() && state.chat.status == ChatStatus.IN_PROGRESS,
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
                         }
                     }
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-            AudioRecorderButton(
-                onRecordStart = handlers.startRecording,
-                onRecordStop = handlers.stopRecording,
-                isDisabled = state.isMessageLoading,
-                isRecording = state.isAudioRecording,
-                modifier = Modifier.padding(bottom = 16.dp),
-            )
+            if (state.chat.chatType == ChatType.WRITING) {
+                MessageInput(
+                    onSendMessage = {},
+                    isDisabled = state.isMessageLoading,
+                )
+            } else {
+                AudioRecorderButton(
+                    onRecordStart = handlers.startRecording,
+                    onRecordStop = handlers.stopRecording,
+                    isDisabled = state.isMessageLoading,
+                    isRecording = state.isAudioRecording,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                )
+            }
         }
 
         if (state.chat == null) {

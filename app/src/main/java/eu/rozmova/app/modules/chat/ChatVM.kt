@@ -80,6 +80,7 @@ class ChatVM
                                 messages = chat.messages.map { MessageUI(it, false) },
                             )
                         }
+                        Log.i(tag, "Chat type is ${chat.chatType}")
                         postSideEffect(ChatEvents.ScrollToBottom)
                     }.mapLeft { err ->
                         Log.e(tag, "Error loading chat: ${err.message}")

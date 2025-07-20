@@ -19,13 +19,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.domain.Author
 import eu.rozmova.app.domain.MessageDto
+import eu.rozmova.app.modules.chat.MessageUI
 
 @Composable
 fun MessageItem(
-    message: MessageDto,
+    message: MessageUI,
     modifier: Modifier = Modifier,
 ) {
-    val isUserMessage = message.author == Author.USER
+    val isUserMessage = message.dto.author == Author.USER
     Row(
         modifier = modifier.padding(vertical = 4.dp),
         horizontalArrangement = if (isUserMessage) Arrangement.End else Arrangement.Start,
@@ -59,7 +60,7 @@ fun MessageItem(
                     Spacer(modifier = Modifier.width(8.dp))
                     // Transcription toggle button
                     Text(
-                        text = message.content,
+                        text = message.dto.content,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(horizontal = 8.dp),
                     )
@@ -74,12 +75,15 @@ fun MessageItem(
 private fun MessageItemPreview() {
     MessageItem(
         message =
-            MessageDto(
-                id = "1",
-                content = "Hello, world!",
-                author = Author.USER,
-                audioId = null,
-                link = "",
+            MessageUI(
+                MessageDto(
+                    id = "1",
+                    content = "Hello, world!",
+                    author = Author.USER,
+                    audioId = null,
+                    link = "",
+                ),
+                false,
             ),
     )
 }

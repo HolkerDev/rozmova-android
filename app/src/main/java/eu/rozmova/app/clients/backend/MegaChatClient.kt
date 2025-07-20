@@ -17,6 +17,11 @@ interface MegaChatClient {
         @Query("scenarioLang") scenarioLang: String,
     ): Response<ListChatsResp>
 
+    @GET("v1/chats/{chatId}")
+    suspend fun getById(
+        @Path("chatId") chatId: String,
+    ): Response<GetChatByIdResp>
+
     @GET("v1/chats/latest")
     suspend fun getLatest(
         @Query("userLang") userLang: String,
@@ -51,6 +56,10 @@ interface MegaChatClient {
         @Body body: CreateChatReq,
     ): Response<CreateChatResp>
 }
+
+data class GetChatByIdResp(
+    val chat: ChatDto,
+)
 
 data class DeleteChatResp(
     val chats: List<ChatDto>,
