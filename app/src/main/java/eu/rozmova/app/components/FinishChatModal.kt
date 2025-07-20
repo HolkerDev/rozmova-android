@@ -2,6 +2,7 @@ package eu.rozmova.app.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -9,24 +10,94 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.domain.Author
+import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.domain.MessageDto
+import eu.rozmova.app.modules.chat.MessageUI
+import eu.rozmova.app.modules.convochat.components.shouldfinishdialog.ShouldFinishAudioEvents
+import eu.rozmova.app.modules.convochat.components.shouldfinishdialog.ShouldFinishAudioVM
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
+
+private data class Handlers(
+    val onYesClick: () -> Unit,
+    val onDismiss: () -> Unit,
+    val toSubscription: () -> Unit,
+    val playUsrMsg: () -> Unit,
+    val playBotMsg: () -> Unit,
+    val stopPlay: () -> Unit,
+)
 
 @Composable
-fun ShouldFinishChatDialog(
-    lastBotMsg: MessageDto,
-    lastUserMsg: MessageDto,
+fun ShouldFinishDialog(
+    lastBotMsg: MessageUI,
+    lastUserMsg: MessageUI,
+    chatType: ChatType,
     onYesClick: () -> Unit,
-    onNoClick: () -> Unit,
     onDismiss: () -> Unit,
+    toSubscription: () -> Unit,
+    viewModel: ShouldFinishAudioVM = hiltViewModel(),
+) {
+    var botMsg by remember { mutableStateOf(lastBotMsg) }
+    var userMsg by remember { mutableStateOf(lastUserMsg) }
+    val state by viewModel.collectAsState()
+
+    viewModel.collectSideEffect { event ->
+        when (event) {
+            ShouldFinishAudioEvents.StopAll -> {
+                botMsg = botMsg.copy(isPlaying = false)
+                userMsg = userMsg.copy(isPlaying = false)
+            }
+        }
+    }
+
+    Content(
+        userMsg,
+        botMsg,
+        chatType,
+        Handlers(
+            onYesClick = onYesClick,
+            onDismiss = onDismiss,
+            toSubscription = toSubscription,
+            playUsrMsg = {
+                viewModel.stopAudio()
+                botMsg = botMsg.copy(isPlaying = false)
+                userMsg = userMsg.copy(isPlaying = true)
+                viewModel.playAudio(userMsg.dto)
+            },
+            playBotMsg = {
+                viewModel.stopAudio()
+                userMsg = userMsg.copy(isPlaying = false)
+                botMsg = botMsg.copy(isPlaying = true)
+                viewModel.playAudio(botMsg.dto)
+            },
+            stopPlay = {
+                viewModel.stopAudio()
+                userMsg = userMsg.copy(isPlaying = false)
+                botMsg = botMsg.copy(isPlaying = false)
+            },
+        ),
+    )
+}
+
+@Composable
+private fun Content(
+    lastUserMsg: MessageUI,
+    lastBotMsg: MessageUI,
+    chatType: ChatType,
+    handlers: Handlers,
 ) {
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = handlers.onDismiss,
         title = {
             Text(
                 text = stringResource(R.string.should_finish_chat_title),
@@ -35,15 +106,37 @@ fun ShouldFinishChatDialog(
         },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
-                MessageItem(lastUserMsg, modifier = Modifier.fillMaxWidth())
-                MessageItem(lastBotMsg, modifier = Modifier.fillMaxWidth())
+                if (chatType == ChatType.SPEAKING) {
+                    AudioMessageItem(
+                        lastUserMsg,
+                        modifier = Modifier.fillMaxWidth().padding(start = 20.dp),
+                        onPlayMessage = { handlers.playUsrMsg() },
+                        onStopMessage = { handlers.stopPlay() },
+                        isSubscribed = true,
+                        navigateToSubscription = handlers.toSubscription,
+                    )
+                    AudioMessageItem(
+                        lastBotMsg,
+                        modifier = Modifier.fillMaxWidth().padding(end = 20.dp),
+                        onPlayMessage = {
+                            handlers.playBotMsg()
+                        },
+                        onStopMessage = {
+                            handlers.stopPlay()
+                        },
+                        navigateToSubscription = handlers.toSubscription,
+                        isSubscribed = true,
+                    )
+                    return@Column
+                }
+                MessageItem(lastUserMsg.dto, modifier = Modifier.fillMaxWidth())
+                MessageItem(lastBotMsg.dto, modifier = Modifier.fillMaxWidth())
             }
         },
         confirmButton = {
             Button(
                 onClick = {
-                    onYesClick()
-                    onDismiss()
+                    handlers.onYesClick()
                 },
                 shape = MaterialTheme.shapes.medium,
             ) {
@@ -53,8 +146,7 @@ fun ShouldFinishChatDialog(
         dismissButton = {
             TextButton(
                 onClick = {
-                    onNoClick()
-                    onDismiss()
+                    handlers.onDismiss()
                 },
                 shape = MaterialTheme.shapes.medium,
             ) {
@@ -70,25 +162,38 @@ fun ShouldFinishChatDialog(
 @Preview
 @Composable
 private fun YesNoDialogPreview() {
-    ShouldFinishChatDialog(
+    Content(
         lastUserMsg =
-            MessageDto(
-                id = "1",
-                content = "Danke.",
-                author = Author.USER,
-                audioId = null,
-                link = "",
+            MessageUI(
+                MessageDto(
+                    id = "1",
+                    content = "Danke.",
+                    author = Author.USER,
+                    audioId = null,
+                    link = "",
+                ),
+                false,
             ),
         lastBotMsg =
-            MessageDto(
-                id = "2",
-                content = "You're welcome.",
-                author = Author.BOT,
-                audioId = null,
-                link = "",
+            MessageUI(
+                MessageDto(
+                    id = "2",
+                    content = "You're welcome.",
+                    author = Author.BOT,
+                    audioId = null,
+                    link = "",
+                ),
+                false,
             ),
-        onYesClick = {},
-        onNoClick = {},
-        onDismiss = { },
+        chatType = ChatType.SPEAKING,
+        handlers =
+            Handlers(
+                onYesClick = {},
+                onDismiss = {},
+                toSubscription = {},
+                playUsrMsg = {},
+                playBotMsg = {},
+                stopPlay = {},
+            ),
     )
 }

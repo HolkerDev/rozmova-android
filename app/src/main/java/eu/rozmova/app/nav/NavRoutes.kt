@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import eu.rozmova.app.R
-import eu.rozmova.app.domain.ChatType
 
 sealed class NavRoutes(
     val route: String,
@@ -31,11 +30,8 @@ sealed class NavRoutes(
 
     data object ReviewList : NavRoutes(route = "review_list")
 
-    data object Chat : NavRoutes(route = "chat/{chatId}/{chatType}") {
-        fun routeWith(
-            chatId: String,
-            chatType: ChatType,
-        ) = "chat/$chatId/${chatType.name}"
+    data object Chat : NavRoutes(route = "chat/{chatId}") {
+        fun routeWith(chatId: String) = "chat/$chatId"
     }
 
     data object Library : NavRoutes(route = "library", icon = Icons.Default.LocalLibrary, labelResourceId = R.string.library_screen)

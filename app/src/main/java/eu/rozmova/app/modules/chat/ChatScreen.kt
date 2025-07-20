@@ -48,7 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
 import eu.rozmova.app.components.AudioRecorderButton
 import eu.rozmova.app.components.InstructionsButton
-import eu.rozmova.app.components.ShouldFinishChatDialog
+import eu.rozmova.app.components.ShouldFinishDialog
 import eu.rozmova.app.components.SituationButton
 import eu.rozmova.app.components.conversationchat.AudioMessageList
 import eu.rozmova.app.components.messagechat.FinishChat
@@ -56,6 +56,8 @@ import eu.rozmova.app.domain.ChatStatus
 import eu.rozmova.app.modules.chat.components.ReviewDialog
 import eu.rozmova.app.modules.chat.components.RightTranslationBar
 import eu.rozmova.app.modules.chat.components.SituationDialog
+import eu.rozmova.app.modules.chat.components.UserInstructionsDialog
+import eu.rozmova.app.modules.shared.HelperWords
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -74,6 +76,8 @@ private data class Handlers(
 fun ChatScreen(
     chatId: String,
     toReview: (reviewId: String) -> Unit,
+    toSubscription: () -> Unit,
+    back: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ChatVM = hiltViewModel(),
 ) {
@@ -84,12 +88,6 @@ fun ChatScreen(
 
     viewModel.collectSideEffect { event ->
         when (event) {
-//            is ConvoChatEvents.ProposeFinish ->
-//                finishChat =
-//                    FinishChat(
-//                        lastBotMsg = event.lastBotMsg,
-//                        lastUserMsg = event.lastUserMsg,
-//                    )
             ChatEvents.ScrollToBottom ->
                 state.chat?.takeIf { it.messages.size > 1 }?.let { chat ->
                     messageListState.animateScrollToItem(
@@ -98,6 +96,12 @@ fun ChatScreen(
                 }
 
             is ChatEvents.ReviewReady -> toReview(event.reviewId)
+            is ChatEvents.ProposeFinish ->
+                FinishChat(
+                    lastBotMsg = event.lastBotMsg,
+                    lastUserMsg = event.lastUserMsg,
+                    chatType = event.chatType,
+                )
         }
     }
 
@@ -112,22 +116,26 @@ fun ChatScreen(
         handlers =
             Handlers(
                 finishChat = {
-//                    viewModel.stopAudio()
-//                    viewModel.finishChat(chatId)
+                    viewModel.stopAudio()
+                    viewModel.finishChat(chatId)
                 },
                 onFinishRejected = {
-//                    viewModel.stopAudio()
-//                    finishChatModal = null
+                    viewModel.stopAudio()
+                    finishChatModal = null
                 },
                 toSubscription = {
-//                    viewModel.stopAudio()
-//                    onNavigateToSubscription()
+                    viewModel.stopAudio()
+                    toSubscription()
                 },
-                stopAudio = {},
-                playAudio = {},
-                back = {},
-                startRecording = {},
-                stopRecording = {},
+                stopAudio = { viewModel.stopAudio() },
+                playAudio = { msgId: String -> viewModel.playAudio(msgId) },
+                back = back,
+                startRecording = {
+                    viewModel.startRecording()
+                },
+                stopRecording = {
+                    viewModel.stopRecording()
+                },
             ),
         modifier,
     )
@@ -148,18 +156,17 @@ private fun Content(
     var showWordsBottomSheet by remember { mutableStateOf(false) }
 
     finishChatModal?.let { data ->
-        ShouldFinishChatDialog(
+        ShouldFinishDialog(
             lastBotMsg = data.lastBotMsg,
             lastUserMsg = data.lastUserMsg,
             onYesClick = {
                 handlers.finishChat()
             },
-            onNoClick = {
-                handlers.onFinishRejected()
-            },
             onDismiss = {
                 handlers.onFinishRejected()
             },
+            chatType = data.chatType,
+            toSubscription = handlers.toSubscription,
         )
     }
 
@@ -333,6 +340,25 @@ private fun Content(
             SituationDialog(
                 state.chat.scenario.situation,
                 onClose = { showSituationDialog = false },
+            )
+        }
+
+        if (showInstructionsDialog) {
+            UserInstructionsDialog(
+                state.chat.scenario.userInstructions,
+                onClose = { showInstructionsDialog = false },
+            )
+        }
+
+        if (showWordsBottomSheet) {
+            HelperWords(
+                words = state.chat.scenario.helperWords,
+                onDismiss = { showWordsBottomSheet = false },
+                navigateToSubscription = {
+                    showWordsBottomSheet = false
+                    handlers.toSubscription()
+                },
+                isSubscribed = true,
             )
         }
     }

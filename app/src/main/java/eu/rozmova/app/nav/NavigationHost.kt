@@ -42,7 +42,7 @@ fun NavigationHost(
         // Main Screens
         composable(NavRoutes.Chats.route) {
             ChatsListScreen(onChatSelect = { chatId, chatType ->
-                navController.navigate("chat/$chatId/$chatType")
+                navController.navigate(NavRoutes.Chat.routeWith(chatId))
             })
         }
 
@@ -50,7 +50,7 @@ fun NavigationHost(
             LearnScreen(
                 startOnboarding = { navController.navigate(NavRoutes.Onboarding.route) },
                 toChat = { chatId, chatType ->
-                    navController.navigate(NavRoutes.Chat.routeWith(chatId, chatType))
+                    navController.navigate(NavRoutes.Chat.routeWith(chatId))
                 },
                 toCreateChat = { scenarioId ->
                     navController.navigate(NavRoutes.CreateChat.routeWith(scenarioId))
@@ -102,7 +102,7 @@ fun NavigationHost(
                             chatId: String,
                             chatType: ChatType,
                         ) {
-                            navController.navigate(NavRoutes.Chat.routeWith(chatId, chatType))
+                            navController.navigate(NavRoutes.Chat.routeWith(chatId))
                         }
                     },
             )
@@ -150,7 +150,6 @@ fun NavigationHost(
                     navController.navigate(
                         NavRoutes.Chat.routeWith(
                             chatId,
-                            chatType,
                         ),
                     )
                 },
@@ -202,19 +201,13 @@ fun NavigationHost(
             arguments =
                 listOf(
                     navArgument("chatId") { type = NavType.StringType },
-                    navArgument("chatType") { type = NavType.StringType },
                 ),
         ) { backStackEntry ->
             val chatId: String = backStackEntry.arguments?.getString("chatId") ?: ""
-            val chatType =
-                backStackEntry.arguments
-                    ?.getString("chatType")
-                    ?.let { ChatType.valueOf(it) } ?: ChatType.WRITING
 
-            ChatScreen(
+            eu.rozmova.app.modules.chat.ChatScreen(
                 chatId = chatId,
-                chatType = chatType,
-                onBack = {
+                back = {
                     val previousRoute = navController.previousBackStackEntry?.destination?.route
                     if (previousRoute == NavRoutes.GenerateScenario.route || previousRoute == NavRoutes.CreateChat.route) {
                         // Clear everything back to Learn and recreate bottom nav state
@@ -231,7 +224,7 @@ fun NavigationHost(
                     navController.popBackStack()
                     navController.navigate(NavRoutes.Review.routeWith(reviewId))
                 },
-                onNavigateToSubscription = {
+                toSubscription = {
                     navController.navigate(NavRoutes.Subscription.route)
                 },
             )
