@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -333,7 +334,16 @@ private fun Content(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            if (state.isError) {
+                Text(
+                    text = stringResource(R.string.error_generic),
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).align(Alignment.CenterHorizontally),
+                )
+            } else {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
             if (state.chat.chatType == ChatType.WRITING) {
                 MessageInput(
                     onSendMessage = handlers.sendMessage,

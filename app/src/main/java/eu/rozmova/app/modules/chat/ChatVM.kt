@@ -30,6 +30,7 @@ data class ChatState(
     val chat: ChatDto? = null,
     val messages: List<MessageUI> = emptyList(),
     val isLoading: Boolean = false,
+    val isError: Boolean = false,
     val isReviewLoading: Boolean = false,
     val isAudioRecording: Boolean = false,
     val isMessageLoading: Boolean = false,
@@ -103,17 +104,22 @@ class ChatVM
         fun finishChat(chatId: String) =
             intent {
                 reduce { state.copy(isReviewLoading = true) }
-                chatsRepository.review(chatId = chatId).map { reviewId ->
-                    appStateRepository.triggerRefetch()
-                    postSideEffect(ChatEvents.ReviewReady(reviewId))
-                }
+                chatsRepository
+                    .review(chatId = chatId)
+                    .map { reviewId ->
+                        appStateRepository.triggerRefetch()
+                        postSideEffect(ChatEvents.ReviewReady(reviewId))
+                    }.mapLeft { error ->
+                        Log.e(tag, "Error finishing chat: ${error.message}")
+                        reduce { state.copy(isReviewLoading = false, isError = true) }
+                    }
             }
 
         fun sendMessage(
             chatId: String,
             message: String,
         ) = intent {
-            reduce { state.copy(isMessageLoading = true) }
+            reduce { state.copy(isMessageLoading = true, isError = false) }
             chatsRepository
                 .sendMessage(
                     chatId = chatId,
@@ -136,6 +142,9 @@ class ChatVM
                             ),
                         )
                     }
+                }.mapLeft { error ->
+                    Log.e(tag, "Error sending message: ${error.message}")
+                    reduce { state.copy(isMessageLoading = false, isError = true) }
                 }
             postSideEffect(ChatEvents.ScrollToBottom)
         }
@@ -169,13 +178,14 @@ class ChatVM
                         postSideEffect(ChatEvents.ScrollToBottom)
                     }.mapLeft { error ->
                         Log.e("ChatDetailsViewModel", "Error sending audio message: ${error.message}")
-                        reduce { state.copy(isMessageLoading = false) }
+                        reduce { state.copy(isMessageLoading = false, isError = true) }
                     }
             }
 
         fun startRecording() =
             intent {
                 try {
+                    reduce { state.copy(isError = false) }
                     val outputDir =
                         getApplication<Application>().getExternalFilesDir(Environment.DIRECTORY_MUSIC)
                     val fileId = UUID.randomUUID()
