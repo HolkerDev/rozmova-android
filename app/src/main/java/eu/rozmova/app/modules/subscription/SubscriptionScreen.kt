@@ -50,7 +50,7 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 fun SubscriptionScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: SubscriptionViewModel = hiltViewModel(),
+    viewModel: SubscriptionVM = hiltViewModel(),
 ) {
     val state by viewModel.collectAsState()
     val context = LocalContext.current

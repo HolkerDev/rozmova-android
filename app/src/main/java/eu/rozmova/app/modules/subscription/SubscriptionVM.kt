@@ -31,7 +31,7 @@ sealed class SubscriptionSideEffect {
 }
 
 @HiltViewModel
-class SubscriptionViewModel
+class SubscriptionVM
     @Inject
     constructor(
         private val billingService: BillingService,
@@ -61,7 +61,6 @@ class SubscriptionViewModel
         ) = intent {
             reduce { state.copy(isLoading = true, error = null) }
             billingService.purchaseSubscription(activity, product.productId)
-            reduce { state.copy(isLoading = false, subscriptionState = SubscriptionState.Subscribed) }
         }
 
         fun fetchSubscriptionState() =
