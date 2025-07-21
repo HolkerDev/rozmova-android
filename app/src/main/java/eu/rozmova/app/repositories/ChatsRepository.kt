@@ -13,6 +13,8 @@ import eu.rozmova.app.clients.s3.S3Client
 import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.domain.ReviewDto
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -79,29 +81,23 @@ class ChatsRepository
         suspend fun fetchAll(
             userLang: String,
             scenarioLang: String,
-        ): Either<InfraErrors, List<ChatDto>> =
-            Either
-                .catch {
-                    megaChatClient.listChats(userLang, scenarioLang).let { res ->
-                        if (res.isSuccessful) {
-                            val responseBody =
-                                res.body()
-                                    ?: throw IllegalStateException("Chats list fetch failed due to empty body: ${res.message()}")
-                            Log.i(
-                                tag,
-                                "Fetched ${
-                                    responseBody.chats.map { it.chatType }.joinToString(",")
-                                } chats",
-                            )
-                            responseBody.chats
-                        } else {
-                            throw IllegalStateException("Chats list fetch failed: ${res.message()}")
-                        }
-                    }
-                }.mapLeft { e ->
-                    Log.e(tag, "Failed to fetch all chats", e)
-                    InfraErrors.NetworkError("Failed to fetch all chats")
+        ): Result<List<ChatDto>> =
+            try {
+                val response = megaChatClient.listChats(userLang, scenarioLang)
+                if (response.isSuccessful.not()) {
+                    Log.e(tag, "Chats list fetch failed: ${response.errorBody()?.string()}")
+                    throw IllegalStateException("Chats list fetch failed: ${response.errorBody()?.string()}")
                 }
+
+                val responseBody =
+                    response.body()
+                        ?: throw IllegalStateException("Chats list fetch failed due to empty body: ${response.body()}")
+                Result.success(responseBody.chats)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to fetch all chats", e)
+                Sentry.captureMessage("Error trying to fetch all chats: ${e.message}", SentryLevel.ERROR)
+                Result.failure(InfraErrors.NetworkError("Failed to fetch all chats"))
+            }
 
         suspend fun deleteChat(chatId: String): Either<InfraErrors, List<ChatDto>> =
             Either

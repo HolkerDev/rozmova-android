@@ -109,9 +109,13 @@ class LearnScreenVM
             intent {
                 val learnLang = settingsRepository.getLearningLangOrDefault()
                 val userLang = localeManager.getCurrentLocale().language
-                scenariosRepository.getTodaySelection(userLang, learnLang).map { recScenarios ->
-                    reduce { state.copy(recommendedScenarios = recScenarios) }
-                }
+                scenariosRepository
+                    .getTodaySelection(userLang, learnLang)
+                    .onSuccess { recScenarios ->
+                        reduce { state.copy(recommendedScenarios = recScenarios) }
+                    }.onFailure { error ->
+                        Log.e("LearnScreenVM", "Error fetching today's scenarios", error)
+                    }
             }
 
         private fun fetchLatestChat() =

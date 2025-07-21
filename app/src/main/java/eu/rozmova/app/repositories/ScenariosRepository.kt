@@ -13,6 +13,8 @@ import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.domain.TodayScenarioSelection
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -99,34 +101,40 @@ class ScenariosRepository
         suspend fun getTodaySelection(
             userLang: String,
             scenarioLang: String,
-        ): Either<InfraErrors, TodayScenarioSelection> =
-            Either
-                .catch {
-                    Log.i("ScenariosRepository", "Fetching today's scenario selection")
-                    val response =
-                        scenarioClient.fetchRecommendedScenarios(
-                            RecommendedScenariosRequest(
-                                userLang = userLang,
-                                scenarioLang = scenarioLang,
-                            ),
-                        )
-                    if (response.isSuccessful) {
-                        response.body()?.let { resp ->
-                            TodayScenarioSelection(
-                                easyScenario = resp.easy,
-                                mediumScenario = resp.medium,
-                                hardScenario = resp.hard,
-                            )
-                        } ?: throw IllegalStateException("Response body is null")
-                    } else {
-                        throw InfraErrors.NetworkError(
-                            "Error trying to fetch today selection: $response",
-                        )
-                    }
-                }.mapLeft {
-                    Log.e("ScenariosRepository", "Error trying to fetch today selection", it)
-                    InfraErrors.DatabaseError("Error trying to fetch today selection")
+        ): Result<TodayScenarioSelection> =
+            try {
+                Sentry.addBreadcrumb("Fetching today's scenario selection for userLang: $userLang, scenarioLang: $scenarioLang")
+                val response =
+                    scenarioClient.fetchRecommendedScenarios(
+                        RecommendedScenariosRequest(
+                            userLang = userLang,
+                            scenarioLang = scenarioLang,
+                        ),
+                    )
+
+                if (response.isSuccessful.not()) {
+                    throw InfraErrors.NetworkError(
+                        "Error trying to fetch today's scenario selection: ${response.errorBody()}",
+                    )
                 }
+
+                val todaySelection =
+                    response.body()?.let { resp ->
+                        TodayScenarioSelection(
+                            easyScenario = resp.easy,
+                            mediumScenario = resp.medium,
+                            hardScenario = resp.hard,
+                        )
+                    } ?: throw IllegalStateException("Response body is null")
+
+                Result.success(todaySelection)
+            } catch (e: Exception) {
+                Sentry.captureMessage(
+                    "Error trying to fetch today's scenario selection: ${e.message}",
+                    SentryLevel.ERROR,
+                )
+                Result.failure(InfraErrors.DatabaseError("Error trying to fetch today's scenario selection"))
+            }
 
         suspend fun getScenarioById(scenarioId: String): Either<InfraErrors, ScenarioDto> =
             Either

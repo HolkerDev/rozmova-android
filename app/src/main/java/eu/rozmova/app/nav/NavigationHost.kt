@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.modules.allscenarios.AllScenariosScreen
+import eu.rozmova.app.modules.chat.ChatScreen
 import eu.rozmova.app.modules.chatlist.ChatsListScreen
 import eu.rozmova.app.modules.createchat.CreateChatNavigation
 import eu.rozmova.app.modules.createchat.CreateChatScreen
@@ -22,7 +23,6 @@ import eu.rozmova.app.modules.onboarding.OnboardingScreen
 import eu.rozmova.app.modules.review.ReviewScreen
 import eu.rozmova.app.modules.reviewlist.ReviewListScreen
 import eu.rozmova.app.modules.subscription.SubscriptionScreen
-import eu.rozmova.app.screens.chat.ChatScreen
 import eu.rozmova.app.screens.learn.LearnScreen
 import eu.rozmova.app.screens.login.LoginScreen
 import eu.rozmova.app.screens.main.MainScreen
@@ -41,7 +41,7 @@ fun NavigationHost(
     ) {
         // Main Screens
         composable(NavRoutes.Chats.route) {
-            ChatsListScreen(onChatSelect = { chatId, chatType ->
+            ChatsListScreen(onChatSelect = { chatId ->
                 navController.navigate(NavRoutes.Chat.routeWith(chatId))
             })
         }
@@ -205,7 +205,7 @@ fun NavigationHost(
         ) { backStackEntry ->
             val chatId: String = backStackEntry.arguments?.getString("chatId") ?: ""
 
-            eu.rozmova.app.modules.chat.ChatScreen(
+            ChatScreen(
                 chatId = chatId,
                 back = {
                     val previousRoute = navController.previousBackStackEntry?.destination?.route

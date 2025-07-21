@@ -40,6 +40,7 @@ import eu.rozmova.app.repositories.billing.SubscriptionRepository
 import eu.rozmova.app.services.billing.BillingEvents
 import eu.rozmova.app.services.billing.BillingService
 import eu.rozmova.app.ui.theme.RozmovaTheme
+import io.sentry.android.core.SentryAndroid
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -243,6 +244,14 @@ private fun getCurrentRoute(navController: NavHostController): String? {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!BuildConfig.DEBUG) {
+            SentryAndroid.init(this) { options ->
+                options.isAttachScreenshot = true
+                options.dsn = "https://2f208e0f457154130d4569b7c1326ef4@o4509570570649600.ingest.de.sentry.io/4509570577072208"
+                options.tracesSampleRate = 1.0
+            }
+        }
 
         enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)

@@ -15,7 +15,7 @@ data class ChatsListState(
     val chats: List<ChatDto> = emptyList(),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
-    val error: Throwable? = null,
+    val isError: Boolean = false,
 )
 
 @HiltViewModel
@@ -41,45 +41,46 @@ class ChatListVM
 
         fun loadChats() =
             intent {
-                reduce { state.copy(isLoading = true) }
+                reduce { state.copy(isLoading = true, isError = false) }
                 val scenarioLang = settingsRepository.getLearningLangOrDefault()
                 val userLang = settingsRepository.getInterfaceLang()
                 chatsRepository
                     .fetchAll(userLang, scenarioLang)
-                    .map { chats ->
+                    .onSuccess { chats ->
                         reduce { state.copy(isLoading = false, chats = chats) }
-                    }.mapLeft { error ->
+                    }.onFailure { error ->
                         Log.e(tag, "Error loading chats", error)
-                        reduce { state.copy(isLoading = false, error = error) }
+                        reduce { state.copy(isLoading = false, isError = true) }
                     }
             }
 
         fun refresh() =
             intent {
-                reduce { state.copy(isRefreshing = true) }
-                try {
-                    val scenarioLang = settingsRepository.getLearningLangOrDefault()
-                    val userLang = settingsRepository.getInterfaceLang()
-                    val chats = chatsRepository.fetchAll(userLang, scenarioLang)
+                reduce { state.copy(isRefreshing = true, isError = false) }
+                val scenarioLang = settingsRepository.getLearningLangOrDefault()
+                val userLang = settingsRepository.getInterfaceLang()
+                val chats = chatsRepository.fetchAll(userLang, scenarioLang)
 
-                    chats.map { respChats ->
+                chats
+                    .onSuccess { respChats ->
                         reduce { state.copy(chats = respChats) }
+                    }.onFailure { error ->
+                        Log.e(tag, "Error while refreshing chats", error)
+                        reduce { state.copy(isError = true) }
                     }
-                } finally {
-                    reduce { state.copy(isRefreshing = false) }
-                }
+                reduce { state.copy(isRefreshing = false) }
             }
 
         fun deleteChat(chatId: String) =
             intent {
-                reduce { state.copy(isLoading = true) }
+                reduce { state.copy(isLoading = true, isError = false) }
                 chatsRepository
                     .deleteChat(chatId)
                     .map { chats ->
                         reduce { state.copy(chats = chats, isLoading = false) }
                     }.mapLeft { error ->
                         Log.e(tag, "Error while deleting chat", error)
-                        reduce { state.copy(isLoading = false, error = error) }
+                        reduce { state.copy(isLoading = false, isError = true) }
                     }
             }
     }
