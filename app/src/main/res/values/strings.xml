@@ -104,9 +104,7 @@
     <string name="subscription_cancel_anytime">Cancel anytime • No commitment</string>
     <string name="subscription_youre_premium">You\'re Premium!</string>
     <string name="subscription_thank_you">Thank you for subscribing to Rozmova Premium</string>
-    <string name="subscription_error_unavailable">Subscription not available</string>
-    <string name="subscription_error_network">Network error. Please check your connection.</string>
-    <string name="subscription_error_service_unavailable">Google Play services unavailable. Please try again later.</string>
+    <string name="subscription_error_unavailable">Something went wrong. Please try again.</string>
     <string name="subscription_retry">Retry</string>
     <string name="subscription_oops">Oops!</string>
     <string name="premium_feature_unlimited_conversations">Unlimited speaking convesations</string>

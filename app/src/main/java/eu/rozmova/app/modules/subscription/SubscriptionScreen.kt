@@ -4,7 +4,6 @@ import android.app.Activity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,7 +27,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,7 +56,6 @@ fun SubscriptionScreen(
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
             is SubscriptionSideEffect.ShowError -> {
-                // Handle error
             }
             is SubscriptionSideEffect.ShowSuccess -> {
                 // Handle success
@@ -120,21 +117,14 @@ fun SubscriptionScreen(
 
                 is SubscriptionState.Error -> {
                     ErrorContent(
-                        message = subscriptionState.message,
-                        onRetryClick = { },
+                        onRetryClick = { viewModel.fetchSubscriptionState() },
                     )
                 }
 
                 is SubscriptionState.NotAvailable -> {
                     ErrorContent(
-                        message = "Subscription not available",
-                        onRetryClick = { },
+                        onRetryClick = { viewModel.fetchSubscriptionState() },
                     )
-                }
-            }
-
-            if (state.error != null) {
-                LaunchedEffect(state.error) {
                 }
             }
         }
@@ -184,35 +174,7 @@ private fun SubscribedContent() {
 }
 
 @Composable
-private fun StatusRow(
-    label: String,
-    value: String,
-) {
-    Row(
-        modifier =
-            Modifier.Companion
-                .fillMaxWidth()
-                .padding(vertical = 2.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Companion.Medium,
-        )
-    }
-}
-
-@Composable
-private fun ErrorContent(
-    message: String,
-    onRetryClick: () -> Unit,
-) {
+private fun ErrorContent(onRetryClick: () -> Unit) {
     Column(
         modifier = Modifier.Companion.fillMaxWidth(),
         horizontalAlignment = Alignment.Companion.CenterHorizontally,
@@ -226,7 +188,7 @@ private fun ErrorContent(
         Spacer(modifier = Modifier.Companion.height(8.dp))
 
         Text(
-            text = message,
+            text = stringResource(R.string.subscription_error_unavailable),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Companion.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -243,5 +205,7 @@ private fun ErrorContent(
 @Preview
 @Composable
 private fun PreviewSubscribedState() {
-    SubscribedContent()
+    ErrorContent(
+        onRetryClick = {},
+    )
 }

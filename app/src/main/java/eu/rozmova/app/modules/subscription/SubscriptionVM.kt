@@ -16,7 +16,7 @@ import javax.inject.Inject
 data class SubscriptionUiState(
     val subscriptionState: SubscriptionState = SubscriptionState.Loading,
     val isLoading: Boolean = false,
-    val error: String? = null,
+    val error: Boolean = false,
     val showSuccessMessage: Boolean = false,
 )
 
@@ -47,8 +47,14 @@ class SubscriptionVM
                 billingService.billingState.collect { events ->
                     when (events) {
                         is BillingEvents.PurchaseFound -> {
-                            reduce { state.copy(isLoading = false, subscriptionState = SubscriptionState.Subscribed) }
+                            reduce {
+                                state.copy(
+                                    isLoading = false,
+                                    subscriptionState = SubscriptionState.Subscribed,
+                                )
+                            }
                         }
+
                         else -> {}
                     }
                 }
@@ -59,7 +65,7 @@ class SubscriptionVM
             activity: Activity,
             product: SubscriptionProduct,
         ) = intent {
-            reduce { state.copy(isLoading = true, error = null) }
+            reduce { state.copy(isLoading = true, error = false) }
             billingService.purchaseSubscription(activity, product.productId)
         }
 
@@ -70,7 +76,14 @@ class SubscriptionVM
                     reduce { state.copy(subscriptionState = SubscriptionState.Subscribed) }
                 } else {
                     val availableSubscription = billingService.getAvailableSubscriptions().first()
-                    reduce { state.copy(subscriptionState = SubscriptionState.Available(availableSubscription)) }
+                    reduce {
+                        state.copy(
+                            subscriptionState =
+                                SubscriptionState.Available(
+                                    availableSubscription,
+                                ),
+                        )
+                    }
                 }
             }
     }

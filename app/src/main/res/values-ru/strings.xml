@@ -103,6 +103,9 @@
     <string name="subscription_per_month">в месяц</string>
     <string name="subscription_subscribe_now">Подписаться</string>
     <string name="subscription_cancel_anytime">Можно отменить в любое время</string>
+    <string name="subscription_error_unavailable">Что-то пошло не так. Попробуйте еще раз.</string>
+    <string name="subscription_retry">Повторить попытку</string>
+    <string name="subscription_oops">Упс!</string>
     <string name="premium_feature_unlimited_conversations">Безлимитные разговорные сценарии</string>
     <string name="premium_feature_dictionary_access">Доступ к словарю в сценариях</string>
     <string name="premium_feature_transcription_access">Доступ к аудио транскрипциям</string>

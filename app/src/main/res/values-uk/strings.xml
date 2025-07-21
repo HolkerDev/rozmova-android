@@ -97,6 +97,7 @@
     <string name="onboarding_salutation_title">Виберіть рід</string>
     <string name="onboarding_salutation_description">Будь ласка, вкажіть ваш граматичний рід. Це покращить занурення під час розмов у сценаріях.</string>
     <string name="pronoun_they">середній рід</string>
+    <string name="subscription_oops">Упс!</string>
     <string name="premium_feature_unlimited_conversations">Безлімітні розмовні сценарії</string>
     <string name="premium_feature_dictionary_access">Доступ до словника в сценаріях</string>
     <string name="premium_feature_transcription_access">Доступ до аудіо транскрипцій</string>
@@ -167,4 +168,6 @@
     <string name="delete_chat_desc">Ви впевненні, що хочете видалити цей чат?</string>
     <string name="generate_scenario_error">Щось пішло не так. Спробуйте пізніше.</string>
     <string name="error_generic">Щось пішло не так. Спробуйте пізніше.</string>
+    <string name="subscription_error_unavailable">Щось пішло не так. Спробуйте ще раз.</string>
+    <string name="subscription_retry">Спробувати ще раз.</string>
 </resources>
