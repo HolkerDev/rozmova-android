@@ -38,8 +38,8 @@ android {
         applicationId = "eu.rozmova.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 41
-        versionName = "0.0.41"
+        versionCode = 42
+        versionName = "0.0.42"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
