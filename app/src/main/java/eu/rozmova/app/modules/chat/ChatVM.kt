@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.Author
@@ -69,6 +70,18 @@ class ChatVM
         private var mediaRecorder: MediaRecorder? = null
         private var audioFile: File? = null
 
+        init {
+            exoPlayer.addListener(
+                object : Player.Listener {
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        if (playbackState == Player.STATE_ENDED) {
+                            onAudioFinished()
+                        }
+                    }
+                },
+            )
+        }
+
         fun loadChat(chatId: String) =
             intent {
                 chatsRepository
@@ -107,7 +120,13 @@ class ChatVM
                     message = message,
                 ).map { chatUpdate ->
                     val messages = chatUpdate.chat.messages.map { MessageUI(it, false) }
-                    reduce { state.copy(chat = chatUpdate.chat, messages = messages, isMessageLoading = false) }
+                    reduce {
+                        state.copy(
+                            chat = chatUpdate.chat,
+                            messages = messages,
+                            isMessageLoading = false,
+                        )
+                    }
                     if (chatUpdate.shouldFinish) {
                         postSideEffect(
                             ChatEvents.ProposeFinish(
