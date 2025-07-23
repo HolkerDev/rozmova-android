@@ -9,11 +9,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.modules.allscenarios.AllScenariosScreen
 import eu.rozmova.app.modules.chat.ChatScreen
 import eu.rozmova.app.modules.chatlist.ChatsListScreen
-import eu.rozmova.app.modules.createchat.CreateChatNavigation
 import eu.rozmova.app.modules.createchat.CreateChatScreen
 import eu.rozmova.app.modules.devscreen.DevScreen
 import eu.rozmova.app.modules.generatechat.GenerateChatScreen
@@ -92,19 +90,15 @@ fun NavigationHost(
             val scenarioId: String = backStackEntry.arguments?.getString("scenarioId") ?: ""
             CreateChatScreen(
                 scenarioId = scenarioId,
-                navigation =
-                    object : CreateChatNavigation {
-                        override fun back() {
-                            navController.navigateUp()
-                        }
-
-                        override fun toChat(
-                            chatId: String,
-                            chatType: ChatType,
-                        ) {
-                            navController.navigate(NavRoutes.Chat.routeWith(chatId))
-                        }
-                    },
+                toSubscription = {
+                    navController.navigate(NavRoutes.Subscription.route)
+                },
+                toChat = { chatId ->
+                    navController.navigate(NavRoutes.Chat.routeWith(chatId))
+                },
+                back = {
+                    navController.navigateUp()
+                },
             )
         }
 

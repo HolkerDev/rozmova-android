@@ -36,6 +36,10 @@ data class ChatUpdate(
     val shouldFinish: Boolean,
 )
 
+class UsageLimitReachedException(
+    msg: String = "Usage limit reached",
+) : Exception(msg)
+
 @Singleton
 class ChatsRepository
     @Inject
@@ -141,26 +145,39 @@ class ChatsRepository
         suspend fun createChat(
             scenarioId: String,
             chatType: ChatType,
-        ): Either<InfraErrors, String> =
-            Either
-                .catch {
-                    val response =
-                        megaChatClient.createChat(
-                            CreateChatReq(
-                                scenarioId = scenarioId,
-                                chatType = chatType.name,
-                            ),
-                        )
-                    if (!response.isSuccessful) {
-                        Log.e(tag, "Chat creation failed: ${response.errorBody()?.string()}")
-                        throw IllegalStateException("Chat creation failed: ${response.message()}")
+        ): Result<String> =
+            try {
+                val response =
+                    megaChatClient.createChat(
+                        CreateChatReq(
+                            scenarioId = scenarioId,
+                            chatType = chatType.name,
+                        ),
+                    )
+
+                when {
+                    response.code() == 429 -> {
+                        Log.e(tag, "Usage limit reached for chat creation")
+                        Result.failure(UsageLimitReachedException("Usage limit reached for chat creation"))
                     }
-                    response.body()?.chatId
-                        ?: throw IllegalStateException("Chat creation failed")
-                }.mapLeft { e ->
-                    Log.e(tag, "Failed to create chat", e)
-                    InfraErrors.NetworkError("Failed to create chat")
+                    !response.isSuccessful -> {
+                        Log.e(tag, "Chat creation failed: ${response.errorBody()?.string()}, status: ${response.code()}")
+                        Result.failure(
+                            IllegalStateException("Chat creation failed: ${response.errorBody()?.string()}, status: ${response.code()}"),
+                        )
+                    }
+                    else -> {
+                        val chatId =
+                            response.body()?.chatId
+                                ?: throw IllegalStateException("Body is null in chat creation response: ${response.body()}")
+                        Result.success(chatId)
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to create chat", e)
+                Sentry.captureMessage("Error trying to create chat: ${e.message}", SentryLevel.ERROR)
+                Result.failure(InfraErrors.NetworkError("Failed to create chat"))
+            }
 
         suspend fun review(chatId: String): Either<InfraErrors, String> =
             Either

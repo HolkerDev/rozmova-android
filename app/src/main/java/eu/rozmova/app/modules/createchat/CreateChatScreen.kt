@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
@@ -57,6 +58,7 @@ import eu.rozmova.app.domain.LangDto
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.domain.UserInstruction
+import eu.rozmova.app.modules.createchat.components.SpeakingLimitReached
 import eu.rozmova.app.modules.shared.DifficultyLabel
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
@@ -84,23 +86,24 @@ fun ChatTypeUI.toModel(): ChatType =
         ChatTypeUI.WRITING -> ChatType.WRITING
     }
 
-interface CreateChatNavigation {
-    fun back()
-
-    fun toChat(
-        chatId: String,
-        chatType: ChatType,
-    )
-}
+private class Handlers(
+    val onChatStart: (ChatTypeUI) -> Unit,
+    val toSubscription: () -> Unit,
+    val closeLimitReachedModal: () -> Unit,
+    val back: () -> Unit,
+)
 
 @Composable
 fun CreateChatScreen(
     scenarioId: String,
-    navigation: CreateChatNavigation,
+    toSubscription: () -> Unit,
+    toChat: (chatId: String) -> Unit,
+    back: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CreateChatVM = hiltViewModel(),
 ) {
     val state by viewModel.collectAsState()
+    var isLimitReachedModalVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {
         viewModel.fetchScenario(scenarioId)
@@ -109,17 +112,27 @@ fun CreateChatScreen(
     viewModel.collectSideEffect { event ->
         when (event) {
             is CreateChatEvent.ChatCreated -> {
-                navigation.toChat(event.chatId, event.chatType)
+                toChat(event.chatId)
+            }
+
+            CreateChatEvent.UsageLimitReached -> {
+                isLimitReachedModalVisible = true
             }
         }
     }
 
     Content(
-        navigation = navigation,
-        onChatStart = { chatType ->
-            viewModel.createChat(scenarioId, chatType.toModel())
-        },
+        isLimitReachedModalVisible = isLimitReachedModalVisible,
         state = state,
+        handlers =
+            Handlers(
+                onChatStart = { chatType ->
+                    viewModel.createChat(scenarioId, chatType.toModel())
+                },
+                toSubscription = toSubscription,
+                closeLimitReachedModal = { isLimitReachedModalVisible = false },
+                back = back,
+            ),
         modifier = modifier,
     )
 }
@@ -127,8 +140,8 @@ fun CreateChatScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
-    navigation: CreateChatNavigation,
-    onChatStart: (ChatTypeUI) -> Unit,
+    handlers: Handlers,
+    isLimitReachedModalVisible: Boolean,
     state: CreateChatState,
     modifier: Modifier = Modifier,
 ) {
@@ -140,7 +153,7 @@ private fun Content(
             TopAppBar(
                 title = { Text(stringResource(R.string.create_chat_title)) },
                 navigationIcon = {
-                    IconButton(onClick = navigation::back) {
+                    IconButton(onClick = handlers.back) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
                             contentDescription = "Back",
@@ -160,11 +173,18 @@ private fun Content(
                 color = MaterialTheme.colorScheme.surface,
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp).padding(bottom = 4.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .padding(bottom = 4.dp),
                 ) {
                     if (state.errorChatCreation) {
                         Text(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 4.dp),
                             text = stringResource(R.string.error_generic),
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodyMedium,
@@ -172,7 +192,7 @@ private fun Content(
                         )
                     }
                     Button(
-                        onClick = { onChatStart(selectedChatType) },
+                        onClick = { handlers.onChatStart(selectedChatType) },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = state.scenario != null && !state.isLoading,
                         shape = MaterialTheme.shapes.medium,
@@ -246,6 +266,14 @@ private fun Content(
                 // Add bottom padding to ensure content doesn't get hidden behind bottom bar
                 Spacer(modifier = Modifier.height(16.dp))
             }
+
+            // Limit Reached Modal
+            if (isLimitReachedModalVisible) {
+                SpeakingLimitReached(
+                    onUpgradeClick = handlers.toSubscription,
+                    onDismiss = handlers.closeLimitReachedModal,
+                )
+            }
         }
     }
 }
@@ -266,7 +294,10 @@ private fun ScenarioDetailsCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(18.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(18.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -313,7 +344,10 @@ private fun ChatTypeSelection(
         )
 
         Column(
-            modifier = Modifier.fillMaxWidth().selectableGroup(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .selectableGroup(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             listOf(ChatTypeUI.WRITING, ChatTypeUI.SPEAKING).forEach { chatType ->
@@ -360,7 +394,10 @@ private fun ChatTypeOption(
             },
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(8.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -425,17 +462,7 @@ private fun ScenarioDetailsScreenPreview() {
 
     MaterialTheme {
         Content(
-            navigation =
-                object : CreateChatNavigation {
-                    override fun back() {}
-
-                    override fun toChat(
-                        chatId: String,
-                        chatType: ChatType,
-                    ) {
-                    }
-                },
-            onChatStart = { isCreationError = true },
+            isLimitReachedModalVisible = true,
             state =
                 CreateChatState(
                     isLoading = isLoading,
@@ -450,7 +477,9 @@ private fun ScenarioDetailsScreenPreview() {
                             difficulty = DifficultyDto.HARD,
                             scenarioType = ScenarioTypeDto.CONVERSATION,
                             title = "Job Interview Scenario",
-                            situation = "You are interviewing for a software developer position at a startup. The interviewer asks you to explain a complex technical concept to someone without a technical background. You need to demonstrate both your technical knowledge and communication skills.",
+                            situation =
+                                "You are interviewing for a software developer position at a startup." +
+                                    "The interviewer asks you to explain a complex technical concept to someone without a technical background. You need to demonstrate both your technical knowledge and communication skills.",
                             labels = listOf(),
                             helperWords = listOf(),
                             userInstructions =
@@ -461,6 +490,13 @@ private fun ScenarioDetailsScreenPreview() {
                                     ),
                                 ),
                         ),
+                ),
+            handlers =
+                Handlers(
+                    onChatStart = {},
+                    toSubscription = {},
+                    closeLimitReachedModal = {},
+                    back = {},
                 ),
         )
     }

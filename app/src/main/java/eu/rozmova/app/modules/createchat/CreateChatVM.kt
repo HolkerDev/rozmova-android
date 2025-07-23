@@ -7,6 +7,7 @@ import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.domain.ScenarioDto
 import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.ScenariosRepository
+import eu.rozmova.app.repositories.UsageLimitReachedException
 import eu.rozmova.app.state.AppStateRepository
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
@@ -25,6 +26,8 @@ sealed interface CreateChatEvent {
         val chatId: String,
         val chatType: ChatType,
     ) : CreateChatEvent
+
+    data object UsageLimitReached : CreateChatEvent
 }
 
 @HiltViewModel
@@ -58,11 +61,17 @@ class CreateChatVM
             reduce { state.copy(errorChatCreation = false, isLoading = true) }
             chatsRepository
                 .createChat(scenarioId, chatType)
-                .map { chatId ->
+                .onSuccess { chatId ->
                     Log.d("CreateChatVM", "Chat created with ID: $chatId")
                     appStateRepository.triggerRefetch()
                     postSideEffect(CreateChatEvent.ChatCreated(chatId, chatType))
-                }.mapLeft { error ->
+                }.onFailure { error ->
+                    if (error is UsageLimitReachedException) {
+                        Log.w("CreateChatVM", "Usage limit reached", error)
+                        reduce { state.copy(isLoading = false) }
+                        postSideEffect(CreateChatEvent.UsageLimitReached)
+                        return@onFailure
+                    }
                     Log.e("CreateChatVM", "Error creating chat", error)
                     reduce { state.copy(errorChatCreation = true, isLoading = false) }
                 }
