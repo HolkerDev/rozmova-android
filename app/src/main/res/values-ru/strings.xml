@@ -109,9 +109,8 @@
     <string name="premium_feature_unlimited_conversations">Безлимитные разговорные сценарии</string>
     <string name="premium_feature_dictionary_access">Доступ к словарю в сценариях</string>
     <string name="premium_feature_transcription_access">Доступ к аудио транскрипциям</string>
-    <string name="premium_feature_custom_scenario_generation">Возможность создавать свои сценарии</string>
-    <string name="premium_feature_unlimited_respect">Безграничный респект</string>
-    <string name="premium_feature_integrated_translator_access">Доступ к интегрированному переводчику</string>
+    <string name="premium_feature_custom_scenario_generation">Безлимитные пользовательские сценарии</string>
+    <string name="premium_feature_integrated_translator_access">Безлимитный контекстный переводчику</string>
     <string name="subscription_youre_premium">У вас есть Премиум подписка!</string>
     <string name="subscription_thank_you">Спасибо за Вашу подписку на Розмова Премиум</string>
     <string name="sub_required_helper_words">Вспомогательные слова доступны только в Премиум подписке.</string>

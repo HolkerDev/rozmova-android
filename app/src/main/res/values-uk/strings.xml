@@ -101,9 +101,8 @@
     <string name="premium_feature_unlimited_conversations">Безлімітні розмовні сценарії</string>
     <string name="premium_feature_dictionary_access">Доступ до словника в сценаріях</string>
     <string name="premium_feature_transcription_access">Доступ до аудіо транскрипцій</string>
-    <string name="premium_feature_custom_scenario_generation">Можливість створювати власні сценарії</string>
-    <string name="premium_feature_unlimited_respect">Безмежна повага</string>
-    <string name="premium_feature_integrated_translator_access">Доступ до вбудованого перекладача</string>
+    <string name="premium_feature_custom_scenario_generation">Безлімітні користувацкі сценарії</string>
+    <string name="premium_feature_integrated_translator_access">Безлімітний контекстний перекладача</string>
     <string name="subscription_premium">Преміум підписка</string>
     <string name="subscription_unlock_features">Відкрити преміум функціонал</string>
     <string name="subscription_monthly">Місячна</string>
