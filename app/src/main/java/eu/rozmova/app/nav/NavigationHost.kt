@@ -150,6 +150,9 @@ fun NavigationHost(
                 onBack = {
                     navController.navigateUp()
                 },
+                toSubscription = {
+                    navController.navigate(NavRoutes.Subscription.route)
+                },
             )
         }
 

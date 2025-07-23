@@ -69,34 +69,53 @@ class ScenariosRepository
             chatType: ChatType,
             difficulty: DifficultyDto,
             description: String,
-        ): Either<InfraErrors, String> =
-            Either
-                .catch {
-                    Log.i(
-                        "ScenariosRepository",
-                        "Generating scenario with type: $chatType, difficulty: $difficulty",
+        ): Result<String> =
+            try {
+                Log.i(
+                    "ScenariosRepository",
+                    "Generating scenario with type: $chatType, difficulty: $difficulty",
+                )
+                val response =
+                    megaScenariosClient.generateScenarioV2(
+                        GenerateScenarioV2Req(
+                            description = description,
+                            userLang = userLang,
+                            scenarioLang = scenarioLang,
+                            chatType = chatType.name,
+                            difficulty = difficulty.name,
+                        ),
                     )
-                    val response =
-                        megaScenariosClient.generateScenarioV2(
-                            GenerateScenarioV2Req(
-                                description = description,
-                                userLang = userLang,
-                                scenarioLang = scenarioLang,
-                                chatType = chatType.name,
-                                difficulty = difficulty.name,
-                            ),
+
+                when {
+                    response.code() == 429 -> {
+                        Log.w(
+                            "ScenariosRepository",
+                            "Usage limit reached for scenario generation",
                         )
-                    if (!response.isSuccessful) {
-                        throw InfraErrors.NetworkError(
+                        Result.failure(UsageLimitReachedException("Usage limit reached for scenario generation."))
+                    }
+                    response.isSuccessful.not() -> {
+                        Log.e(
+                            "ScenariosRepository",
                             "Error trying to generate scenario: ${response.errorBody()?.string()}",
                         )
+                        Result.failure(
+                            InfraErrors.NetworkError(
+                                "Error trying to generate scenario: ${response.errorBody()?.string()}",
+                            ),
+                        )
                     }
-                    response.body()
-                        ?: throw IllegalStateException("Response body is null")
-                }.mapLeft { error ->
-                    Log.e("ScenariosRepository", "Error trying to generate scenario", error)
-                    InfraErrors.NetworkError("Error trying to generate scenario: $error")
+                    else -> {
+                        val chatId =
+                            response.body()
+                                ?: throw IllegalStateException("Response body is null")
+                        Result.success(chatId)
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e("ScenariosRepository", "Error trying to generate scenario", e)
+                Result.failure(InfraErrors.NetworkError("Error trying to generate scenario: $e"))
+            }
 
         suspend fun getTodaySelection(
             userLang: String,

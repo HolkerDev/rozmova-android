@@ -175,4 +175,7 @@
     <string name="translation_limit_reached_title">Translation Limit Reached</string>
     <string name="translation_limit_reached_message">You\'ve reached your free translation limit for this week. Upgrade to Premium for unlimited translations.</string>
     <string name="translation_limit_resets">Free limit resets weekly</string>
+    <string name="generation_limit_reached_title">Generation Limit Reached</string>
+    <string name="generation_limit_reached_message">You\'ve reached your free custom scenario generation limit for this week. Upgrade to Premium for unlimited generations.</string>
+    <string name="generation_limit_resets">Free limit resets weekly</string>
 </resources>

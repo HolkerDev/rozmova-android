@@ -6,6 +6,7 @@ import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.repositories.ScenariosRepository
 import eu.rozmova.app.repositories.SettingsRepository
+import eu.rozmova.app.repositories.UsageLimitReachedException
 import eu.rozmova.app.state.AppStateRepository
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
@@ -22,6 +23,8 @@ sealed interface GenerateChatEvents {
         val chatId: String,
         val chatType: ChatType,
     ) : GenerateChatEvents
+
+    data object UsageLimitReached : GenerateChatEvents
 }
 
 @HiltViewModel
@@ -33,7 +36,8 @@ class GenerateChatVM
         private val appStateRepository: AppStateRepository,
     ) : ViewModel(),
         ContainerHost<GenerateChatState, GenerateChatEvents> {
-        override val container: Container<GenerateChatState, GenerateChatEvents> = container(GenerateChatState())
+        override val container: Container<GenerateChatState, GenerateChatEvents> =
+            container(GenerateChatState())
 
         fun generateScenario(
             difficultyDto: DifficultyDto,
@@ -45,16 +49,21 @@ class GenerateChatVM
             val scenarioLang = settingsRepository.getLearningLangOrDefault()
             scenariosRepository
                 .generateScenario(userLang, scenarioLang, chatType, difficultyDto, description)
-                .map { response ->
+                .onSuccess { chatId ->
                     appStateRepository.triggerRefetch()
                     postSideEffect(
                         GenerateChatEvents.ChatCreated(
-                            response,
+                            chatId,
                             chatType,
                         ),
                     )
                     reduce { state.copy(isLoading = false) }
-                }.mapLeft {
+                }.onFailure { error ->
+                    if (error is UsageLimitReachedException) {
+                        postSideEffect(GenerateChatEvents.UsageLimitReached)
+                        reduce { state.copy(isLoading = false) }
+                        return@onFailure
+                    }
                     reduce { state.copy(isLoading = false, error = true) }
                 }
         }

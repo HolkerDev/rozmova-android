@@ -48,6 +48,7 @@ import eu.rozmova.app.domain.DifficultyDto
 import eu.rozmova.app.domain.ScenarioTypeDto
 import eu.rozmova.app.modules.createchat.ChatTypeUI
 import eu.rozmova.app.modules.createchat.toModel
+import eu.rozmova.app.modules.generatechat.components.GenerationLimitReached
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -58,12 +59,14 @@ typealias ChatId = String
 fun GenerateChatScreen(
     onChatReady: (ChatId, ChatType) -> Unit,
     onBack: () -> Unit,
+    toSubscription: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: GenerateChatVM = hiltViewModel(),
 ) {
     var description by remember { mutableStateOf("") }
     var selectedChatType by remember { mutableStateOf(ChatTypeUI.WRITING) }
     var selectedDifficulty by remember { mutableStateOf(Difficulty.EASY) }
+    var showLimitReachedDialog by remember { mutableStateOf(false) }
 
     val state by viewModel.collectAsState()
 
@@ -71,6 +74,10 @@ fun GenerateChatScreen(
         when (events) {
             is GenerateChatEvents.ChatCreated -> {
                 onChatReady(events.chatId, events.chatType)
+            }
+
+            GenerateChatEvents.UsageLimitReached -> {
+                showLimitReachedDialog = true
             }
         }
     }
@@ -288,6 +295,18 @@ fun GenerateChatScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (showLimitReachedDialog) {
+            GenerationLimitReached(
+                onUpgradeClick = {
+                    showLimitReachedDialog = false
+                    toSubscription()
+                },
+                onDismiss = {
+                    showLimitReachedDialog = false
+                },
+            )
         }
     }
 }

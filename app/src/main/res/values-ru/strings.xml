@@ -176,4 +176,7 @@
     <string name="translation_limit_reached_title">Достигнут лимит переводов</string>
     <string name="translation_limit_reached_message">Вы достигли бесплатного лимита переводов на эту неделю. Обновитесь до Премиум для неограниченных переводов.</string>
     <string name="translation_limit_resets">Бесплатный лимит обновляется еженедельно</string>
+    <string name="generation_limit_reached_title">Достигнут лимит генерации</string>
+    <string name="generation_limit_reached_message">Вы достигли бесплатного лимита генерации пользовательских сценариев на эту неделю. Обновитесь до Премиум для неограниченных генераций.</string>
+    <string name="generation_limit_resets">Бесплатный лимит обновляется еженедельно</string>
 </resources>
