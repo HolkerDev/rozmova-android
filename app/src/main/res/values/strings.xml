@@ -170,7 +170,10 @@
     <string name="generate_scenario_error">Something went wrong. Try again later.</string>
     <string name="error_generic">Something went wrong. Try again later.</string>
     <string name="speaking_limit_reached_title">Speaking Limit Reached</string>
-    <string name="speaking_limit_reached_message">You\'ve reached your free speaking scenarios limit for this week. Upgrade to Premium for unlimited conversations.</string>
-    <string name="upgrade_to_premium">Check Premium</string>
+    <string name="speaking_limit_reached_message">You\'ve reached your free speaking limit for this week. Upgrade to Premium for unlimited conversations.</string>
+    <string name="upgrade_to_premium">Upgrade to Premium</string>
     <string name="speaking_limit_resets">Free limit resets weekly</string>
+    <string name="translation_limit_reached_title">Translation Limit Reached</string>
+    <string name="translation_limit_reached_message">You\'ve reached your free translation limit for this week. Upgrade to Premium for unlimited translations.</string>
+    <string name="translation_limit_resets">Free limit resets weekly</string>
 </resources>

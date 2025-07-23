@@ -367,6 +367,7 @@ private fun Content(
             chatId = state.chat.id,
             show = showHelpModal,
             onClose = { showHelpModal = false },
+            toSubscription = handlers.toSubscription,
         )
 
         if (showSituationDialog) {

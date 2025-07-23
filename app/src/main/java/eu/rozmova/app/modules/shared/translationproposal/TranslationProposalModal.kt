@@ -44,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.R
+import eu.rozmova.app.modules.shared.translationproposal.components.TranslationLimitReached
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -51,10 +52,12 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 fun TranslationProposalModal(
     onDismiss: () -> Unit,
     chatId: String,
+    toSubscription: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TranslationProposalVM = hiltViewModel(),
 ) {
     val state by viewModel.collectAsState()
+    var isUsageLimitReached by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val clipboardManager =
         remember { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
@@ -65,6 +68,10 @@ fun TranslationProposalModal(
         when (event) {
             is TranslationEvents.ClearInput -> {
                 message = ""
+            }
+
+            TranslationEvents.ShowUsageLimitReached -> {
+                isUsageLimitReached = true
             }
         }
     }
@@ -101,7 +108,10 @@ fun TranslationProposalModal(
                         .padding(16.dp),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -135,6 +145,17 @@ fun TranslationProposalModal(
                             .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
+                    if (isUsageLimitReached) {
+                        items(1) {
+                            TranslationLimitReached(
+                                onUpgradeClick = {
+                                    onDismiss()
+                                    toSubscription()
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
                     items(state.translatedTexts) { proposal ->
                         Card(
                             modifier = Modifier.fillMaxWidth(),
@@ -181,7 +202,10 @@ fun TranslationProposalModal(
                                         Text(
                                             text = "• $note",
                                             style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                            color =
+                                                MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                    alpha = 0.7f,
+                                                ),
                                             modifier = Modifier.padding(top = 2.dp),
                                         )
                                     }

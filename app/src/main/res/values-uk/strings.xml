@@ -172,6 +172,9 @@
     <string name="subscription_retry">Спробувати ще раз.</string>
     <string name="speaking_limit_reached_title">Досягнуто ліміт розмов</string>
     <string name="speaking_limit_reached_message">Ви досягли безкоштовного ліміту розмов на цей тиждень. Оновіться до Преміум для необмежених розмов.</string>
-    <string name="upgrade_to_premium">Ознайомитися з Преміумом</string>
+    <string name="upgrade_to_premium">Оновити до Преміум</string>
     <string name="speaking_limit_resets">Безкоштовний ліміт оновлюється щотижня</string>
+    <string name="translation_limit_reached_title">Досягнуто ліміт перекладів</string>
+    <string name="translation_limit_reached_message">Ви досягли безкоштовного ліміту перекладів на цей тиждень. Оновіться до Преміум для необмежених перекладів.</string>
+    <string name="translation_limit_resets">Безкоштовний ліміт оновлюється щотижня</string>
 </resources>

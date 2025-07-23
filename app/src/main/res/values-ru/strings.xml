@@ -172,6 +172,9 @@
     <string name="error_generic">Что-то пошло не так. Попробуйте позже.</string>
     <string name="speaking_limit_reached_title">Достигнут лимит разговоров</string>
     <string name="speaking_limit_reached_message">Вы достигли бесплатного лимита разговоров на эту неделю. Обновитесь до Премиум для неограниченных разговоров.</string>
-    <string name="upgrade_to_premium">Ознакомится с Премиумом</string>
+    <string name="upgrade_to_premium">Обновить до Премиум</string>
     <string name="speaking_limit_resets">Бесплатный лимит обновляется еженедельно</string>
+    <string name="translation_limit_reached_title">Достигнут лимит переводов</string>
+    <string name="translation_limit_reached_message">Вы достигли бесплатного лимита переводов на эту неделю. Обновитесь до Премиум для неограниченных переводов.</string>
+    <string name="translation_limit_resets">Бесплатный лимит обновляется еженедельно</string>
 </resources>

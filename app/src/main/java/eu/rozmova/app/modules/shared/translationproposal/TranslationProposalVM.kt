@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.TranslationProposal
 import eu.rozmova.app.repositories.SettingsRepository
 import eu.rozmova.app.repositories.TranslationRepository
+import eu.rozmova.app.repositories.UsageLimitReachedException
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -18,6 +19,8 @@ data class TranslationProposalState(
 
 sealed class TranslationEvents {
     data object ClearInput : TranslationEvents()
+
+    data object ShowUsageLimitReached : TranslationEvents()
 }
 
 @HiltViewModel
@@ -43,13 +46,18 @@ class TranslationProposalVM
             val userLang = settingsRepository.getInterfaceLang()
             translationRepository
                 .genProposal(phrase, learnLanguage, userLang, chatId)
-                .map { translationProposal ->
+                .onSuccess { translationProposal ->
                     val currentTranslations = state.translatedTexts.toMutableList()
                     currentTranslations.add(0, translationProposal)
                     reduce { state.copy(translatedTexts = currentTranslations, isLoading = false) }
                     postSideEffect(TranslationEvents.ClearInput)
-                }.mapLeft {
-                    Log.e(tag, "Error generating translation proposal: $it")
+                }.onFailure { error ->
+                    if (error is UsageLimitReachedException) {
+                        reduce { state.copy(isLoading = false) }
+                        postSideEffect(TranslationEvents.ShowUsageLimitReached)
+                        return@onFailure
+                    }
+                    Log.e(tag, "Error generating translation proposal: $error")
                     reduce { state.copy(isLoading = false) }
                 }
         }

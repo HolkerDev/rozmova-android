@@ -12,6 +12,7 @@ fun RightTranslationBar(
     chatId: String,
     show: Boolean,
     onClose: () -> Unit,
+    toSubscription: () -> Unit,
 ) {
     AnimatedVisibility(
         visible = show,
@@ -29,6 +30,7 @@ fun RightTranslationBar(
         TranslationProposalModal(
             chatId = chatId,
             onDismiss = onClose,
+            toSubscription = toSubscription,
         )
     }
 }
