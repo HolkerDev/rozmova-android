@@ -270,7 +270,10 @@ private fun Content(
             // Limit Reached Modal
             if (isLimitReachedModalVisible) {
                 SpeakingLimitReached(
-                    onUpgradeClick = handlers.toSubscription,
+                    onUpgradeClick = {
+                        handlers.toSubscription()
+                        handlers.closeLimitReachedModal()
+                    },
                     onDismiss = handlers.closeLimitReachedModal,
                 )
             }
