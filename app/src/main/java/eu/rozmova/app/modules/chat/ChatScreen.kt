@@ -324,7 +324,7 @@ private fun Content(
                                     onChatFinish = handlers.finishChat,
                                     messageListState = listRef,
                                     isLoadingMessage = state.isMessageLoading,
-                                    isSubscribed = true,
+                                    isSubscribed = state.isSubscribed,
                                     navigateToSubscription = handlers.toSubscription,
                                     showFinishButton = state.messages.isNotEmpty() && state.chat.status == ChatStatus.IN_PROGRESS,
                                     modifier = Modifier.weight(1f),

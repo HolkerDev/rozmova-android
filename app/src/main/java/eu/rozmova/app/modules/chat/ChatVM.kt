@@ -17,6 +17,7 @@ import eu.rozmova.app.domain.ChatDto
 import eu.rozmova.app.domain.ChatType
 import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.repositories.ChatsRepository
+import eu.rozmova.app.repositories.billing.SubscriptionRepository
 import eu.rozmova.app.state.AppStateRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -34,6 +35,7 @@ data class ChatState(
     val isReviewLoading: Boolean = false,
     val isAudioRecording: Boolean = false,
     val isMessageLoading: Boolean = false,
+    val isSubscribed: Boolean = false,
 )
 
 sealed interface ChatEvents {
@@ -62,6 +64,7 @@ class ChatVM
         private val chatsRepository: ChatsRepository,
         private val appStateRepository: AppStateRepository,
         private val exoPlayer: ExoPlayer,
+        private val subscriptionRepository: SubscriptionRepository,
         application: Application,
     ) : AndroidViewModel(application),
         ContainerHost<ChatState, ChatEvents> {
@@ -81,7 +84,16 @@ class ChatVM
                     }
                 },
             )
+            initIsSubscribed()
         }
+
+        private fun initIsSubscribed() =
+            intent {
+                val isSubscribed =
+                    subscriptionRepository
+                        .getIsSubscribed()
+                reduce { state.copy(isSubscribed = isSubscribed) }
+            }
 
         fun loadChat(chatId: String) =
             intent {

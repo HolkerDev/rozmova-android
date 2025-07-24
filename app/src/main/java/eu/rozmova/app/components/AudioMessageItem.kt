@@ -36,10 +36,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.R
-import eu.rozmova.app.components.conversationchat.AudioChatMessage
 import eu.rozmova.app.domain.Author
 import eu.rozmova.app.modules.chat.MessageUI
 
@@ -152,7 +150,7 @@ fun AudioMessageItem(
                     enter = expandVertically() + fadeIn(),
                     exit = shrinkVertically() + fadeOut(),
                 ) {
-                    if (isSubscribed) {
+                    if (isSubscribed || message.dto.author == Author.USER) {
                         Text(
                             text = message.dto.content,
                             style = MaterialTheme.typography.bodyMedium,
@@ -186,9 +184,9 @@ fun AudioMessageItem(
     }
 }
 
-//@Preview
-//@Composable
-//private fun AudioMessageItemPreview() {
+// @Preview
+// @Composable
+// private fun AudioMessageItemPreview() {
 //    AudioMessageItem(
 //        message =
 //            AudioChatMessage(
@@ -202,4 +200,4 @@ fun AudioMessageItem(
 //        onStopMessage = {},
 //        navigateToSubscription = {},
 //    )
-//}
+// }
