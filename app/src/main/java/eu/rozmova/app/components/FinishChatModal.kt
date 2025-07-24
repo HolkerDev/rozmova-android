@@ -25,6 +25,7 @@ import eu.rozmova.app.domain.MessageDto
 import eu.rozmova.app.modules.chat.MessageUI
 import eu.rozmova.app.modules.convochat.components.shouldfinishdialog.ShouldFinishAudioEvents
 import eu.rozmova.app.modules.convochat.components.shouldfinishdialog.ShouldFinishAudioVM
+import eu.rozmova.app.modules.convochat.components.shouldfinishdialog.ShouldFinishUiState
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -61,12 +62,16 @@ fun ShouldFinishDialog(
     }
 
     Content(
+        state,
         userMsg,
         botMsg,
         chatType,
         Handlers(
             onYesClick = onYesClick,
-            onDismiss = onDismiss,
+            onDismiss = {
+                viewModel.stopAudio()
+                onDismiss()
+            },
             toSubscription = toSubscription,
             playUsrMsg = {
                 viewModel.stopAudio()
@@ -91,6 +96,7 @@ fun ShouldFinishDialog(
 
 @Composable
 private fun Content(
+    state: ShouldFinishUiState,
     lastUserMsg: MessageUI,
     lastBotMsg: MessageUI,
     chatType: ChatType,
@@ -112,7 +118,7 @@ private fun Content(
                         modifier = Modifier.fillMaxWidth().padding(start = 20.dp),
                         onPlayMessage = { handlers.playUsrMsg() },
                         onStopMessage = { handlers.stopPlay() },
-                        isSubscribed = true,
+                        isSubscribed = state.isSubscribed,
                         navigateToSubscription = handlers.toSubscription,
                     )
                     AudioMessageItem(
@@ -125,7 +131,7 @@ private fun Content(
                             handlers.stopPlay()
                         },
                         navigateToSubscription = handlers.toSubscription,
-                        isSubscribed = true,
+                        isSubscribed = state.isSubscribed,
                     )
                     return@Column
                 }
@@ -186,6 +192,10 @@ private fun YesNoDialogPreview() {
                 false,
             ),
         chatType = ChatType.SPEAKING,
+        state =
+            ShouldFinishUiState(
+                isSubscribed = true,
+            ),
         handlers =
             Handlers(
                 onYesClick = {},

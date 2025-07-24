@@ -102,11 +102,12 @@ fun ChatScreen(
 
             is ChatEvents.ReviewReady -> toReview(event.reviewId)
             is ChatEvents.ProposeFinish ->
-                FinishChat(
-                    lastBotMsg = event.lastBotMsg,
-                    lastUserMsg = event.lastUserMsg,
-                    chatType = event.chatType,
-                )
+                finishChatModal =
+                    FinishChat(
+                        lastBotMsg = event.lastBotMsg,
+                        lastUserMsg = event.lastUserMsg,
+                        chatType = event.chatType,
+                    )
         }
     }
 
@@ -392,7 +393,7 @@ private fun Content(
                     showWordsBottomSheet = false
                     handlers.toSubscription()
                 },
-                isSubscribed = true,
+                isSubscribed = state.isSubscribed,
             )
         }
     }

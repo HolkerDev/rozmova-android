@@ -59,8 +59,11 @@ class ShouldFinishAudioVM
 
         private fun fetchSubscription() =
             intent {
-                val isSubscribed = true
-                reduce { state.copy(isSubscribed = isSubscribed) }
+                subscriptionRepository.isSubscribedFlow.collect { isSubscribed ->
+                    reduce {
+                        state.copy(isSubscribed = isSubscribed)
+                    }
+                }
             }
 
         fun playAudio(message: MessageDto) =

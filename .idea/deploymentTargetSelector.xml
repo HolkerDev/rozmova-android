@@ -13,9 +13,6 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="PreviewChatsListScreen">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="PreviewSubscribedState">
         <option name="selectionMode" value="DROPDOWN" />
         <DropdownSelection timestamp="2025-07-22T17:40:39.498683Z">
@@ -50,6 +47,9 @@
         <DialogSelection />
       </SelectionState>
       <SelectionState runConfigName="PreviewTranslationLimitReached">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="YesNoDialogPreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
