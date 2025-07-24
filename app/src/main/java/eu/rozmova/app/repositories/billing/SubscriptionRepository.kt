@@ -23,11 +23,12 @@ class SubscriptionRepository
     ) {
         private val dataStore: DataStore<Preferences> = context.dataStore
 
+        val isSubscribedFlow = dataStore.data.map { preferences ->
+            preferences[isSubscribedKey] == "true"
+        }
+
         suspend fun getIsSubscribed(): Boolean =
-            dataStore.data
-                .map { preferences ->
-                    preferences[isSubscribedKey] == "true"
-                }.first()
+            isSubscribedFlow.first()
 
         suspend fun setIsSubscribed(isSubscribed: Boolean) {
             dataStore.edit { preferences ->

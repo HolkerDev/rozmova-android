@@ -20,6 +20,7 @@ import eu.rozmova.app.repositories.ChatsRepository
 import eu.rozmova.app.repositories.billing.SubscriptionRepository
 import eu.rozmova.app.state.AppStateRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.withContext
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -89,10 +90,9 @@ class ChatVM
 
         private fun initIsSubscribed() =
             intent {
-                val isSubscribed =
-                    subscriptionRepository
-                        .getIsSubscribed()
-                reduce { state.copy(isSubscribed = isSubscribed) }
+                subscriptionRepository.isSubscribedFlow.collect { isSubscribed ->
+                    reduce { state.copy(isSubscribed = isSubscribed) }
+                }
             }
 
         fun loadChat(chatId: String) =

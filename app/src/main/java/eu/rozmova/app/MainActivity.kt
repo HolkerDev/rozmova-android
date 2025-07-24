@@ -107,7 +107,7 @@ class AppViewModel
         private suspend fun handlePurchaseFound(purchase: Purchase) {
             val response = verificationClient.verifyToken(VerifySubscriptionReq(purchase.purchaseToken))
             if (!response.isSuccessful) {
-                Log.e("AppViewModel", "Failed to verify subscription: ${response.body()}")
+                Log.e("AppViewModel", "Failed to verify subscription: ${response.errorBody()?.string()}")
                 return
             }
             val isSubscribed = response.body()?.isSubscribed == true
