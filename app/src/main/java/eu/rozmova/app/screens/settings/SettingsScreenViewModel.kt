@@ -48,8 +48,9 @@ class SettingsScreenViewModel
 
         private fun fetchSubscription() =
             intent {
-                val isSubscribed = subscriptionRepository.getIsSubscribed()
-                reduce { state.copy(isSubscribed = isSubscribed) }
+                subscriptionRepository.isSubscribedFlow.collect { isSubscribed ->
+                    reduce { state.copy(isSubscribed = isSubscribed) }
+                }
             }
 
         private fun fetchCurrentLangPreferences() =
