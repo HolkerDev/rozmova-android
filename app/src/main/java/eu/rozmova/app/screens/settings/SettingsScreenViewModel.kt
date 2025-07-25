@@ -85,6 +85,7 @@ class SettingsScreenViewModel
         fun signOut() =
             intent {
                 settingsRepository.clearLearningLang()
+                subscriptionRepository.setIsSubscribed(false)
                 settingsRepository.clearSalutation()
                 authRepository.signOut()
             }
@@ -107,6 +108,7 @@ class SettingsScreenViewModel
                     settingsRepository.clearLearningLang()
                     settingsRepository.clearSalutation()
                     userRepository.deleteUser()
+                    subscriptionRepository.setIsSubscribed(false)
                     // Sign out the user which should clear authentication data
                     authRepository.signOut()
 
