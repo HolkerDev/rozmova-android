@@ -53,6 +53,7 @@ fun TodaysScenarioSelection(
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
             ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
