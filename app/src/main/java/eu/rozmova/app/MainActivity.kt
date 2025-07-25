@@ -89,6 +89,7 @@ class AppViewModel
                                     "AppViewModel",
                                     "Failed to verify VIP status: ${isVIPResp.body()}",
                                 )
+                                subscriptionRepository.setIsSubscribed(false)
                                 return@collect
                             }
                             if (isVIPResp.body()?.isVIP == true) {
@@ -108,6 +109,7 @@ class AppViewModel
             val response = verificationClient.verifyToken(VerifySubscriptionReq(purchase.purchaseToken))
             if (!response.isSuccessful) {
                 Log.e("AppViewModel", "Failed to verify subscription: ${response.errorBody()?.string()}")
+                subscriptionRepository.setIsSubscribed(false)
                 return
             }
             val isSubscribed = response.body()?.isSubscribed == true
