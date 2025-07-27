@@ -111,8 +111,8 @@ val allHobbies =
 
 @Composable
 fun SelectHobbiesOnboarding(
-    selectedHobbies: Set<String> = emptySet(),
-    onHobbyToggle: (String) -> Unit = {},
+    selectedHobbies: Set<String>,
+    onHobbyToggle: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Content(
@@ -150,15 +150,28 @@ private fun Content(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        // Selected hobbies count
-        if (selectedHobbies.isNotEmpty()) {
-            Text(
-                text = "${selectedHobbies.size} hobby${if (selectedHobbies.size == 1) "" else "ies"} selected",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Medium,
-            )
-        }
+        // Selection requirement and count
+        val minHobbiesRequired = 2
+        val isRequirementMet = selectedHobbies.size >= minHobbiesRequired
+
+        Text(
+            text =
+                if (selectedHobbies.isEmpty()) {
+                    "Please select at least $minHobbiesRequired hobbies"
+                } else if (!isRequirementMet) {
+                    "${selectedHobbies.size} of $minHobbiesRequired minimum hobbies selected"
+                } else {
+                    "${selectedHobbies.size} hobby${if (selectedHobbies.size == 1) "" else "ies"} selected ✓"
+                },
+            style = MaterialTheme.typography.labelMedium,
+            color =
+                if (isRequirementMet) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.error
+                },
+            fontWeight = FontWeight.Medium,
+        )
 
         // Hobbies List
         LazyColumn(
