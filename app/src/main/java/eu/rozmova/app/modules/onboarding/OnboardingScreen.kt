@@ -9,8 +9,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -144,19 +144,18 @@ private fun Content(
             }
         }
 
-        // Bottom section with indicators and buttons
-        Column(
+        // Bottom section with indicators and button
+        Box(
             modifier =
                 Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Page indicators
+            // Page indicators (centered)
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(bottom = 32.dp),
+                modifier = Modifier.align(Alignment.Center),
             ) {
                 repeat(4) { index ->
                     PageIndicator(
@@ -167,44 +166,48 @@ private fun Content(
                 }
             }
 
-            // Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (isValid) {
-                    FloatingActionButton(
-                        onClick = {
-                            if (pagerState.currentPage < 3) {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                }
-                            } else {
-                                onOnboardingComplete()
+            // Button (right aligned)
+            if (isValid) {
+                FloatingActionButton(
+                    onClick = {
+                        if (pagerState.currentPage < 3) {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
                             }
-                        },
+                        } else {
+                            onOnboardingComplete()
+                        }
+                    },
 //                    containerColor = onboardingPages[pagerState.currentPage].backgroundColor,
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.White,
-                        modifier = Modifier.size(56.dp),
-                    ) {
-                        Icon(
-                            imageVector =
-                                if (pagerState.currentPage < 3) {
-                                    Icons.Default.ArrowForward
-                                } else {
-                                    Icons.Default.Check
-                                },
-                            contentDescription =
-                                if (pagerState.currentPage < 3) {
-                                    "Next"
-                                } else {
-                                    "Get Started"
-                                },
-                        )
-                    }
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White,
+                    modifier =
+                        Modifier
+                            .size(56.dp)
+                            .align(Alignment.CenterEnd),
+                ) {
+                    Icon(
+                        imageVector =
+                            if (pagerState.currentPage < 3) {
+                                Icons.Default.ArrowForward
+                            } else {
+                                Icons.Default.Check
+                            },
+                        contentDescription =
+                            if (pagerState.currentPage < 3) {
+                                "Next"
+                            } else {
+                                "Get Started"
+                            },
+                    )
                 }
+            } else {
+                Spacer(
+                    modifier =
+                        Modifier
+                            .size(56.dp)
+                            .align(Alignment.CenterEnd),
+                )
             }
         }
     }
