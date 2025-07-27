@@ -161,7 +161,7 @@ private fun Content(
                 } else if (!isRequirementMet) {
                     "${selectedHobbies.size} of $minHobbiesRequired minimum hobbies selected"
                 } else {
-                    "${selectedHobbies.size} hobby${if (selectedHobbies.size == 1) "" else "ies"} selected ✓"
+                    "${selectedHobbies.size} hobbies selected ✓"
                 },
             style = MaterialTheme.typography.labelMedium,
             color =
