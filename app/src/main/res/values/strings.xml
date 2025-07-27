@@ -183,4 +183,17 @@
     <string name="generation_limit_reached_title">Generation Limit Reached</string>
     <string name="generation_limit_reached_message">You\'ve reached your free custom scenario generation limit for this week. Upgrade to Premium for unlimited generations.</string>
     <string name="generation_limit_resets">Free limit resets weekly</string>
+    <string name="onboarding_job_title">What\'s your profession?</string>
+    <string name="onboarding_job_description">Tell us about your job or profession to help us create more relevant scenarios</string>
+    <string name="job_position_hint">Enter your job title or profession...</string>
+    <string name="no_job_currently">I don\'t have a job currently</string>
+    <string name="job_student">Student</string>
+    <string name="job_retired">Retired</string>
+    <string name="job_unemployed">Unemployed</string>
+    <string name="job_freelancer">Freelancer</string>
+    <string name="job_entrepreneur">Entrepreneur</string>
+    <string name="job_homemaker">Homemaker</string>
+    <string name="job_between_jobs">Between jobs</string>
+    <string name="job_custom_hint">Or specify your profession</string>
+    <string name="job_selection_required">Please select an option or enter your profession</string>
 </resources>

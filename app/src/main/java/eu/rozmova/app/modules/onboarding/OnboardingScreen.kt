@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalFoundationApi::class)
 
 package eu.rozmova.app.modules.onboarding
+
 import android.util.Log
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -27,7 +28,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,12 +43,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.modules.onboarding.components.Hobby
 import eu.rozmova.app.modules.onboarding.components.PrivacyNoticeOnboarding
 import eu.rozmova.app.modules.onboarding.components.SelectHobbiesOnboarding
-import eu.rozmova.app.modules.onboarding.components.SelectLearningLangOnboarding
+import eu.rozmova.app.modules.onboarding.components.SelectJobOnboardingExpat
 import eu.rozmova.app.modules.onboarding.components.SelectPronounOnboarding
 import kotlinx.coroutines.launch
 
 private data class Handlers(
-    val saveAll: (hobbies: Set<String>) -> Unit,
+    val saveAll: (pronoun: String, hobbies: Set<Hobby>) -> Unit,
 )
 
 @Composable
@@ -57,19 +57,14 @@ fun OnboardingScreen(
     modifier: Modifier = Modifier,
     viewModel: OnboardingVM = hiltViewModel(),
 ) {
-    val lang = viewModel.getCurrentLanguage()
-    viewModel.savePronoun("he") // Default salutation
+    viewModel.savePronoun("he")
 
     Content(
         handlers =
             Handlers(
-                saveAll = {},
+                saveAll = { pronoun, hobbies ->
+                },
             ),
-        startLanguage = lang,
-        setInterfaceLang = { langCode -> viewModel.selectLanguage(langCode) },
-        onLearnLangSelect = { learningLang ->
-            viewModel.saveLearningLanguage(learningLang)
-        },
         onOnboardingComplete = {
             viewModel.completeOnboarding()
             onLearn()
@@ -85,22 +80,15 @@ fun OnboardingScreen(
 @Composable
 private fun Content(
     handlers: Handlers,
-    startLanguage: String,
-    setInterfaceLang: (String) -> Unit,
-    onLearnLangSelect: (String) -> Unit,
     onPronounSelect: (String) -> Unit,
     onOnboardingComplete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pagerState = rememberPagerState(pageCount = { 4 })
     val coroutineScope = rememberCoroutineScope()
-    var learningLang by remember { mutableStateOf<String>("de") }
     var selectedHobbies by remember { mutableStateOf<Set<Hobby>>(emptySet()) }
-    var isValid by remember { mutableStateOf(false) }
-
-    LaunchedEffect(learningLang) {
-        onLearnLangSelect(learningLang)
-    }
+    var selectedJob by remember { mutableStateOf("") }
+    var isValid by remember { mutableStateOf(pagerState.currentPage == 2 || pagerState.currentPage == 3) }
 
     Box(
         modifier =
@@ -111,9 +99,10 @@ private fun Content(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
+            userScrollEnabled = false,
         ) { page ->
             when (page) {
-                0 ->
+                0 -> {
                     SelectHobbiesOnboarding(
                         selectedHobbies = selectedHobbies,
                         onHobbyToggle = { hobby ->
@@ -127,19 +116,26 @@ private fun Content(
                             isValid = selectedHobbies.size >= 2
                         },
                     )
-                1 ->
-                    SelectLearningLangOnboarding(
-                        onLangSelect = {
-                            learningLang = it
+                }
+
+                1 -> {
+                    SelectJobOnboardingExpat(
+                        selectedJob = selectedJob,
+                        onJobSelected = { job ->
+                            selectedJob = job
+                            isValid = selectedJob.isNotEmpty() && selectedHobbies.size >= 2
                         },
-                        selectedLang = learningLang,
                     )
-                2 ->
+                }
+
+                2 -> {
                     SelectPronounOnboarding(
                         onPronounSelect = { pronounCode ->
                             onPronounSelect(pronounCode)
                         },
                     )
+                }
+
                 3 -> PrivacyNoticeOnboarding()
             }
         }
@@ -170,6 +166,13 @@ private fun Content(
             if (isValid) {
                 FloatingActionButton(
                     onClick = {
+                        val nextPage = pagerState.currentPage + 1
+                        isValid =
+                            if (nextPage == 2 || nextPage == 3) {
+                                true
+                            } else {
+                                false
+                            }
                         if (pagerState.currentPage < 3) {
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)

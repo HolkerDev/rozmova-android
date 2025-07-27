@@ -116,7 +116,7 @@ fun NavigationHost(
         }
         composable(route = NavRoutes.Settings.route) {
             SettingsScreen(
-                onNavigateToSubscription = { navController.navigate(NavRoutes.Subscription.route) },
+                toSubscription = { navController.navigate(NavRoutes.Subscription.route) },
             )
         }
 
