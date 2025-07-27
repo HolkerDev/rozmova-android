@@ -111,8 +111,8 @@ val allHobbies =
 
 @Composable
 fun SelectHobbiesOnboarding(
-    selectedHobbies: Set<String>,
-    onHobbyToggle: (String) -> Unit,
+    selectedHobbies: Set<Hobby>,
+    onHobbyToggle: (Hobby) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Content(
@@ -125,8 +125,8 @@ fun SelectHobbiesOnboarding(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun Content(
-    selectedHobbies: Set<String>,
-    onHobbyToggle: (String) -> Unit,
+    selectedHobbies: Set<Hobby>,
+    onHobbyToggle: (Hobby) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -196,8 +196,8 @@ private fun Content(
 private fun HobbyCategorySection(
     category: HobbyCategory,
     hobbies: List<Hobby>,
-    selectedHobbies: Set<String>,
-    onHobbyToggle: (String) -> Unit,
+    selectedHobbies: Set<Hobby>,
+    onHobbyToggle: (Hobby) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -253,8 +253,8 @@ private fun HobbyCategorySection(
                 hobbies.forEach { hobby ->
                     HobbyChip(
                         hobby = hobby,
-                        isSelected = hobby.id in selectedHobbies,
-                        onToggle = { onHobbyToggle(hobby.id) },
+                        isSelected = hobby in selectedHobbies,
+                        onToggle = { onHobbyToggle(hobby) },
                     )
                 }
             }
@@ -318,7 +318,7 @@ private fun HobbyChip(
 @Preview
 @Composable
 private fun PreviewSelectHobbiesOnboarding() {
-    var selectedHobbies by remember { mutableStateOf(emptySet<String>()) }
+    var selectedHobbies by remember { mutableStateOf(emptySet<Hobby>()) }
 
     MaterialTheme {
         SelectHobbiesOnboarding(

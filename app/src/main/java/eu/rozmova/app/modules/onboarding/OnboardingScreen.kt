@@ -37,27 +37,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import eu.rozmova.app.modules.onboarding.components.Hobby
 import eu.rozmova.app.modules.onboarding.components.PrivacyNoticeOnboarding
-import eu.rozmova.app.modules.onboarding.components.SelectLanguageOnboarding
+import eu.rozmova.app.modules.onboarding.components.SelectHobbiesOnboarding
 import eu.rozmova.app.modules.onboarding.components.SelectLearningLangOnboarding
 import eu.rozmova.app.modules.onboarding.components.SelectPronounOnboarding
-import eu.rozmova.app.utils.LocaleManager
 import kotlinx.coroutines.launch
+
+private data class Handlers(
+    val saveAll: (hobbies: Set<String>) -> Unit,
+)
 
 @Composable
 fun OnboardingScreen(
     onLearn: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: OnboardingScreenViewModel = hiltViewModel(),
+    viewModel: OnboardingVM = hiltViewModel(),
 ) {
     val lang = viewModel.getCurrentLanguage()
     viewModel.savePronoun("he") // Default salutation
 
     Content(
+        handlers =
+            Handlers(
+                saveAll = {},
+            ),
         startLanguage = lang,
         setInterfaceLang = { langCode -> viewModel.selectLanguage(langCode) },
         onLearnLangSelect = { learningLang ->
@@ -77,6 +84,7 @@ fun OnboardingScreen(
 
 @Composable
 private fun Content(
+    handlers: Handlers,
     startLanguage: String,
     setInterfaceLang: (String) -> Unit,
     onLearnLangSelect: (String) -> Unit,
@@ -87,6 +95,7 @@ private fun Content(
     val pagerState = rememberPagerState(pageCount = { 4 })
     val coroutineScope = rememberCoroutineScope()
     var learningLang by remember { mutableStateOf<String>("de") }
+    var selectedHobbies by remember { mutableStateOf<Set<Hobby>>(emptySet()) }
 
     LaunchedEffect(learningLang) {
         onLearnLangSelect(learningLang)
@@ -104,9 +113,16 @@ private fun Content(
         ) { page ->
             when (page) {
                 0 ->
-                    SelectLanguageOnboarding(
-                        startLang = startLanguage,
-                        onLangSelect = { langCode -> setInterfaceLang(langCode) },
+                    SelectHobbiesOnboarding(
+                        selectedHobbies = selectedHobbies,
+                        onHobbyToggle = { hobby ->
+                            selectedHobbies =
+                                if (hobby in selectedHobbies) {
+                                    selectedHobbies - hobby
+                                } else {
+                                    selectedHobbies + hobby
+                                }
+                        },
                     )
                 1 ->
                     SelectLearningLangOnboarding(

@@ -14,7 +14,7 @@ data class OnboardingScreenState(
 )
 
 @HiltViewModel
-class OnboardingScreenViewModel
+class OnboardingVM
     @Inject
     constructor(
         private val localeManager: LocaleManager,
