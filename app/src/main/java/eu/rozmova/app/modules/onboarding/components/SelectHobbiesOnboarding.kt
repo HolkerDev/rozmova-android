@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,7 +27,6 @@ import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -232,24 +230,6 @@ private fun HobbyCategorySection(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                val selectedCount = hobbies.count { it.id in selectedHobbies }
-                if (selectedCount > 0) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                        shape = MaterialTheme.shapes.small,
-                    ) {
-                        Text(
-                            text = "$selectedCount selected",
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium,
-                        )
-                    }
-                }
             }
 
             // Hobbies Grid
