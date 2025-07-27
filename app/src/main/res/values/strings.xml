@@ -72,6 +72,11 @@
     <string name="onboarding_lang_description">Select the language you are most comfortable with. This will help us provide a better experience for you.</string>
     <string name="lang_pl">Polish</string>
     <string name="onboarding_learn_lang_title">Choose the language you learn</string>
+    <string name="onboarding_hobbies_title">What are your hobbies?</string>
+    <string name="onboarding_hobbies_description">Select your interests to help us personalize your experience</string>
+    <string name="onboarding_hobbies_minimum_required">Please select at least %d hobbies</string>
+    <string name="onboarding_hobbies_progress">%d of %d minimum hobbies selected</string>
+    <string name="onboarding_hobbies_completed">%d hobbies selected ✓</string>
     <string name="onboarding_privacy_title">Your Privacy Matters</string>
     <string name="onboarding_privacy_description">We respect your privacy and are committed to protecting your personal data. Here\'s how we handle your information.</string>
     <string name="privacy_audio_not_saved_title">Audio Privacy</string>

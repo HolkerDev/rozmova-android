@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,15 +21,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Interests
 import androidx.compose.material.icons.filled.Nature
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedFilterChip
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,9 +43,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import eu.rozmova.app.R
 
 data class Hobby(
     val id: String,
@@ -109,17 +119,22 @@ val allHobbies =
         Hobby("electronics", "Electronics/Tinkering", HobbyCategory.TECHNICAL_INTELLECTUAL),
     )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectHobbiesOnboarding(
     selectedHobbies: Set<Hobby>,
     onHobbyToggle: (Hobby) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Content(
-        selectedHobbies = selectedHobbies,
-        onHobbyToggle = onHobbyToggle,
+    Scaffold(
         modifier = modifier,
-    )
+    ) { paddingValues ->
+        Content(
+            selectedHobbies = selectedHobbies,
+            onHobbyToggle = onHobbyToggle,
+            paddingValues = paddingValues,
+        )
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -127,54 +142,80 @@ fun SelectHobbiesOnboarding(
 private fun Content(
     selectedHobbies: Set<Hobby>,
     onHobbyToggle: (Hobby) -> Unit,
+    paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = modifier.fillMaxSize().padding(paddingValues),
     ) {
-        // Header
-        Text(
-            text = "What are your hobbies?",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+        // Header Section
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                imageVector = Icons.Default.Interests,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
 
-        Text(
-            text = "Select your interests to help us personalize your experience",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Selection requirement and count
-        val minHobbiesRequired = 2
-        val isRequirementMet = selectedHobbies.size >= minHobbiesRequired
+            Text(
+                text = stringResource(R.string.onboarding_hobbies_title),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+            )
 
-        Text(
-            text =
-                if (selectedHobbies.isEmpty()) {
-                    "Please select at least $minHobbiesRequired hobbies"
-                } else if (!isRequirementMet) {
-                    "${selectedHobbies.size} of $minHobbiesRequired minimum hobbies selected"
-                } else {
-                    "${selectedHobbies.size} hobbies selected ✓"
-                },
-            style = MaterialTheme.typography.labelMedium,
-            color =
-                if (isRequirementMet) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.error
-                },
-            fontWeight = FontWeight.Medium,
-        )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = stringResource(R.string.onboarding_hobbies_description),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Selection requirement and count
+            val minHobbiesRequired = 2
+            val isRequirementMet = selectedHobbies.size >= minHobbiesRequired
+
+            Text(
+                text =
+                    when {
+                        selectedHobbies.isEmpty() -> {
+                            stringResource(R.string.onboarding_hobbies_minimum_required, minHobbiesRequired)
+                        }
+                        !isRequirementMet -> {
+                            stringResource(R.string.onboarding_hobbies_progress, selectedHobbies.size, minHobbiesRequired)
+                        }
+                        else -> {
+                            stringResource(R.string.onboarding_hobbies_completed, selectedHobbies.size)
+                        }
+                    },
+                style = MaterialTheme.typography.labelMedium,
+                color =
+                    if (isRequirementMet) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    },
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Hobbies List
         LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             val groupedHobbies = allHobbies.groupBy { it.category }
@@ -186,6 +227,11 @@ private fun Content(
                     selectedHobbies = selectedHobbies,
                     onHobbyToggle = onHobbyToggle,
                 )
+            }
+            item {
+                val configuration = LocalConfiguration.current
+                val screenHeight = configuration.screenHeightDp.dp
+                Spacer(modifier = Modifier.height(screenHeight * 0.1f))
             }
         }
     }
@@ -315,20 +361,20 @@ private fun HobbyChip(
     )
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-private fun PreviewSelectHobbiesOnboarding() {
+private fun SelectHobbiesOnboardingPreview() {
     var selectedHobbies by remember { mutableStateOf(emptySet<Hobby>()) }
 
     MaterialTheme {
         SelectHobbiesOnboarding(
             selectedHobbies = selectedHobbies,
-            onHobbyToggle = { hobbyId ->
+            onHobbyToggle = { hobby ->
                 selectedHobbies =
-                    if (hobbyId in selectedHobbies) {
-                        selectedHobbies - hobbyId
+                    if (hobby in selectedHobbies) {
+                        selectedHobbies - hobby
                     } else {
-                        selectedHobbies + hobbyId
+                        selectedHobbies + hobby
                     }
             },
         )

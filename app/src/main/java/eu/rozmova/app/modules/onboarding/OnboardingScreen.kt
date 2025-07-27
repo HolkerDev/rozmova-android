@@ -96,6 +96,7 @@ private fun Content(
     val coroutineScope = rememberCoroutineScope()
     var learningLang by remember { mutableStateOf<String>("de") }
     var selectedHobbies by remember { mutableStateOf<Set<Hobby>>(emptySet()) }
+    var isValid by remember { mutableStateOf(false) }
 
     LaunchedEffect(learningLang) {
         onLearnLangSelect(learningLang)
@@ -122,6 +123,8 @@ private fun Content(
                                 } else {
                                     selectedHobbies + hobby
                                 }
+
+                            isValid = selectedHobbies.size >= 2
                         },
                     )
                 1 ->
@@ -170,36 +173,37 @@ private fun Content(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Next/Get Started button
-                FloatingActionButton(
-                    onClick = {
-                        if (pagerState.currentPage < 3) {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                if (isValid) {
+                    FloatingActionButton(
+                        onClick = {
+                            if (pagerState.currentPage < 3) {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                }
+                            } else {
+                                onOnboardingComplete()
                             }
-                        } else {
-                            onOnboardingComplete()
-                        }
-                    },
+                        },
 //                    containerColor = onboardingPages[pagerState.currentPage].backgroundColor,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White,
-                    modifier = Modifier.size(56.dp),
-                ) {
-                    Icon(
-                        imageVector =
-                            if (pagerState.currentPage < 3) {
-                                Icons.Default.ArrowForward
-                            } else {
-                                Icons.Default.Check
-                            },
-                        contentDescription =
-                            if (pagerState.currentPage < 3) {
-                                "Next"
-                            } else {
-                                "Get Started"
-                            },
-                    )
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = Color.White,
+                        modifier = Modifier.size(56.dp),
+                    ) {
+                        Icon(
+                            imageVector =
+                                if (pagerState.currentPage < 3) {
+                                    Icons.Default.ArrowForward
+                                } else {
+                                    Icons.Default.Check
+                                },
+                            contentDescription =
+                                if (pagerState.currentPage < 3) {
+                                    "Next"
+                                } else {
+                                    "Get Started"
+                                },
+                        )
+                    }
                 }
             }
         }

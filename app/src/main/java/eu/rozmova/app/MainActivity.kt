@@ -36,6 +36,7 @@ import eu.rozmova.app.nav.NavigationHost
 import eu.rozmova.app.nav.bottomNavigationItems
 import eu.rozmova.app.repositories.AuthRepository
 import eu.rozmova.app.repositories.AuthState
+import eu.rozmova.app.repositories.OnboardingRepository
 import eu.rozmova.app.repositories.billing.SubscriptionRepository
 import eu.rozmova.app.services.billing.BillingEvents
 import eu.rozmova.app.services.billing.BillingService
@@ -60,6 +61,7 @@ class AppViewModel
     @Inject
     constructor(
         private val authRepository: AuthRepository,
+        private val onboardingRepository: OnboardingRepository,
         private val billingService: BillingService,
         private val subscriptionRepository: SubscriptionRepository,
         private val verificationClient: VerificationClient,
@@ -104,6 +106,8 @@ class AppViewModel
                 }
             }
         }
+
+        fun isOnboardingComplete(): Boolean = onboardingRepository.isOnboardingComplete()
 
         private suspend fun handlePurchaseFound(purchase: Purchase) {
             val response = verificationClient.verifyToken(VerifySubscriptionReq(purchase.purchaseToken))
@@ -175,6 +179,14 @@ private fun App(viewModel: AppViewModel = hiltViewModel()) {
                         if (currentDestination == NavRoutes.Main.route ||
                             currentDestination == NavRoutes.Login.route
                         ) {
+                            if (viewModel.isOnboardingComplete().not()) {
+                                Log.i("MainActivity", "Navigating to Onboarding")
+                                navController.navigate(NavRoutes.Onboarding.route) {
+                                    popUpTo(0) { inclusive = true }
+                                    launchSingleTop = true
+                                }
+                                return@LaunchedEffect
+                            }
                             navController.navigate(NavRoutes.Learn.route) {
                                 popUpTo(NavRoutes.Main.route) { inclusive = true }
                                 launchSingleTop = true
