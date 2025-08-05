@@ -46,6 +46,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.Container
+import org.orbitmvi.orbit.ContainerHost
+import org.orbitmvi.orbit.compose.collectSideEffect
+import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
 
 sealed class AppState {
@@ -54,6 +58,12 @@ sealed class AppState {
     data object Authenticated : AppState()
 
     data object Unauthenticated : AppState()
+}
+
+sealed interface AppEvent {
+    data object NavigateToOnboarding : AppEvent
+
+    data object NavigateToLearn : AppEvent
 }
 
 @HiltViewModel
@@ -65,7 +75,10 @@ class AppViewModel
         private val billingService: BillingService,
         private val subscriptionRepository: SubscriptionRepository,
         private val verificationClient: VerificationClient,
-    ) : ViewModel() {
+    ) : ViewModel(),
+        ContainerHost<Unit, AppEvent> {
+        override val container: Container<Unit, AppEvent> = container(Unit)
+
         init {
             viewModelScope.launch {
                 authRepository.observeAuthState()
@@ -107,7 +120,16 @@ class AppViewModel
             }
         }
 
-        fun isOnboardingComplete(): Boolean = onboardingRepository.isOnboardingComplete()
+        fun checkOnboarding() =
+            intent {
+                val isComplete = onboardingRepository.isOnboardingComplete()
+                if (isComplete) {
+                    postSideEffect(AppEvent.NavigateToOnboarding)
+                    return@intent
+                }
+
+                postSideEffect(AppEvent.NavigateToLearn)
+            }
 
         private suspend fun handlePurchaseFound(purchase: Purchase) {
             val response = verificationClient.verifyToken(VerifySubscriptionReq(purchase.purchaseToken))
@@ -156,6 +178,24 @@ private fun App(viewModel: AppViewModel = hiltViewModel()) {
         listOf(NavRoutes.Learn, NavRoutes.Chats, NavRoutes.Library, NavRoutes.Settings)
     val appState by viewModel.appState.collectAsState()
 
+    viewModel.collectSideEffect { event ->
+        when (event) {
+            AppEvent.NavigateToOnboarding -> {
+                Log.i("MainActivity", "Navigating to Onboarding")
+                navController.navigate(NavRoutes.Onboarding.route) {
+                    popUpTo(0) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+            AppEvent.NavigateToLearn -> {
+                navController.navigate(NavRoutes.Learn.route) {
+                    popUpTo(NavRoutes.Main.route) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+        }
+    }
+
     RozmovaTheme {
         Scaffold(
             bottomBar = {
@@ -179,18 +219,7 @@ private fun App(viewModel: AppViewModel = hiltViewModel()) {
                         if (currentDestination == NavRoutes.Main.route ||
                             currentDestination == NavRoutes.Login.route
                         ) {
-                            if (viewModel.isOnboardingComplete().not()) {
-                                Log.i("MainActivity", "Navigating to Onboarding")
-                                navController.navigate(NavRoutes.Onboarding.route) {
-                                    popUpTo(0) { inclusive = true }
-                                    launchSingleTop = true
-                                }
-                                return@LaunchedEffect
-                            }
-                            navController.navigate(NavRoutes.Learn.route) {
-                                popUpTo(NavRoutes.Main.route) { inclusive = true }
-                                launchSingleTop = true
-                            }
+                            viewModel.checkOnboarding()
                         }
                     }
 
