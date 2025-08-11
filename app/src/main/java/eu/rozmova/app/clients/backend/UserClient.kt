@@ -10,10 +10,7 @@ interface UserClient {
     suspend fun deleteUser(): Response<String>
 
     @GET("v1/user/prefs")
-    suspend fun getUserPreferences(): Response<UserPrefs>
-
-    @POST("v1/user/prefs")
-    suspend fun updateUserPreferences(userPrefs: UserPrefs): Response<Unit>
+    suspend fun getUserPreferences(): Response<UserPrefsResp>
 }
 
 data class UserPrefsResp(
