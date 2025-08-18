@@ -1,5 +1,6 @@
 package eu.rozmova.app.di
 
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -20,6 +21,12 @@ import eu.rozmova.app.clients.backend.network.AuthInterceptor
 import eu.rozmova.app.utils.instantDeserializer
 import eu.rozmova.app.utils.instantSerializer
 import io.github.jan.supabase.SupabaseClient
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.client.plugins.websocket.pingInterval
+import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
+import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -28,6 +35,7 @@ import java.time.Instant
 import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.milliseconds
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -43,6 +51,22 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+        authInterceptor: AuthInterceptor,
+    ): OkHttpClient =
+        OkHttpClient
+            .Builder()
+            .addInterceptor(authInterceptor)
+            .addInterceptor(loggingInterceptor)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+
+    @Provides
+    @Singleton
+    @Named("websocket")
+    fun provideWebSocketOkHttpClient(
         loggingInterceptor: HttpLoggingInterceptor,
         authInterceptor: AuthInterceptor,
     ): OkHttpClient =
@@ -75,13 +99,15 @@ object NetworkModule {
     fun provideMegaApiRetrofit(
         okHttpClient: OkHttpClient,
         gson: Gson,
-    ): Retrofit =
-        Retrofit
+    ): Retrofit {
+        Log.d("NetworkModule", "Creating Mega Retrofit with base URL: ${BuildConfig.API_MEGA_BASE_URL}")
+        return Retrofit
             .Builder()
             .baseUrl(BuildConfig.API_MEGA_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
+    }
 
     @Provides
     @Singleton
@@ -153,4 +179,29 @@ object NetworkModule {
         @Named("mega")
         retrofit: Retrofit,
     ): MegaChatClient = retrofit.create(MegaChatClient::class.java)
+
+    @Provides
+    @Singleton
+    fun provideJson(): Json =
+        Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+        }
+
+    @Provides
+    @Singleton
+    fun provideWs(
+        @Named("websocket") okHttpClient: OkHttpClient,
+    ): HttpClient {
+        Log.d("NetworkModule", "Creating WebSocket client for WSS connections")
+        return HttpClient(OkHttp) {
+            engine {
+                preconfigured = okHttpClient
+            }
+            install(WebSockets) {
+                pingInterval = 20_000.milliseconds
+                contentConverter = KotlinxWebsocketSerializationConverter(Json)
+            }
+        }
+    }
 }

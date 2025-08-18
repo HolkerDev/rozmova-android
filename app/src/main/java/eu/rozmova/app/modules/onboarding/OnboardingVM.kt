@@ -2,50 +2,50 @@ package eu.rozmova.app.modules.onboarding
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import eu.rozmova.app.repositories.SettingsRepository
-import eu.rozmova.app.state.AppStateRepository
-import eu.rozmova.app.utils.LocaleManager
+import eu.rozmova.app.domain.Level
+import eu.rozmova.app.services.UserInitData
+import eu.rozmova.app.services.UserInitState
+import eu.rozmova.app.services.UserService
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
 
+sealed interface OnboardingEvent
+
 data class OnboardingScreenState(
-    val selectedLanguage: String = "en",
+    val isLoading: Boolean = false,
+    val error: String? = null,
 )
 
 @HiltViewModel
 class OnboardingVM
     @Inject
     constructor(
-        private val localeManager: LocaleManager,
-        private val settingsRepository: SettingsRepository,
-        private val appStateRepository: AppStateRepository,
+        private val userService: UserService,
     ) : ViewModel(),
         ContainerHost<OnboardingScreenState, Unit> {
         override val container = container<OnboardingScreenState, Unit>(OnboardingScreenState())
 
-        fun selectLanguage(languageCode: String) {
+        private fun subscribeToUserInitProgress() =
             intent {
-                localeManager.setLocale(languageCode)
-                reduce { state.copy(selectedLanguage = languageCode) }
+                userService.userInitProgress.collect {
+                    when (it) {
+                        UserInitState.CreatingBucket -> {
+                        }
+                        UserInitState.Error -> TODO()
+                        UserInitState.Finished -> TODO()
+                        UserInitState.Idle -> TODO()
+                        UserInitState.SavingData -> TODO()
+                    }
+                }
             }
+
+        fun initUser(
+            job: String?,
+            hobbies: List<String>,
+            pronoun: String,
+            level: Level,
+        ) = intent {
+            userService.startUserInit(UserInitData(job, hobbies, pronoun, level))
         }
-
-        fun completeOnboarding() =
-            intent {
-                settingsRepository.setOnboardingComplete()
-                appStateRepository.triggerRefetch()
-            }
-
-        fun getCurrentLanguage(): String = localeManager.getCurrentLocale().language
-
-        fun savePronoun(salutationCode: String) =
-            intent {
-                settingsRepository.setPronounCode(salutationCode)
-            }
-
-        fun saveLearningLanguage(learningLang: String) =
-            intent {
-                settingsRepository.setLearningLang(learningLang)
-            }
     }

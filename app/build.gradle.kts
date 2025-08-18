@@ -73,6 +73,12 @@ android {
             "\"${secrets.getProperty("api.mega.base.url", "")}\"",
         )
 
+        buildConfigField(
+            "String",
+            "API_MEGA_BASE_WS_URL",
+            "\"${secrets.getProperty("api.mega.base.ws.url", "")}\"",
+        )
+
         resourceConfigurations += listOf("en", "uk", "ru")
     }
 
@@ -118,7 +124,7 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:realtime-kt")
     implementation("io.github.jan-tennert.supabase:functions-kt")
     implementation("io.github.jan-tennert.supabase:storage-kt")
-    implementation("io.ktor:ktor-client-android:3.0.2")
+    implementation("io.ktor:ktor-client-android:3.0.3")
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
@@ -141,10 +147,15 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.exoplayer.dash)
     implementation(libs.androidx.media3.ui)
+    implementation("io.ktor:ktor-client-core:3.0.3")
+    implementation("io.ktor:ktor-client-websockets:3.0.3")
+    implementation("io.ktor:ktor-client-okhttp:3.0.3")
+    implementation("io.ktor:ktor-client-plugins:3.0.3")
+    implementation("io.ktor:ktor-serialization-kotlinx:3.0.3")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.3")
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.accompanist.navigation.animation)
-    implementation(libs.androidx.navigation.compose)
     implementation(libs.retrofit2.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)

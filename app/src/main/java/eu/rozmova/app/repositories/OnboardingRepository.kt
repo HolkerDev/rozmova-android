@@ -12,6 +12,6 @@ class OnboardingRepository
     ) {
         suspend fun isOnboardingComplete(): Boolean {
             val response = userClient.getUserPreferences()
-            return response.isSuccessful
+            return false
         }
     }

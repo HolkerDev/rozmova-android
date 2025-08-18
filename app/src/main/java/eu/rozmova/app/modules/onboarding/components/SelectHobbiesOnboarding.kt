@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Interests
@@ -30,6 +31,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -42,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
@@ -124,16 +127,47 @@ val allHobbies =
 fun SelectHobbiesOnboarding(
     selectedHobbies: Set<Hobby>,
     onHobbyToggle: (Hobby) -> Unit,
+    onNext: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
     ) { paddingValues ->
-        Content(
-            selectedHobbies = selectedHobbies,
-            onHobbyToggle = onHobbyToggle,
-            paddingValues = paddingValues,
-        )
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Content(
+                selectedHobbies = selectedHobbies,
+                onHobbyToggle = onHobbyToggle,
+                paddingValues = paddingValues,
+            )
+
+            // Next button positioned at bottom right
+            val isValid = selectedHobbies.size >= 2
+            if (isValid) {
+                FloatingActionButton(
+                    onClick = onNext,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(24.dp)
+                        .size(56.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        contentDescription = "Next",
+                    )
+                }
+            } else {
+                Spacer(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(24.dp)
+                        .size(56.dp),
+                )
+            }
+        }
     }
 }
 
@@ -191,9 +225,15 @@ private fun Content(
                         selectedHobbies.isEmpty() -> {
                             stringResource(R.string.onboarding_hobbies_minimum_required, minHobbiesRequired)
                         }
+
                         !isRequirementMet -> {
-                            stringResource(R.string.onboarding_hobbies_progress, selectedHobbies.size, minHobbiesRequired)
+                            stringResource(
+                                R.string.onboarding_hobbies_progress,
+                                selectedHobbies.size,
+                                minHobbiesRequired
+                            )
                         }
+
                         else -> {
                             stringResource(R.string.onboarding_hobbies_completed, selectedHobbies.size)
                         }
@@ -377,6 +417,7 @@ private fun SelectHobbiesOnboardingPreview() {
                         selectedHobbies + hobby
                     }
             },
+            onNext = {},
         )
     }
 }

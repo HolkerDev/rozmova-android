@@ -123,7 +123,7 @@ class AppViewModel
         fun checkOnboarding() =
             intent {
                 val isComplete = onboardingRepository.isOnboardingComplete()
-                if (isComplete) {
+                if (!isComplete) {
                     postSideEffect(AppEvent.NavigateToOnboarding)
                     return@intent
                 }

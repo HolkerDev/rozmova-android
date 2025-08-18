@@ -48,3 +48,45 @@
 -keep class androidx.credentials.playservices.** {
   *;
 }
+
+# Ktor rules - prevent class loading issues
+-keep class io.ktor.** { *; }
+-keep class kotlinx.coroutines.** { *; }
+-dontwarn kotlinx.atomicfu.**
+-dontwarn io.netty.**
+-dontwarn com.typesafe.**
+-dontwarn org.slf4j.**
+
+# Ktor plugins - specifically preserve HttpTimeout and related classes
+-keep class io.ktor.client.plugins.** { *; }
+-keep class io.ktor.client.engine.** { *; }
+-keep class io.ktor.client.features.** { *; }
+-keep class io.ktor.client.plugins.HttpTimeout { *; }
+-keep class io.ktor.client.plugins.HttpTimeoutConfig { *; }
+-keep class io.ktor.client.plugins.HttpTimeoutException { *; }
+
+# WebSocket specific
+-keep class io.ktor.client.plugins.websocket.** { *; }
+-keep class io.ktor.websocket.** { *; }
+
+# OkHttp engine
+-keep class io.ktor.client.engine.okhttp.** { *; }
+-keep class okhttp3.** { *; }
+-keep class okio.** { *; }
+-dontwarn io.ktor.client.engine.okhttp.**
+
+# Serialization
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+-dontnote kotlinx.serialization.SerializationKt
+
+-keep,includedescriptorclasses class **$$serializer { *; }
+-keepclassmembers class ** {
+    *** Companion;
+}
+-keepclasseswithmembers class ** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+# Ensure no obfuscation of plugin classes
+-keepnames class io.ktor.client.plugins.*
