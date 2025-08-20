@@ -117,16 +117,25 @@ private fun Content(
                                 pagerState.animateScrollToPage(1)
                             }
                         },
+                        showBackButton = false,
+                        onBack = {},
                     )
                 }
 
                 1 -> {
                     SelectJobOnboarding(
-                        initialState = selectedJob,
-                        onNext = { job ->
+                        selectedJob = selectedJob,
+                        onJobSelect = { job ->
                             selectedJob = job
+                        },
+                        onNext = {
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(2)
+                            }
+                        },
+                        onBack = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(0)
                             }
                         },
                     )
@@ -143,19 +152,23 @@ private fun Content(
                                 pagerState.animateScrollToPage(3)
                             }
                         },
+                        onBack = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(1)
+                            }
+                        },
                     )
                 }
 
                 3 ->
                     PrivacyNoticeOnboarding(
                         onNext = {
-                            handlers.saveAll(
-                                selectedPronoun,
-                                selectedHobbies,
-                                selectedJob,
-                                Level.A1,
-                            )
                             onOnboardingComplete()
+                        },
+                        onBack = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(2)
+                            }
                         },
                     )
             }

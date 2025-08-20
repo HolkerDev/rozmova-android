@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Groups
@@ -33,6 +34,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -128,19 +130,38 @@ fun SelectHobbiesOnboarding(
     selectedHobbies: Set<Hobby>,
     onHobbyToggle: (Hobby) -> Unit,
     onNext: () -> Unit,
+    showBackButton: Boolean,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
     ) { paddingValues ->
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             Content(
                 selectedHobbies = selectedHobbies,
                 onHobbyToggle = onHobbyToggle,
                 paddingValues = paddingValues,
             )
+
+            // Back button positioned at top left
+            if (showBackButton) {
+                IconButton(
+                    onClick = onBack,
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopStart)
+                            .padding(16.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
 
             // Next button positioned at bottom right
             val isValid = selectedHobbies.size >= 2
@@ -149,10 +170,11 @@ fun SelectHobbiesOnboarding(
                     onClick = onNext,
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(24.dp)
-                        .size(56.dp),
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(24.dp)
+                            .size(56.dp),
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowForward,
@@ -161,10 +183,11 @@ fun SelectHobbiesOnboarding(
                 }
             } else {
                 Spacer(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(24.dp)
-                        .size(56.dp),
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(24.dp)
+                            .size(56.dp),
                 )
             }
         }
@@ -230,7 +253,7 @@ private fun Content(
                             stringResource(
                                 R.string.onboarding_hobbies_progress,
                                 selectedHobbies.size,
-                                minHobbiesRequired
+                                minHobbiesRequired,
                             )
                         }
 
@@ -418,6 +441,8 @@ private fun SelectHobbiesOnboardingPreview() {
                     }
             },
             onNext = {},
+            onBack = {},
+            showBackButton = false,
         )
     }
 }

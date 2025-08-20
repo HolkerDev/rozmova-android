@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Work
@@ -46,13 +47,12 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectJobOnboarding(
-    initialState: String?,
-    onNext: (job: String?) -> Unit,
+    selectedJob: String?,
+    onJobSelect: (String?) -> Unit,
+    onNext: () -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var selectedJob by remember { mutableStateOf(initialState ?: "") }
-    var needsProfessionalWords by remember { mutableStateOf(initialState != null) }
-
     Scaffold(
         modifier = modifier,
     ) { paddingValues ->
@@ -61,21 +61,30 @@ fun SelectJobOnboarding(
         ) {
             Content(
                 selectedJob = selectedJob,
-                onJobSelected = { job ->
-                    selectedJob = job
-                },
+                onJobSelect = onJobSelect,
                 paddingValues = paddingValues,
-                needsProfessionalWords = needsProfessionalWords,
-                onProfessionalWordsChanged = { needsProfessionalWords = it },
             )
 
+            // Back button positioned at top left
+            IconButton(
+                onClick = onBack,
+                modifier =
+                    Modifier
+                        .align(Alignment.TopStart)
+                        .padding(16.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+
             // Next button positioned at bottom right
-            val isValid = !needsProfessionalWords || selectedJob.isNotEmpty()
+            val isValid = selectedJob == null || (selectedJob != null && selectedJob.isNotEmpty())
             if (isValid) {
                 FloatingActionButton(
-                    onClick = {
-                        onNext(if (needsProfessionalWords) selectedJob else null)
-                    },
+                    onClick = onNext,
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White,
                     modifier =
@@ -104,13 +113,12 @@ fun SelectJobOnboarding(
 
 @Composable
 private fun Content(
-    selectedJob: String,
-    onJobSelected: (String) -> Unit,
+    selectedJob: String?,
+    onJobSelect: (String?) -> Unit,
     paddingValues: PaddingValues,
-    needsProfessionalWords: Boolean,
-    onProfessionalWordsChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val needsProfessionalWords = selectedJob != null
     Column(
         modifier =
             modifier
@@ -172,8 +180,7 @@ private fun Content(
                     RadioButton(
                         selected = !needsProfessionalWords,
                         onClick = {
-                            onProfessionalWordsChanged(false)
-                            onJobSelected("")
+                            onJobSelect(null)
                         },
                     )
                     Spacer(modifier = Modifier.padding(start = 8.dp))
@@ -191,7 +198,9 @@ private fun Content(
                 ) {
                     RadioButton(
                         selected = needsProfessionalWords,
-                        onClick = { onProfessionalWordsChanged(true) },
+                        onClick = {
+                            onJobSelect("")
+                        },
                     )
                     Spacer(modifier = Modifier.padding(start = 8.dp))
                     Text(
@@ -207,8 +216,8 @@ private fun Content(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
-                    value = selectedJob,
-                    onValueChange = onJobSelected,
+                    value = selectedJob ?: "",
+                    onValueChange = { onJobSelect(it) },
                     label = {
                         Text("Your profession")
                     },
@@ -216,9 +225,9 @@ private fun Content(
                         Text("e.g., Software Engineer, Doctor, Teacher, Lawyer...")
                     },
                     trailingIcon = {
-                        if (selectedJob.isNotEmpty()) {
+                        if (selectedJob != null && selectedJob.isNotEmpty()) {
                             IconButton(
-                                onClick = { onJobSelected("") },
+                                onClick = { onJobSelect("") },
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
@@ -248,11 +257,17 @@ private fun Content(
 
 @Preview(showBackground = true)
 @Composable
-private fun SelectJobOnboardingPreview() {
+private fun SelectJobOnboardingProfessionalWordsEmptyPreview() {
+    var selectedJob by remember { mutableStateOf<String?>(null) }
+
     MaterialTheme {
         SelectJobOnboarding(
-            initialState = "Software Engineer",
+            selectedJob = selectedJob,
+            onJobSelect = { job ->
+                selectedJob = job
+            },
             onNext = {},
+            onBack = {},
         )
     }
 }
