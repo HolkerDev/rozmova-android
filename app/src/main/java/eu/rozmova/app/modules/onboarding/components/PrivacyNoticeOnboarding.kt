@@ -130,17 +130,19 @@ fun PrivacyNoticeOnboarding(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // Back button positioned at top left
-            IconButton(
+            // Back button positioned at bottom left
+            FloatingActionButton(
                 onClick = onBack,
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = Color.White,
                 modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(16.dp),
+                    .align(Alignment.BottomStart)
+                    .padding(24.dp)
+                    .size(56.dp),
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
 
