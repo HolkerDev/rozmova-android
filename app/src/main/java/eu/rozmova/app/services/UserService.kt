@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.jsonPrimitive
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -71,7 +72,6 @@ class UserService
                     incoming
                         .consumeAsFlow()
                         .catch { e ->
-                            Log.e("UserService", "WebSocket error: ${e.message}")
                         }.collect { frame ->
                             when (frame) {
                                 is Frame.Text -> {
@@ -81,6 +81,18 @@ class UserService
                                         "error" -> {
                                             Log.e("UserService", "Error response: ${response.data}")
                                             _userInitProgress.value = UserInitState.Error
+                                        }
+                                        "initUser" -> {
+                                            Log.i("UserService", "User init response: ${response.data}")
+                                            val status = response.data.jsonPrimitive.content
+                                            when (status) {
+                                                "FINISHED" -> {
+                                                    _userInitProgress.value = UserInitState.Finished
+                                                }
+                                                else -> {
+                                                    Log.w("UserService", "Unknown userInit status: $status")
+                                                }
+                                            }
                                         }
 
                                         else -> {

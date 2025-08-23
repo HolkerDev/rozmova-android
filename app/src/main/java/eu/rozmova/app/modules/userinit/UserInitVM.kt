@@ -45,7 +45,7 @@ class UserInitVM
                             reduce { state.copy(error = true) }
                         }
                         Finished -> {
-                            reduce { state.copy(isReady = false) }
+                            reduce { state.copy(isReady = true) }
                         }
                         Idle -> {
                             reduce { state.copy(isReady = false) }
