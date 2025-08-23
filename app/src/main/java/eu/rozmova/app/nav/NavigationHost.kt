@@ -9,6 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import eu.rozmova.app.domain.Level
 import eu.rozmova.app.modules.allscenarios.AllScenariosScreen
 import eu.rozmova.app.modules.chat.ChatScreen
 import eu.rozmova.app.modules.chatlist.ChatsListScreen
@@ -21,6 +22,7 @@ import eu.rozmova.app.modules.onboarding.OnboardingScreen
 import eu.rozmova.app.modules.review.ReviewScreen
 import eu.rozmova.app.modules.reviewlist.ReviewListScreen
 import eu.rozmova.app.modules.subscription.SubscriptionScreen
+import eu.rozmova.app.modules.userinit.UserInitScreen
 import eu.rozmova.app.screens.learn.LearnScreen
 import eu.rozmova.app.screens.login.LoginScreen
 import eu.rozmova.app.screens.main.MainScreen
@@ -52,6 +54,56 @@ fun NavigationHost(
                 },
                 toCreateChat = { scenarioId ->
                     navController.navigate(NavRoutes.CreateChat.routeWith(scenarioId))
+                },
+            )
+        }
+
+        composable(
+            route = NavRoutes.UserInit.route,
+            arguments =
+                listOf(
+                    navArgument("hobbies") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = ""
+                    },
+                    navArgument("job") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    },
+                    navArgument("pronoun") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = ""
+                    },
+                    navArgument("level") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = ""
+                    },
+                ),
+        ) { backStackEntry ->
+            val hobbiesString = backStackEntry.arguments?.getString("hobbies") ?: ""
+            val hobbies =
+                if (hobbiesString.isNotEmpty()) {
+                    hobbiesString.split(",")
+                } else {
+                    emptyList()
+                }
+            val job = backStackEntry.arguments?.getString("job")
+            val pronoun = backStackEntry.arguments?.getString("pronoun") ?: ""
+            val level = backStackEntry.arguments?.getString("level")?.let(Level::fromValue) ?: Level.A1
+
+            UserInitScreen(
+                hobbies = hobbies.toSet(),
+                job = job,
+                pronoun = pronoun,
+                level = level,
+                toLearn = {
+                    navController.navigate(NavRoutes.Learn.route) {
+                        popUpTo(NavRoutes.UserInit.route) { inclusive = true }
+                    }
                 },
             )
         }

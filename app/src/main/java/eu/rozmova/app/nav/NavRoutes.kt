@@ -42,6 +42,15 @@ sealed class NavRoutes(
         fun routeWith(scenarioId: String) = "create_chat/$scenarioId"
     }
 
+    data object UserInit : NavRoutes(route = "user_init?hobbies={hobbies}&job={job}&pronoun={pronoun}&level={level}") {
+        fun routeWith(
+            hobbies: List<String>,
+            job: String?,
+            pronoun: String,
+            level: String,
+        ) = "user_init?hobbies=${hobbies.joinToString(",")}&job=$job&pronoun=$pronoun&level=$level"
+    }
+
     data object Settings : NavRoutes(
         route = "settings",
         icon = Icons.Default.Settings,
