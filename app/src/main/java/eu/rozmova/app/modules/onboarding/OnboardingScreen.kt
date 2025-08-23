@@ -34,9 +34,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.domain.Level
 import eu.rozmova.app.modules.onboarding.components.Hobby
-import eu.rozmova.app.modules.onboarding.components.PrivacyNoticeOnboarding
 import eu.rozmova.app.modules.onboarding.components.SelectHobbiesOnboarding
 import eu.rozmova.app.modules.onboarding.components.SelectJobOnboarding
+import eu.rozmova.app.modules.onboarding.components.SelectLevelOnboarding
 import eu.rozmova.app.modules.onboarding.components.SelectPronounOnboarding
 import kotlinx.coroutines.launch
 
@@ -147,7 +147,8 @@ private fun Content(
                 }
 
                 3 ->
-                    PrivacyNoticeOnboarding(
+                    SelectLevelOnboarding(
+                        onLevelSelect = {},
                         onNext = {
                             handlers.saveAll(
                                 selectedPronoun,
@@ -162,6 +163,21 @@ private fun Content(
                             }
                         },
                     )
+//                    PrivacyNoticeOnboarding(
+//                        onNext = {
+//                            handlers.saveAll(
+//                                selectedPronoun,
+//                                selectedHobbies,
+//                                selectedJob,
+//                                Level.A1,
+//                            )
+//                        },
+//                        onBack = {
+//                            coroutineScope.launch {
+//                                pagerState.animateScrollToPage(2)
+//                            }
+//                        },
+//                    )
             }
         }
 
