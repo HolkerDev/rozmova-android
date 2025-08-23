@@ -183,11 +183,20 @@ fun NavigationHost(
         }
 
         composable(route = NavRoutes.Onboarding.route) {
-            OnboardingScreen(onLearn = {
-                navController.navigate(NavRoutes.Learn.route) {
-                    popUpTo(NavRoutes.Onboarding.route) { inclusive = true }
-                }
-            })
+            OnboardingScreen(
+                toInitUser = { pronoun, hobbies, job, level ->
+                    navController.navigate(
+                        NavRoutes.UserInit.routeWith(
+                            hobbies = hobbies.toList(),
+                            job = job,
+                            pronoun = pronoun,
+                            level = level.value,
+                        ),
+                    ) {
+                        popUpTo(NavRoutes.Learn.route) { inclusive = true }
+                    }
+                },
+            )
         }
 
         composable(route = NavRoutes.GenerateScenario.route) {

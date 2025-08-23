@@ -21,7 +21,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +32,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import eu.rozmova.app.domain.Level
 import eu.rozmova.app.modules.onboarding.components.Hobby
 import eu.rozmova.app.modules.onboarding.components.PrivacyNoticeOnboarding
@@ -48,27 +46,16 @@ private data class Handlers(
 
 @Composable
 fun OnboardingScreen(
-    onLearn: () -> Unit,
+    toInitUser: (pronoun: String, hobbies: Set<String>, job: String?, level: Level) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: OnboardingVM = hiltViewModel(),
 ) {
-    val state by viewModel.container.stateFlow.collectAsState()
-
     Content(
         handlers =
             Handlers(
                 saveAll = { pronoun, hobbies, job, level ->
-                    viewModel.initUser(
-                        job = job,
-                        hobbies = hobbies.map { it.name },
-                        pronoun = pronoun,
-                        level = level,
-                    )
+                    toInitUser(pronoun, hobbies.map { it.name }.toSet(), job, level)
                 },
             ),
-        onOnboardingComplete = {
-            onLearn()
-        },
         onPronounSelect = { salutationCode ->
             Log.i("Onboarding", "Selected salutation: $salutationCode")
         },
@@ -80,7 +67,6 @@ fun OnboardingScreen(
 private fun Content(
     handlers: Handlers,
     onPronounSelect: (String) -> Unit,
-    onOnboardingComplete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pagerState = rememberPagerState(pageCount = { 4 })
@@ -163,7 +149,12 @@ private fun Content(
                 3 ->
                     PrivacyNoticeOnboarding(
                         onNext = {
-                            onOnboardingComplete()
+                            handlers.saveAll(
+                                selectedPronoun,
+                                selectedHobbies,
+                                selectedJob,
+                                Level.A1,
+                            )
                         },
                         onBack = {
                             coroutineScope.launch {
@@ -227,7 +218,7 @@ private fun PageIndicator(
 private fun OnboardingScreenPreview() {
     MaterialTheme {
         OnboardingScreen(
-            onLearn = {},
+            toInitUser = { _, _, _, _ -> },
         )
     }
 }

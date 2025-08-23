@@ -39,7 +39,9 @@ fun UserInitScreen(
 
     Content(
         isReady = state.isReady,
-        onStartLearning = {},
+        onStartLearning = {
+            toLearn()
+        },
         modifier = modifier,
     )
 }
