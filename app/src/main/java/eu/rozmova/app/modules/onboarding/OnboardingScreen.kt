@@ -73,7 +73,7 @@ private fun Content(
     val coroutineScope = rememberCoroutineScope()
     var selectedHobbies by remember { mutableStateOf<Set<Hobby>>(emptySet()) }
     var selectedJob by remember { mutableStateOf<String?>(null) }
-    var selectedPronoun by remember { mutableStateOf("") }
+    var selectedPronoun by remember { mutableStateOf("he") }
 
     Box(
         modifier =

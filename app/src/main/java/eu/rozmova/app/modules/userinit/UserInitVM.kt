@@ -1,5 +1,6 @@
 package eu.rozmova.app.modules.userinit
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.rozmova.app.domain.Level
@@ -62,6 +63,7 @@ class UserInitVM
             pronoun: String,
             level: Level,
         ) = intent {
+            Log.i("UserInitVM", "initUser: $hobbies, $job, $pronoun, $level")
             userService.startUserInit(
                 UserInitData(
                     job = job,
