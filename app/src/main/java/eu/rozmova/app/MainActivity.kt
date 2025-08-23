@@ -124,9 +124,12 @@ class AppViewModel
             intent {
                 val isComplete = onboardingRepository.isOnboardingComplete()
                 if (!isComplete) {
+                    Log.i("AppViewModel", "Onboarding not complete, navigating to onboarding")
                     postSideEffect(AppEvent.NavigateToOnboarding)
                     return@intent
                 }
+
+                Log.i("AppViewModel", "Onboarding complete, navigating to learn")
 
                 postSideEffect(AppEvent.NavigateToLearn)
             }

@@ -49,7 +49,6 @@ class LearnScreenVM
         private fun initialize() =
             intent {
                 Log.i("LearnScreenViewModel", "Initializing LearnScreenViewModel - hashCode: ${this@LearnScreenVM.hashCode()}")
-                fetchLearningLanguage()
                 fetchTodayScenarios()
                 fetchLatestChat()
                 fetchWeeklyScenarios()
@@ -62,18 +61,6 @@ class LearnScreenVM
                     fetchTodayScenarios()
                     fetchLatestChat()
                     fetchWeeklyScenarios()
-                }
-            }
-
-        private fun fetchLearningLanguage() =
-            intent {
-                val learnLang = settingsRepository.getLearningLang()
-                val pronoun = settingsRepository.getPronounCode()
-                val onboardingComplete = settingsRepository.isOnboardingComplete()
-                if (learnLang == null || pronoun == null || !onboardingComplete) {
-                    postSideEffect(
-                        LearnEvent.StartOnboarding,
-                    )
                 }
             }
 
