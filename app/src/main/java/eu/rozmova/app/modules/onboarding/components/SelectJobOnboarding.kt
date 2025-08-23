@@ -83,7 +83,7 @@ fun SelectJobOnboarding(
             }
 
             // Next button positioned at bottom right
-            val isValid = selectedJob == null || (selectedJob != null && selectedJob.isNotEmpty())
+            val isValid = selectedJob == null || (selectedJob.isNotEmpty())
             if (isValid) {
                 FloatingActionButton(
                     onClick = onNext,
@@ -176,7 +176,10 @@ private fun Content(
             ) {
                 // Option 1: I don't need professional words
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     RadioButton(
@@ -194,59 +197,68 @@ private fun Content(
                 }
 
                 // Option 2: I want professional words
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
-                        selected = needsProfessionalWords,
-                        onClick = {
-                            onJobSelect("")
-                        },
-                    )
-                    Spacer(modifier = Modifier.padding(start = 8.dp))
-                    Text(
-                        text = "I want professional vocabulary for my field",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
+                Column {
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = needsProfessionalWords,
+                            onClick = {
+                                onJobSelect("")
+                            },
+                        )
+                        Spacer(modifier = Modifier.padding(start = 8.dp))
+                        Text(
+                            text = "I want professional vocabulary for my field",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+
+                    // Show profession input only if professional words are needed
+                    if (needsProfessionalWords) {
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        OutlinedTextField(
+                            value = selectedJob ?: "",
+                            onValueChange = { onJobSelect(it) },
+                            label = {
+                                Text("Your profession")
+                            },
+                            placeholder = {
+                                Text("e.g., Software Engineer, Doctor, Teacher, Lawyer...")
+                            },
+                            trailingIcon = {
+                                if (selectedJob.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = { onJobSelect("") },
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = "Clear text",
+                                        )
+                                    }
+                                }
+                            },
+                            keyboardOptions =
+                                KeyboardOptions(
+                                    capitalization = KeyboardCapitalization.Words,
+                                    imeAction = ImeAction.Done,
+                                ),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 40.dp),
+                            // Align with text above
+                            shape = MaterialTheme.shapes.medium,
+                            singleLine = true,
+                        )
+                    }
                 }
-            }
-
-            // Show profession input only if professional words are needed
-            if (needsProfessionalWords) {
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedTextField(
-                    value = selectedJob ?: "",
-                    onValueChange = { onJobSelect(it) },
-                    label = {
-                        Text("Your profession")
-                    },
-                    placeholder = {
-                        Text("e.g., Software Engineer, Doctor, Teacher, Lawyer...")
-                    },
-                    trailingIcon = {
-                        if (selectedJob != null && selectedJob.isNotEmpty()) {
-                            IconButton(
-                                onClick = { onJobSelect("") },
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Clear,
-                                    contentDescription = "Clear text",
-                                )
-                            }
-                        }
-                    },
-                    keyboardOptions =
-                        KeyboardOptions(
-                            capitalization = KeyboardCapitalization.Words,
-                            imeAction = ImeAction.Done,
-                        ),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium,
-                    singleLine = true,
-                )
             }
         }
 
