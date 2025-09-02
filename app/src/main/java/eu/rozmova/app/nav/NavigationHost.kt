@@ -49,12 +49,6 @@ fun NavigationHost(
         composable(NavRoutes.Learn.route) {
             LearnScreen(
                 startOnboarding = { navController.navigate(NavRoutes.Onboarding.route) },
-                toChat = { chatId, chatType ->
-                    navController.navigate(NavRoutes.Chat.routeWith(chatId))
-                },
-                toCreateChat = { scenarioId ->
-                    navController.navigate(NavRoutes.CreateChat.routeWith(scenarioId))
-                },
             )
         }
 

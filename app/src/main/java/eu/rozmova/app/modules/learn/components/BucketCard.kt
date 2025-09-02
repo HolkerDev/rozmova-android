@@ -4,11 +4,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.PlayArrow
@@ -49,6 +52,7 @@ fun BucketCard(
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .fillMaxHeight()
                     .padding(20.dp),
         ) {
             // Bucket Title
@@ -85,12 +89,14 @@ fun BucketCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Word List
-            Column(
-                modifier = Modifier.fillMaxWidth(),
+            // Word List - Now scrollable and takes available space
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f), // This makes it take all available space between header and button
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                wordList.forEach { word ->
+                items(wordList) { word ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -135,7 +141,7 @@ fun BucketCard(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Practice Button
+            // Practice Button - Always visible at bottom
             Button(
                 onClick = onPracticeClick,
                 modifier =
@@ -173,7 +179,23 @@ private fun LearningBucketCardPreview() {
                 println("Practice button clicked!")
             },
             progress = 32,
-            wordList = listOf("Hallo", "Danke", "Tschuss", "Guten Tag", "Ja"),
+            wordList = listOf(
+                "Hallo",
+                "Danke",
+                "Tschuss",
+                "Guten Tag",
+                "Ja",
+                "Nein",
+                "Bitte",
+                "Entschuldigung",
+                "Auf Wiedersehen",
+                "Guten Morgen",
+                "Guten Abend",
+                "Wie geht's?",
+                "Alles klar",
+                "Bis später",
+                "Viel Spaß"
+            ),
         )
     }
 }

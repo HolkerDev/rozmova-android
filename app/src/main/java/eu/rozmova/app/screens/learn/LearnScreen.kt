@@ -28,8 +28,6 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LearnScreen(
-    toCreateChat: (scenarioId: String) -> Unit,
-    toChat: (chatId: String, chatType: ChatType) -> Unit,
     startOnboarding: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LearnScreenVM = hiltViewModel(),
@@ -57,49 +55,20 @@ fun LearnScreen(
             onRefresh = { viewModel.refresh() },
             modifier = Modifier.fillMaxSize(),
         ) {
-            Column(modifier = Modifier.padding(paddingValues)) {
+            Column(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+            ) {
                 state.bucketDto?.let { bucket ->
                     BucketCard(
                         progress = bucket.progress,
                         wordList = bucket.activeWords.map { it.word },
                         onPracticeClick = {},
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }
-//            LazyColumn(contentPadding = paddingValues) {
-//                state.recommendedScenarios?.let { recommendedScenarios ->
-//                    item {
-//                        TodaysScenarioSelection(
-//                            onScenarioClick = { scenario ->
-//                                toCreateChat(scenario.id)
-//                            },
-//                            state = recommendedScenarios,
-//                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-//                        )
-//                    }
-//                }
-//                state.latestChat?.let { latestChat ->
-//                    item {
-//                        QuickResumeCard(
-//                            chat = latestChat,
-//                            onContinueClick = { chatId, chatType ->
-//                                toChat(chatId, chatType)
-//                            },
-//                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-//                        )
-//                    }
-//                }
-//
-//                item {
-//                    RecentlyAdded(
-//                        scenarios = state.weeklyScenarios ?: emptyList(),
-//                        isLoading = state.weeklyScenariosLoading,
-//                        onScenarioSelect = { scenario ->
-//                            toCreateChat(scenario.id)
-//                        },
-//                    )
-//                }
-//            }
         }
     }
 }
