@@ -1,5 +1,6 @@
 package eu.rozmova.app.screens.learn
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,6 +20,8 @@ import eu.rozmova.app.components.QuickResumeCard
 import eu.rozmova.app.components.RecentlyAdded
 import eu.rozmova.app.components.TodaysScenarioSelection
 import eu.rozmova.app.domain.ChatType
+import eu.rozmova.app.modules.learn.components.BucketCard
+import io.github.jan.supabase.realtime.Column
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -54,40 +57,49 @@ fun LearnScreen(
             onRefresh = { viewModel.refresh() },
             modifier = Modifier.fillMaxSize(),
         ) {
-            LazyColumn(contentPadding = paddingValues) {
-                state.recommendedScenarios?.let { recommendedScenarios ->
-                    item {
-                        TodaysScenarioSelection(
-                            onScenarioClick = { scenario ->
-                                toCreateChat(scenario.id)
-                            },
-                            state = recommendedScenarios,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        )
-                    }
-                }
-                state.latestChat?.let { latestChat ->
-                    item {
-                        QuickResumeCard(
-                            chat = latestChat,
-                            onContinueClick = { chatId, chatType ->
-                                toChat(chatId, chatType)
-                            },
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        )
-                    }
-                }
-
-                item {
-                    RecentlyAdded(
-                        scenarios = state.weeklyScenarios ?: emptyList(),
-                        isLoading = state.weeklyScenariosLoading,
-                        onScenarioSelect = { scenario ->
-                            toCreateChat(scenario.id)
-                        },
+            Column(modifier = Modifier.padding(paddingValues)) {
+                state.bucketDto?.let { bucket ->
+                    BucketCard(
+                        progress = bucket.progress,
+                        wordList = bucket.activeWords.map { it.word },
+                        onPracticeClick = {},
                     )
                 }
             }
+//            LazyColumn(contentPadding = paddingValues) {
+//                state.recommendedScenarios?.let { recommendedScenarios ->
+//                    item {
+//                        TodaysScenarioSelection(
+//                            onScenarioClick = { scenario ->
+//                                toCreateChat(scenario.id)
+//                            },
+//                            state = recommendedScenarios,
+//                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+//                        )
+//                    }
+//                }
+//                state.latestChat?.let { latestChat ->
+//                    item {
+//                        QuickResumeCard(
+//                            chat = latestChat,
+//                            onContinueClick = { chatId, chatType ->
+//                                toChat(chatId, chatType)
+//                            },
+//                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+//                        )
+//                    }
+//                }
+//
+//                item {
+//                    RecentlyAdded(
+//                        scenarios = state.weeklyScenarios ?: emptyList(),
+//                        isLoading = state.weeklyScenariosLoading,
+//                        onScenarioSelect = { scenario ->
+//                            toCreateChat(scenario.id)
+//                        },
+//                    )
+//                }
+//            }
         }
     }
 }

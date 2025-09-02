@@ -12,7 +12,7 @@ data class ScenarioDto(
     val title: String,
     val situation: String,
     val labels: List<String>,
-    val helperWords: List<WordDto>,
+    val helperWords: List<HelperWord>,
     val userInstructions: List<UserInstruction>,
 )
 
@@ -21,7 +21,7 @@ data class UserInstruction(
     val task: String,
 )
 
-data class WordDto(
+data class HelperWord(
     val word: String,
     val translation: String,
 )

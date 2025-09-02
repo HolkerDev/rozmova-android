@@ -8,6 +8,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import eu.rozmova.app.BuildConfig
+import eu.rozmova.app.clients.backend.BucketClient
 import eu.rozmova.app.clients.backend.BugReportClient
 import eu.rozmova.app.clients.backend.ChatClient
 import eu.rozmova.app.clients.backend.MegaChatClient
@@ -31,6 +32,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 import javax.inject.Named
@@ -179,6 +181,13 @@ object NetworkModule {
         @Named("mega")
         retrofit: Retrofit,
     ): MegaChatClient = retrofit.create(MegaChatClient::class.java)
+
+    @Provides
+    @Singleton
+    fun provideBucketClient(
+        @Named("mega")
+        retrofit: Retrofit,
+    ): BucketClient = retrofit.create(BucketClient::class.java)
 
     @Provides
     @Singleton

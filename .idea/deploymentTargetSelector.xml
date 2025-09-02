@@ -13,9 +13,6 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="SelectJobOnboardingPreview">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="UserInitScreenPreview">
         <option name="selectionMode" value="DROPDOWN" />
         <DropdownSelection timestamp="2025-08-20T19:10:02.914650Z">
@@ -34,6 +31,9 @@
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="SelectJobOnboardingProfessionalWordsEmptyPreview">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="LearningBucketCardPreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

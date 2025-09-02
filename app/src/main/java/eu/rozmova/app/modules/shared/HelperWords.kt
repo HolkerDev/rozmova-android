@@ -38,12 +38,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import eu.rozmova.app.R
-import eu.rozmova.app.domain.WordDto
+import eu.rozmova.app.domain.HelperWord
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HelperWords(
-    words: List<WordDto>,
+    words: List<HelperWord>,
     isSubscribed: Boolean,
     navigateToSubscription: () -> Unit,
     onDismiss: () -> Unit,
@@ -112,7 +112,7 @@ fun HelperWords(
 
 @Composable
 private fun WordItem(
-    word: WordDto,
+    word: HelperWord,
     modifier: Modifier = Modifier,
 ) {
     var showTranslation by remember { mutableStateOf(false) }
@@ -175,9 +175,9 @@ private fun HelperWordsPreview() {
     HelperWords(
         words =
             listOf(
-                WordDto("Hello", "Ahoj"),
-                WordDto("Goodbye", "Sbohem"),
-                WordDto("Please", "Prosím"),
+                HelperWord("Hello", "Ahoj"),
+                HelperWord("Goodbye", "Sbohem"),
+                HelperWord("Please", "Prosím"),
             ),
         isSubscribed = false,
         navigateToSubscription = {},
